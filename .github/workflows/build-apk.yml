@@ -11,92 +11,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ── 1. Checkout ──────────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ── 2. Node 20 ───────────────────────────────────────────────────
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      # ── 3. Java 17 ───────────────────────────────────────────────────
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
+          distribution: 'temurin'
           java-version: '17'
+          cache: 'gradle'
 
-      # ── 4. Android SDK ───────────────────────────────────────────────
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      # ── 5. Install npm deps ──────────────────────────────────────────
       - name: Install npm dependencies
         run: npm ci
 
-      # ── 6. Download bundled assets (fonts + JS libs) ─────────────────
-      # These are excluded from git to keep the repo small.
-      # CI fetches them fresh each build.
-      - name: Download JS libraries
-        run: |
-          mkdir -p www/libs
-          curl -fsSL https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js \
-               -o www/libs/html2canvas.min.js
-          curl -fsSL https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js \
-               -o www/libs/jspdf.umd.min.js
-          echo "JS libs downloaded: $(du -sh www/libs/)"
+      - name: Sync Capacitor
+        run: npx cap sync android
 
-      - name: Download Google Fonts (offline bundle)
-        run: |
-          mkdir -p www/fonts
-          UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-          GFONTS_URL="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&family=Poppins:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap"
-
-          # Fetch the CSS (Chrome UA → woff2 URLs)
-          CSS=$(curl -fsSL -A "$UA" "$GFONTS_URL")
-
-          # Extract and download every woff2 URL, naming each by its path segments
-          echo "$CSS" | grep -oP "url\(\Khttps://[^)]+\.woff2" | sort -u | while read -r url; do
-            # Build a stable filename: last two path segments joined with _
-            seg1=$(echo "$url" | awk -F/ '{print $(NF-1)}')
-            seg2=$(echo "$url" | awk -F/ '{print $NF}')
-            fname="${seg1}_${seg2}"
-            curl -fsSL "$url" -o "www/fonts/$fname"
-          done
-
-          # Rewrite the CSS with local filenames
-          echo "$CSS" | sed -E "s|url\((https://fonts\.gstatic\.com/[^/]+/([^/]+)/([^)]+)\.woff2)\)|url(\2_\3.woff2)|g" \
-               > www/fonts/fonts.css
-
-          echo "Fonts downloaded: $(ls www/fonts/*.woff2 | wc -l) woff2 files"
-          echo "fonts.css: $(wc -c < www/fonts/fonts.css) bytes"
-
-      # ── 7. Add Android platform (idempotent) ────────────────────────
-      - name: Add Capacitor Android platform
-        run: |
-          if [ ! -d "android" ]; then
-            npx cap add android
-          else
-            echo "android/ already present, skipping cap add"
-          fi
-
-      # ── 8. Sync web assets → Android ────────────────────────────────
-      - name: Sync Capacitor (copy web assets + update plugins)
-        run: npx cap sync android --inline
-
-      # ── 9. Gradle permissions ────────────────────────────────────────
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      # ── 10. Build Debug APK ──────────────────────────────────────────
       - name: Assemble Debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
 
-      # ── 11. Upload artifact ──────────────────────────────────────────
       - name: Upload app-debug.apk
         uses: actions/upload-artifact@v4
         with:

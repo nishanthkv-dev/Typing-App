@@ -1,4 +1,4 @@
-# Node
+ï»¿# Node
 node_modules/
 npm-debug.log*
 
@@ -17,7 +17,3 @@ android/.idea/
 .vscode/
 *.suo
 *.user
-
-# Bundled binary assets — downloaded by CI at build time
-www/fonts/
-www/libs/
