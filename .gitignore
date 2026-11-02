@@ -1,0 +1,23 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Capacitor / Android build outputs
+android/app/build/
+android/.gradle/
+android/build/
+android/local.properties
+android/.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+*.suo
+*.user
+
+# Bundled binary assets — downloaded by CI at build time
+www/fonts/
+www/libs/
