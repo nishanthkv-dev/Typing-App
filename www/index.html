@@ -1660,17 +1660,21 @@ body {
       <div class="diploma-card">
         <div class="diploma-header">
           <div>
-            <h2 id="resName">Student Scorecard</h2>
-            <div class="diploma-institute" id="resTitle">Sri Kalaimagal Typewriting Institute</div>
+            <h2 id="resName">Typing Thalaiva</h2>
+            <div class="diploma-institute" id="resTitle">Official Typing Examination Result</div>
           </div>
           <div class="verdict-badge pass" id="resResult">PASS ✅</div>
         </div>
 
         <div class="diploma-details-grid">
+          <div>Student: <b id="resStudent">Student</b></div>
+          <div>Subject: <b id="resSubject">English Typewriting</b></div>
+          <div>Layout: <b id="resLayout">English QWERTY</b></div>
+          <div>Time: <b id="resTime">0m 0s</b></div>
           <div>Strokes (+sp): <b id="resStrokes">0</b></div>
           <div>Strokes (-sp): <b id="resStrokes2">0</b></div>
           <div>Backspaces: <b id="resBack">0</b></div>
-          <div>Time Elapsed: <b id="resTime">0m 0s</b></div>
+          <div>Accuracy: <b id="resAccSummary">0%</b></div>
         </div>
       </div>
 
@@ -3314,12 +3318,36 @@ function buildReportHTML(r){
        <div class="rp-note">📌 Staff note: this student most frequently mistypes or omits "<b>${esc(weak[0].letter)}</b>". Targeted drills on this letter/key are recommended.</div>`
     : `<div class="rp-note" style="background:#f0fdf4;border-color:#bbf7d0;color:#14532d">✓ No weak letters detected.</div>`;
   const ptitle = (PASSAGES[CFG.lang]&&PASSAGES[CFG.lang][CFG.passageIdx])?PASSAGES[CFG.lang][CFG.passageIdx].title:'';
+  const studentName = (CFG.name && CFG.name.trim()) ? CFG.name.trim() : 'Student';
+  let subjectName = '';
+  if(CFG.category === 'coa'){
+    subjectName = 'COA (Computer on Office Automation)';
+  } else if(isTA){
+    const grade = CFG.speedType==='senior' ? 'Senior Grade' : (CFG.speedType==='junior' ? 'Junior Grade' : 'Speed Practice');
+    subjectName = `Tamil Typewriting (${grade})`;
+  } else {
+    const grade = CFG.speedType==='senior' ? 'Senior Grade' : (CFG.speedType==='junior' ? 'Junior Grade' : 'Speed Practice');
+    subjectName = `English Typewriting (${grade})`;
+  }
+  let layoutName = '';
+  if(isTA){
+    layoutName = (CFG.layout === 'tamil99') ? 'Tamil99 Layout' : 'Tamil Typewriter Layout';
+  } else {
+    layoutName = 'English QWERTY Layout';
+  }
+
   return `<div class="rp">
-    <div class="rp-head"><h2>Sri Kalaimagal Typewriting Institute — Typing Test Result</h2><div>Generated ${esc(now.toLocaleString('en-US'))}</div></div>
+    <div class="rp-head">
+      <h2>Typing Thalaiva</h2>
+      <div style="font-size:12.5px;font-weight:600;opacity:0.95;margin-top:2px;">Official Examination Result · Powered by K V N Techno Labs</div>
+      <div style="font-size:11px;opacity:0.85;margin-top:2px;">Generated ${esc(now.toLocaleString('en-US'))}</div>
+    </div>
     <table class="rp-tbl">
-      <tr><td>Student Name</td><td>${esc(CFG.name)}</td></tr>
-      <tr><td>Exam Category</td><td>${CFG.category==='typing'?'Typing (100 marks)':'COA (50 marks)'}</td></tr>
-      <tr><td>Language</td><td>${isTA?'Tamil':'English'}</td></tr>
+      <tr><td>Student Name</td><td><b>${esc(studentName)}</b></td></tr>
+      <tr><td>Subject</td><td><b>${esc(subjectName)}</b></td></tr>
+      <tr><td>Keyboard Layout</td><td><b style="color:#4c1d95;">${esc(layoutName)}</b></td></tr>
+      <tr><td>Exam Category</td><td>${CFG.category==='typing'?'DoTE Government Typewriting (100 marks)':'COA Computer on Office Automation (50 marks)'}</td></tr>
+      <tr><td>Language</td><td>${isTA?'Tamil (தமிழ்)':'English'}</td></tr>
       <tr><td>Time Taken</td><td>${mm}:${ss}</td></tr>
       <tr><td>Date</td><td>${esc(now.toLocaleDateString('en-US'))}</td></tr>
       <tr><td>Overall Capacity</td><td><span class="rp-badge" style="color:${cap[1]};border-color:${cap[1]}">${cap[0]}</span></td></tr>
@@ -3352,14 +3380,36 @@ function renderResults(r, typed){
     ? 'Unlimited (No target)'
     : (CFG.speedType === 'senior' ? 'Senior (45 WPM target)' : (CFG.speedType === 'junior' ? 'Junior (30 WPM target)' : 'Unlimited (No target)'));
 
-  $('resName').textContent = CFG.name + ' — Scorecard';
-  $('resTitle').textContent = "Sri Kalaimagal Academy · " + speedLabel;
+  const studentName = (CFG.name && CFG.name.trim()) ? CFG.name.trim() : 'Student';
+  let subjectName = '';
+  if(CFG.category === 'coa'){
+    subjectName = 'COA (Computer on Office Automation)';
+  } else if(CFG.lang === 'ta'){
+    const grade = CFG.speedType==='senior' ? 'Senior Grade' : (CFG.speedType==='junior' ? 'Junior Grade' : 'Speed Practice');
+    subjectName = `Tamil Typewriting (${grade})`;
+  } else {
+    const grade = CFG.speedType==='senior' ? 'Senior Grade' : (CFG.speedType==='junior' ? 'Junior Grade' : 'Speed Practice');
+    subjectName = `English Typewriting (${grade})`;
+  }
+  let layoutName = '';
+  if(CFG.lang === 'ta'){
+    layoutName = (CFG.layout === 'tamil99') ? 'Tamil99 Layout' : 'Tamil Typewriter Layout';
+  } else {
+    layoutName = 'English QWERTY Layout';
+  }
+
+  $('resName').textContent = 'Typing Thalaiva';
+  $('resTitle').textContent = `${studentName} · ${subjectName}`;
+  if($('resStudent')) $('resStudent').textContent = studentName;
+  if($('resSubject')) $('resSubject').textContent = subjectName;
+  if($('resLayout')) $('resLayout').textContent = layoutName;
+  if($('resAccSummary')) $('resAccSummary').textContent = r.accuracy + '%';
   $('resResult').className = 'verdict-badge ' + (r.passed ? 'pass' : 'fail');
   $('resResult').innerHTML = r.passed ? 'PASS ✅' : 'NEEDS PRACTICE ⚠️';
   $('resStrokes').textContent = r.strokesWithSpace;
   $('resStrokes2').textContent = r.strokesWithoutSpace;
   $('resBack').textContent = backspaceCount;
-  $('resTime').textContent = `${mm}m ${ss}s (${langLabel})`;
+  $('resTime').textContent = `${mm}m ${ss}s`;
 
   $('statAccResult').textContent = r.accuracy + '%';
   $('statMistakesResult').textContent = r.errors;
