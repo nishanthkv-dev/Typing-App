@@ -30,6 +30,9 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      - name: Run Senior QA Automated Test Suite
+        run: node run_senior_qa_tests.js
+
       - name: Sync Capacitor
         run: npx cap sync android
 

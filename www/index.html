@@ -170,8 +170,10 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
-  height: 100%;
-  overscroll-behavior: none;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
@@ -193,7 +195,8 @@ body {
   width: 100%;
   max-width: 480px;
   min-height: 100vh;
-  padding: calc(14px + env(safe-area-inset-top)) 16px calc(80px + env(safe-area-inset-bottom));
+  padding: calc(14px + env(safe-area-inset-top)) 16px calc(110px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -203,7 +206,7 @@ body {
 .screen.active { display: block; animation: screenFadeIn .22s ease-out; }
 @keyframes screenFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-.tab-content { display: none; }
+.tab-content { display: none; padding-bottom: 50px; }
 .tab-content.active { display: block; animation: screenFadeIn .2s ease-out; }
 
 /* Header */
@@ -705,7 +708,7 @@ body {
   margin-bottom: 12px;
 }
 .academy-tile.lms .tile-badge { background: var(--primary-light); color: var(--primary-text); }
-.academy-tile.steno .tile-badge { background: var(--amber-light); color: var(--amber); }
+
 .academy-tile.mentor .tile-badge { background: var(--emerald-light); color: var(--emerald); }
 .academy-tile.guidelines .tile-badge { background: var(--violet-light); color: var(--violet); }
 .tile-icon { font-size: 26px; margin-bottom: 8px; }
@@ -1174,7 +1177,7 @@ body {
         </div>
         <div class="brand-text">
           <h1>Typing <span>Thalaiva</span></h1>
-          <div class="brand-tag">Sri Kalaimagal Academy</div>
+          <div class="brand-tag">Powered by K V N Techno Labs</div>
         </div>
       </div>
       
@@ -1437,8 +1440,17 @@ body {
         <div class="launch-mode-card" onclick="startTest('scrolling')">
           <div class="mode-icon-circle">📜</div>
           <div class="mode-details">
+            <h4>Teleprompter Mode</h4>
+            <p>Dynamic scrolling window with fixed horizon focus. Keeps your eyes pinned to the typing line.</p>
+          </div>
+          <div class="mode-launch-arrow">▶</div>
+        </div>
+
+        <div class="launch-mode-card" onclick="startTest('page')">
+          <div class="mode-icon-circle">📖</div>
+          <div class="mode-details">
             <h4>Continuous Page Mode</h4>
-            <p>Official examination paragraph view with auto-scrolling line follower. Standard DoTE format.</p>
+            <p>Official examination paragraph view with book-style multi-line layout. Standard DoTE format.</p>
           </div>
           <div class="mode-launch-arrow">▶</div>
         </div>
@@ -1453,6 +1465,8 @@ body {
         </div>
       </div>
 
+      <div class="powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></div>
+      <div style="height:36px;width:100%;"></div>
     </div>
 
     <!-- ---------------- TAB 2: DRILLS (UNTIMED PRACTICE) ---------------- -->
@@ -1504,11 +1518,6 @@ body {
           <div class="tile-desc">Access official syllabus, model question papers, and theory notes.</div>
         </div>
 
-        <div class="academy-tile steno" onclick="openShorthandStudio()">
-          <div class="tile-badge">Stenography</div>
-          <div class="tile-icon">🎙️</div>
-          <div class="tile-title">Shorthand Studio</div>
-          <div class="tile-desc">Audio dictation drills at 60, 80, 100, 120 WPM with metronome.</div>
         </div>
 
         <div class="academy-tile mentor" onclick="openHelpWhatsApp()">
@@ -1556,8 +1565,17 @@ body {
       </div>
 
       <div class="glass-card" style="text-align:center;">
-        <button class="ghostbtn" style="width:100%;" onclick="openAvatarPicker()">📷 Update Profile Photo</button>
+        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:14px;">
+          <div style="position:relative;width:96px;height:96px;margin:0 auto 12px;border-radius:50%;border:3px solid var(--primary);overflow:hidden;box-shadow:var(--card-shadow);background:var(--card-bg);">
+            <img id="profileAvatarImg" alt="Profile" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232563eb'/%3E%3Cpath d='M14 54C14 46 22 42 32 42C42 42 50 46 50 54' fill='%2360a5fa' stroke='%23fff' stroke-width='2'/%3E%3Ccircle cx='32' cy='28' r='14' fill='%23fed7aa'/%3E%3C/svg%3E" style="width:100%;height:100%;object-fit:cover;">
+          </div>
+          <button class="ghostbtn" type="button" style="width:100%;max-width:240px;" onclick="openAvatarPicker()">📷 Update Profile Photo</button>
+          <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+          <div style="font-size:11.5px;color:var(--muted);margin-top:6px;">Select any photo from your phone or camera</div>
+        </div>
       </div>
+      
+      <div class="powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></div>
     </div>
 
     <!-- BOTTOM NAVIGATION BAR (5 TABS) -->
@@ -1619,7 +1637,7 @@ body {
 
       <div class="typewrap" id="typeWrap">
         <div class="panelhead"><span>Your Response</span><span class="sub" id="panelHeadStatus">Waiting for first keystroke…</span></div>
-        <textarea id="typingArea" placeholder="Start typing here… the timer begins on your first keystroke." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="visible-password"></textarea>
+        <textarea id="typingArea" placeholder="Start typing here… the timer begins on your first keystroke." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="text"></textarea>
       </div>
     </div>
     <div class="typewraplabel" id="typeLabel" style="display:none;">Your Typing</div>
@@ -1816,7 +1834,23 @@ body {
         <span id="pracLessonTitle">Lesson 1</span>
         <span id="pracProgressPct">0%</span>
       </div>
-      <div id="pracDisplay" style="font-family:var(--font-mono);font-size:20px;line-height:1.8;"></div>
+      <div id="pracSub" style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;"></div>
+      <div id="pracExText" style="font-family:var(--font-mono);font-size:20px;line-height:1.8;"></div>
+    </div>
+
+    <div class="dash-metrics-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;">
+      <div class="metric-card">
+        <div class="metric-label">Accuracy</div>
+        <div class="metric-val" id="pracAcc">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Correct</div>
+        <div class="metric-val" id="pracCorrect" style="color:var(--emerald);">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Mistakes</div>
+        <div class="metric-val" id="pracMistakes" style="color:var(--rose);">0</div>
+      </div>
     </div>
 
     <div class="inputcard">
@@ -1843,25 +1877,7 @@ body {
 <!-- FLOATING TOAST NOTIFICATION -->
 <div id="toast"></div>
 
-<!-- SHORTHAND STUDIO MODAL -->
-<div class="modalbg" id="modalShorthand">
-  <div class="modalcard">
-    <h3>🎙️ Shorthand &amp; Dictation Studio</h3>
-    <p style="font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:14px;">
-      Practice your stenography audio dictations with real-time speed metronomes aligned with Tamil Nadu DoTE examination benchmarks.
-    </p>
 
-    <div class="form-field">
-      <div class="form-label">Dictation Target Speed:</div>
-      <div class="time-pill-grid">
-        <button class="ghostbtn" style="padding:10px 4px;font-size:12px;" onclick="setStenoSpeed(60)">60 WPM<br><span style="font-size:10px;color:var(--muted);">Beginner</span></button>
-        <button class="solidbtn" style="padding:10px 4px;font-size:12px;" onclick="setStenoSpeed(80)">80 WPM<br><span style="font-size:10px;opacity:0.85;">Junior</span></button>
-        <button class="ghostbtn" style="padding:10px 4px;font-size:12px;" onclick="setStenoSpeed(100)">100 WPM<br><span style="font-size:10px;color:var(--muted);">Inter</span></button>
-        <button class="ghostbtn" style="padding:10px 4px;font-size:12px;" onclick="setStenoSpeed(120)">120 WPM<br><span style="font-size:10px;color:var(--muted);">Senior</span></button>
-        <button class="ghostbtn" style="padding:10px 4px;font-size:12px;" onclick="setStenoSpeed(150)">150 WPM<br><span style="font-size:10px;color:var(--muted);">High Speed</span></button>
-        <button class="ghostbtn" style="padding:10px 4px;font-size:12px;" onclick="setStenoSpeed(180)">180 WPM<br><span style="font-size:10px;color:var(--muted);">Expert</span></button>
-      </div>
-    </div>
 
     <div class="glass-card" style="text-align:center;margin-top:14px;padding:16px;">
       <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;">Metronome Beat Indicator</div>
@@ -1945,41 +1961,7 @@ const AudioEngine = {
 };
 
 /* Shorthand Studio Logic */
-let stenoSpeed = 80;
-let stenoIntervalId = null;
 
-function openShorthandStudio() {
-  $('modalShorthand').classList.add('show');
-}
-function closeShorthandStudio() {
-  $('modalShorthand').classList.remove('show');
-  if(stenoIntervalId) {
-    clearInterval(stenoIntervalId);
-    stenoIntervalId = null;
-    $('btnToggleMetronome').textContent = '▶ Start Audio Metronome';
-  }
-}
-function setStenoSpeed(spd) {
-  stenoSpeed = spd;
-  $('stenoBpmDisplay').textContent = spd + ' WPM';
-  const intervalSec = (60 / spd).toFixed(2);
-  $('stenoIntervalDesc').textContent = '1 beat every ' + intervalSec + ' seconds (' + spd + ' words/min)';
-  if(stenoIntervalId) {
-    clearInterval(stenoIntervalId);
-    stenoIntervalId = setInterval(() => AudioEngine.play('metronome'), (60 / stenoSpeed) * 1000);
-  }
-}
-function toggleStenoMetronome() {
-  if(stenoIntervalId) {
-    clearInterval(stenoIntervalId);
-    stenoIntervalId = null;
-    $('btnToggleMetronome').textContent = '▶ Start Audio Metronome';
-  } else {
-    AudioEngine.play('metronome');
-    stenoIntervalId = setInterval(() => AudioEngine.play('metronome'), (60 / stenoSpeed) * 1000);
-    $('btnToggleMetronome').textContent = '⏹ Stop Audio Metronome';
-  }
-}
 
 function setLanguage(lang) {
   $('selLang').value = lang;
@@ -2175,7 +2157,7 @@ function getPassageTitle(lang, idx){
 /* =====================================================================
    STATE
 ===================================================================== */
-let CFG = {};
+let CFG = {}; window.CFG = CFG;
 let mode = 'scrolling';
 let passageText = '';
 let started = false, submitted = false;
@@ -2183,7 +2165,7 @@ let startTs = null, secsElapsed = 0, timeLimitSecs = 300;
 let timerInt = null;
 let backspaceCount = 0;
 let bsKeyPending = false;   // a keydown Backspace was already counted; its input event must not count again
-function countBackspace(){ backspaceCount++; const l=$('liveBack'); if(l) l.textContent = backspaceCount; }
+function countBackspace(){ backspaceCount++; window.backspaceCount = backspaceCount; const l=$('liveBack'); if(l) l.textContent = backspaceCount; }
 let wpmSamples = [];
 let lastResult = null;
 let markWords = 0;
@@ -2204,27 +2186,68 @@ function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/
    mirrored into both the header avatar and the home-tab profile avatar.
 ===================================================================== */
 function openAvatarPicker(){
-  $('avatarFileInput').click();
+  const fi = $('avatarFileInput');
+  if(fi) fi.click();
 }
-function setStudentAvatar(dataUrl){
+
+function setStudentAvatar(dataUrl, persist = true){
+  if(!dataUrl) return;
   const hdrImg = $('hdrAvatarImg');
   const profImg = $('profileAvatarImg');
-  const profDefault = $('profileAvatarDefault');
-  hdrImg.src = dataUrl;
-  hdrImg.style.display = 'block';
-  profImg.src = dataUrl;
-  profImg.style.display = 'block';
-  if(profDefault) profDefault.style.display = 'none';
+  if(hdrImg){ hdrImg.src = dataUrl; hdrImg.style.display = 'block'; }
+  if(profImg){ profImg.src = dataUrl; profImg.style.display = 'block'; }
+  if(persist && window.storage){
+    try {
+      window.storage.set('student_avatar', dataUrl, false);
+    } catch(e){}
+  }
 }
-$('avatarFileInput').addEventListener('change', e=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  if(!file.type.startsWith('image/')){ toast('Please choose an image file'); return; }
-  const reader = new FileReader();
-  reader.onload = ev => { setStudentAvatar(ev.target.result); toast('Profile photo updated'); };
-  reader.readAsDataURL(file);
-  e.target.value = '';
-});
+
+function initAvatarPicker(){
+  const fi = $('avatarFileInput');
+  if(!fi) return;
+  fi.addEventListener('change', e=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    if(!file.type.startsWith('image/')){ toast('⚠️ Please select an image file'); return; }
+    
+    // Read and compress using off-screen canvas to ~160x160 to keep storage fast
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const size = 160;
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          
+          // Center crop
+          const minDim = Math.min(img.width, img.height);
+          const sx = (img.width - minDim) / 2;
+          const sy = (img.height - minDim) / 2;
+          ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+          
+          const compressed = canvas.toDataURL('image/jpeg', 0.85);
+          setStudentAvatar(compressed, true);
+          toast('✅ Profile photo updated');
+        } catch(err){
+          setStudentAvatar(ev.target.result, true);
+          toast('✅ Profile photo updated');
+        }
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  });
+}
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', initAvatarPicker);
+} else {
+  initAvatarPicker();
+}
 
 /* =====================================================================
    STUDENT PROFILE — name, address, mobile, institute. Persisted via
@@ -2311,6 +2334,7 @@ function readConfig(){
     theme: $('ddTheme') ? $('ddTheme').value : 'white',
     textSize: $('ddTextSize') ? $('ddTextSize').value : '20'
   };
+  window.CFG = CFG;
 }
 
 function applyPreviewStyles(){
@@ -2496,27 +2520,40 @@ function renderPassage(typed){
 // drifts and the current word ends up off-centre or out of view.
 function smoothScrollToCurrent(container, curEl){
   if(!curEl || !container) return;
-  const top = curEl.offsetTop - (container.clientHeight - curEl.offsetHeight)/2;
-  container.scrollTo({top: Math.max(0, top), behavior:'smooth'});
+  const top = Math.max(0, curEl.offsetTop - (container.clientHeight - curEl.offsetHeight)/2);
+  if(typeof container.scrollTo === 'function'){
+    try { container.scrollTo({top: top, behavior:'smooth'}); } catch(e){ container.scrollTop = top; }
+  } else {
+    container.scrollTop = top;
+  }
 }
 function smoothScrollToCurrentH(container, curEl){
   if(!curEl || !container) return;
-  const left = curEl.offsetLeft - (container.clientWidth - curEl.offsetWidth)/2;
-  container.scrollTo({left: Math.max(0, left), behavior:'smooth'});
+  const left = Math.max(0, curEl.offsetLeft - (container.clientWidth - curEl.offsetWidth)/2);
+  if(typeof container.scrollTo === 'function'){
+    try { container.scrollTo({left: left, behavior:'smooth'}); } catch(e){ container.scrollLeft = left; }
+  } else {
+    container.scrollLeft = left;
+  }
 }
 function smoothScrollIntoViewIfNeeded(container, curEl){
   if(!curEl || !container) return;
   const margin = 8, top = curEl.offsetTop, bottom = top + curEl.offsetHeight;
-  if(top < container.scrollTop + margin) container.scrollTo({top: Math.max(0, top - margin), behavior:'smooth'});
-  else if(bottom > container.scrollTop + container.clientHeight - margin) container.scrollTo({top: bottom - container.clientHeight + margin, behavior:'smooth'});
-}
-function followCurrent(){
-  const pc=$('passCard'), cur=$('passDisplay').querySelector('.w-cur');
-  if(!cur){ return; }
-  if(!started && pc.scrollTop===0 && pc.scrollLeft===0) return;
-  if(mode==='line') smoothScrollToCurrentH(pc,cur);
-  else if(mode==='page') smoothScrollIntoViewIfNeeded(pc,cur);
-  else smoothScrollToCurrent(pc,cur);
+  if(top < container.scrollTop + margin){
+    const targetTop = Math.max(0, top - margin);
+    if(typeof container.scrollTo === 'function'){
+      try { container.scrollTo({top: targetTop, behavior:'smooth'}); } catch(e){ container.scrollTop = targetTop; }
+    } else {
+      container.scrollTop = targetTop;
+    }
+  } else if(bottom > container.scrollTop + container.clientHeight - margin){
+    const targetTop = Math.max(0, bottom - container.clientHeight + margin);
+    if(typeof container.scrollTo === 'function'){
+      try { container.scrollTo({top: targetTop, behavior:'smooth'}); } catch(e){ container.scrollTop = targetTop; }
+    } else {
+      container.scrollTop = targetTop;
+    }
+  }
 }
 function resetPassageScroll(){
   const pc=$('passCard'), ta=$('typingArea');
@@ -2545,7 +2582,7 @@ function updateTimerDisplay(secsLeft){
 }
 
 function startTimer(){
-  started = true;
+  started = true; window.started = true;
   startTs = Date.now();
   timerInt = setInterval(()=>{
     secsElapsed = (Date.now() - startTs)/1000;
@@ -3149,7 +3186,7 @@ function calcResults(typed, orig, elapsedSec, onlyEvaluateTyped, live){
 
   // MARKS — institute formula: total - (mistakes x 1.8), capped by how much of the passage was typed
   const total = (typeof CFG!=='undefined' && CFG.totalMarks) || 50;
-  const need = Math.max(1, markWords || O.length);
+  const need = Math.max(1, (typeof markWords !== 'undefined' && markWords > 0 && (!passageText || orig === passageText)) ? markWords : O.length);
   // Typing exam: Senior 100 - mistakes x 1.25, Junior 100 - mistakes x 1.8. COA (Junior & Senior): 50 - mistakes x 1.8.
   const factor = (CFG.category==='typing' && CFG.level==='senior') ? 1.25 : 1.8;
   const raw = Math.max(0, total - totalMistakes*factor);
@@ -3196,7 +3233,7 @@ function buildWeakestKeys(wordErrors, lang){
 function submitTest(auto){
   if(submitted) return;
   if(!started && TA.value.trim()===''){ toast('⚠️ Start typing first!'); return; }
-  submitted = true;
+  submitted = true; window.submitted = true;
   clearInterval(timerInt);
   TA.disabled = true;
   if(auto) {
@@ -3524,12 +3561,13 @@ async function saveResult(r){
     let list = [];
     try{
       const res = await window.storage.get('recent-results', false);
-      if(res && res.value) list = JSON.parse(res.value);
+      const val = (res && typeof res === 'object' && res.value !== undefined) ? res.value : res;
+      if(val) list = typeof val === 'string' ? JSON.parse(val) : val;
     }catch(e){ list = []; }
     const passageTitle = (PASSAGES[CFG.lang] && PASSAGES[CFG.lang][CFG.passageIdx]) ? PASSAGES[CFG.lang][CFG.passageIdx].title : '';
     list.unshift({
       name: CFG.name, lang: CFG.lang, layout: CFG.layout, passage: passageTitle,
-      grossWpm: r.grossWpm, netWpm: r.netWpm, marks: (CFG.time===600 ? r.marks : null), accuracy: r.accuracy, passed: r.passed,
+      grossWpm: r.grossWpm, netWpm: r.netWpm, marks: r.marks, accuracy: r.accuracy, passed: r.passed,
       date: new Date().toLocaleDateString()
     });
     list = list.slice(0, 15);
@@ -3541,7 +3579,8 @@ async function saveResult(r){
 async function loadRecentResults(){
   try{
     const res = await window.storage.get('recent-results', false);
-    const list = res && res.value ? JSON.parse(res.value) : [];
+    const val = (res && typeof res === 'object' && res.value !== undefined) ? res.value : res;
+    const list = val ? (typeof val === 'string' ? JSON.parse(val) : val) : [];
     renderRecentResults(list);
   }catch(e){
     renderRecentResults([]);
@@ -3588,7 +3627,7 @@ const MODAL_CONTENT = {
   },
   contact: {title:'Contact Us', body:'<p><b>Sri Kalaimagal Typewriting Institute</b></p><p>For queries regarding technical examinations, batch schedules, or course registration, please visit the office or contact your instructor.</p>'},
   lms: {title:'Online Classes', body:'<p><b>Sri Kalaimagal Online Learning Portal</b></p><p>Access high-quality typewriting video tutorials, practice materials, and online theory classes from home.</p><p style="margin-top:10px;color:var(--muted);font-weight:600;">⚠️ Feature coming soon in the next update!</p>'},
-  shorthand: {title:'Shorthand Dictation', body:'<p><b>Sri Kalaimagal Stenography Lab</b></p><p>Practice English and Tamil shorthand dictations at various speed levels (60 WPM, 80 WPM, 100 WPM, 120 WPM) with real-time outline references and transcript checkers.</p><p style="margin-top:10px;color:var(--muted);font-weight:600;">⚠️ Feature coming soon in the next update!</p>'},
+  
   analytics: {title:'Analytics', body:'<div id="analyticsBody">Loading…</div>'}
 };
 
@@ -3885,9 +3924,11 @@ function updatePracStats(typed){
     if(typed[i]===target[i]) correct++; else wrong++;
   }
   const acc = typed.length>0 ? Math.round((correct/typed.length)*100) : 0;
-  $('pracAcc').textContent = typed.length>0 ? acc+'%' : '—';
-  $('pracCorrect').textContent = typed.length>0 ? correct : '—';
-  $('pracMistakes').textContent = typed.length>0 ? wrong : '—';
+  const pct = target.length>0 ? Math.min(100, Math.round((typed.length/target.length)*100)) : 0;
+  if($('pracProgressPct')) $('pracProgressPct').textContent = pct + '%';
+  if($('pracAcc')) $('pracAcc').textContent = typed.length>0 ? acc+'%' : '—';
+  if($('pracCorrect')) $('pracCorrect').textContent = typed.length>0 ? correct : '0';
+  if($('pracMistakes')) $('pracMistakes').textContent = typed.length>0 ? wrong : '0';
 }
 
 function onPracticeChanged(){
