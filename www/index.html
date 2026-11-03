@@ -110,7 +110,7 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
   --typesize: 20px;
 }
 
-[data-theme="black"] {
+[data-theme="black"], [data-theme="dark"] {
   --bg-main: #090d16;
   --bg-gradient: linear-gradient(135deg, #090d16 0%, #0f172a 100%);
   --card-bg: #111827;
@@ -717,6 +717,8 @@ body {
 .tile-desc { font-size: 11px; color: var(--muted); line-height: 1.35; }
 
 /* Bottom Nav */
+
+/* Bottom Nav Strict Styling - Single Active State Guaranteed */
 .bottom-nav-bar {
   position: fixed;
   bottom: 0; left: 0; right: 0;
@@ -738,22 +740,204 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  color: var(--muted);
+  color: var(--muted) !important;
   font-family: inherit;
   font-size: 10.5px;
   font-weight: 700;
   padding: 4px 10px;
   border-radius: 12px;
   transition: all .15s ease;
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 .nav-tab-item svg {
   width: 20px;
   height: 20px;
-  fill: currentColor;
+  fill: var(--muted) !important;
   transition: transform .15s ease;
 }
-.nav-tab-item.active { color: var(--primary); }
-.nav-tab-item.active svg { transform: translateY(-2px); }
+.nav-tab-item.active {
+  color: var(--primary) !important;
+}
+.nav-tab-item.active svg {
+  fill: var(--primary) !important;
+  transform: translateY(-2px);
+}
+.nav-tab-item:focus:not(.active),
+.nav-tab-item:hover:not(.active) {
+  color: var(--muted) !important;
+}
+.nav-tab-item:focus:not(.active) svg,
+.nav-tab-item:hover:not(.active) svg {
+  fill: var(--muted) !important;
+}
+
+/* App Footer Clean Docked Styling */
+.app-footer {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+  padding: 16px 12px;
+  margin-top: 24px;
+  border-top: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.app-footer b {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* Quick Shortcut Cards */
+.quick-shortcuts-deck {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.shortcut-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: 14px;
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: var(--card-shadow);
+  transition: all .15s ease;
+  outline: none;
+  font-family: inherit;
+}
+.shortcut-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: var(--card-shadow-hover);
+}
+.shortcut-card:active { transform: scale(0.98); }
+.sc-icon { font-size: 22px; }
+.sc-info b { display: block; font-size: 12.5px; color: var(--ink); line-height: 1.25; margin-bottom: 2px; }
+.sc-info span { font-size: 10.5px; color: var(--muted); display: block; }
+
+/* Analytics KPI Grid & Filter Pills */
+.analytics-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.kpi-card {
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: var(--card-shadow);
+}
+.kpi-card.highlight {
+  border-color: var(--primary);
+  background: rgba(37, 99, 235, 0.03);
+}
+.kpi-icon { font-size: 20px; margin-bottom: 2px; }
+.kpi-val { font-size: 24px; font-weight: 800; color: var(--ink); margin-bottom: 2px; }
+.kpi-label { font-size: 11px; font-weight: 600; color: var(--muted); }
+.filter-pills-row {
+  display: flex;
+  gap: 4px;
+}
+.filter-pill {
+  background: var(--bg-main);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s ease;
+}
+.filter-pill.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* History Accordion Cards */
+.history-item-card {
+  background: var(--bg-main);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: all .15s ease;
+}
+.history-item-header {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+.history-item-body {
+  padding: 12px;
+  border-top: 1px dashed var(--card-border);
+  background: var(--card-bg);
+  display: none;
+  font-size: 12.5px;
+}
+.history-item-body.open { display: block; }
+.qa-box {
+  background: var(--bg-main);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  max-height: 120px;
+  overflow-y: auto;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
+/* Landscape / Horizontal Responsiveness */
+@media (orientation: landscape) and (min-width: 540px), (min-width: 768px) {
+  .app {
+    max-width: 920px !important;
+    padding-left: 28px !important;
+    padding-right: 28px !important;
+  }
+  .bottom-nav-bar {
+    max-width: 920px !important;
+  }
+  .launch-card-deck {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+  .quick-shortcuts-deck {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  .analytics-kpi-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  #screen-practice .passcard {
+    max-height: 220px;
+  }
+  #screen-practice #practiceInput {
+    height: 130px;
+    font-size: 22px;
+  }
+}
+
 
 /* Test Screen Cockpit */
 .test-cockpit-bar {
@@ -1185,7 +1369,7 @@ body {
       <div class="header-tools">
         <div class="streak-chip" title="Daily Practice Streak">
           <span class="streak-flame">🔥</span>
-          <span id="hdrStreakVal">7</span>d
+          <span id="hdrStreakVal">0</span>d
         </div>
         <button class="tool-btn" id="btnAudioToggle" onclick="cycleAudioMode()" title="Sound Effects">🔊</button>
         <div class="avatar-pill" id="hdrAvatarWrap" onclick="switchTab('profile')" title="Student Profile">
@@ -1199,12 +1383,49 @@ body {
       
       <!-- HERO WELCOME BANNER -->
       <div class="hero-card">
-        <div class="hero-label">Tamil Nadu Technical Exam Prep</div>
+        <div class="hero-label" id="lblHeroTargetTrack">Tamil Nadu Technical Exam Prep · Nov 2026</div>
         <div class="hero-title" id="lblVanakkam">Vanakkam, Student! 👋</div>
         <div class="hero-subtitle">Master your touch typing speed, accuracy, and official government examination syllabus.</div>
         <div class="hero-stats-row">
-          <div class="hero-badge-pill">⭐ Level <span id="lblProfileLvl">8</span></div>
-          <div class="hero-badge-pill">🏆 Junior &amp; Senior Ready</div>
+          <div class="hero-badge-pill">🔥 <span id="homeStreakBadge">0 days streak</span></div>
+          <div class="hero-badge-pill">⏱️ Total: <span id="homeUsageTotal">0m</span> (Today: <span id="homeUsageToday">0m</span>)</div>
+          <div class="hero-badge-pill">⭐ Level <span id="lblProfileLvl">1</span></div>
+        </div>
+      </div>
+
+      <!-- QUICK SHORTCUTS FOR SPEED TESTS -->
+      <div class="quick-shortcuts-deck">
+        <button class="shortcut-card" type="button" onclick="quickSelectLanguage('en')">
+          <div class="sc-icon">🇬🇧</div>
+          <div class="sc-info">
+            <b>English Typing</b>
+            <span>QWERTY Speed Test</span>
+          </div>
+        </button>
+        <button class="shortcut-card" type="button" onclick="quickSelectLanguage('ta', 'tamil99')">
+          <div class="sc-icon">🇮🇳</div>
+          <div class="sc-info">
+            <b>Tamil (Tamil99)</b>
+            <span>DoTE Standard Layout</span>
+          </div>
+        </button>
+        <button class="shortcut-card" type="button" onclick="quickSelectLanguage('ta', 'typewriter')">
+          <div class="sc-icon">⌨️</div>
+          <div class="sc-info">
+            <b>Tamil (Typewriter)</b>
+            <span>Mechanical Layout</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- MOST FREQUENT TYPING MISTAKES (TOP 3-5) -->
+      <div class="glass-card" style="margin-bottom:14px;">
+        <div class="card-header-bar">
+          <h2>🎯 Most Frequent Typing Mistakes</h2>
+          <span class="card-badge" style="background:var(--coral-light);color:var(--coral);">Weak Keys</span>
+        </div>
+        <div id="homeWeakKeysContainer">
+          <div style="font-size:12px;color:var(--muted);padding:4px 0;">Complete your first typing test to analyze your frequent mistakes.</div>
         </div>
       </div>
 
@@ -1400,9 +1621,11 @@ body {
                 <select id="ddTextSize">
                   <option value="16">16 px (Compact)</option>
                   <option value="18">18 px (Standard)</option>
-                  <option value="20" selected>20 px (Large)</option>
-                  <option value="22">22 px (Extra)</option>
-                  <option value="24">24 px (Max)</option>
+                  <option value="20" selected>20 px (Medium)</option>
+                  <option value="24">24 px (Large)</option>
+                  <option value="28">28 px (Extra Large)</option>
+                  <option value="32">32 px (Huge)</option>
+                  <option value="35">35 px (Maximum)</option>
                 </select>
               </div>
             </div>
@@ -1466,7 +1689,7 @@ body {
         </div>
       </div>
 
-      <div class="powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></div>
+      <footer class="app-footer powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></footer>
       <div style="height:36px;width:100%;"></div>
     </div>
 
@@ -1484,18 +1707,79 @@ body {
       </div>
     </div>
 
-    <!-- ---------------- TAB 3: ANALYTICS (RECENT RESULTS & STATS) ---------------- -->
+    <!-- ---------------- TAB 3: ANALYTICS (PERFORMANCE & TYPING HISTORY) ---------------- -->
     <div class="tab-content" id="tab-progress">
-      <div class="glass-card">
+      
+      <!-- KPI STATS SUMMARY -->
+      <div class="analytics-kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon">⚡</div>
+          <div class="kpi-val" id="anAvgSpeed">—</div>
+          <div class="kpi-label">Average Speed (WPM)</div>
+        </div>
+        <div class="kpi-card highlight">
+          <div class="kpi-icon">🏆</div>
+          <div class="kpi-val" id="anPeakSpeed">—</div>
+          <div class="kpi-label">Peak Speed (WPM)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">🎯</div>
+          <div class="kpi-val" id="anAvgAcc">—</div>
+          <div class="kpi-label">Average Accuracy</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">📝</div>
+          <div class="kpi-val" id="anTotalTests">0</div>
+          <div class="kpi-label">Tests Completed</div>
+        </div>
+      </div>
+
+      <!-- SPEED PROGRESS TRENDLINE GRAPH -->
+      <div class="glass-card" style="margin-bottom:14px;">
         <div class="card-header-bar">
-          <h2>📊 Performance History</h2>
-          <div style="display:flex;gap:12px;">
-            <span style="color:var(--primary);font-size:12px;font-weight:800;cursor:pointer;" onclick="openModal('analytics')">📈 Chart</span>
-            <span style="color:var(--coral);font-size:12px;font-weight:800;cursor:pointer;" onclick="clearResults()">🧹 Clear</span>
+          <h2>📈 Speed Progress Trendline (WPM)</h2>
+        </div>
+        <div id="analyticsGraphContainer" style="width:100%;height:150px;position:relative;">
+          <canvas id="analyticsGraphCanvas" style="width:100%;height:100%;display:block;"></canvas>
+        </div>
+      </div>
+
+      <!-- FILTER & SORT CONTROLS -->
+      <div class="glass-card" style="margin-bottom:14px;padding:12px 14px;">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span style="font-size:12px;font-weight:700;color:var(--muted);">Language:</span>
+            <div class="filter-pills-row" id="anLangFilterPills">
+              <button class="filter-pill active" id="fltAll" type="button" onclick="setAnalyticsLangFilter('all')">All</button>
+              <button class="filter-pill" id="fltEn" type="button" onclick="setAnalyticsLangFilter('en')">🇬🇧 English</button>
+              <button class="filter-pill" id="fltTa" type="button" onclick="setAnalyticsLangFilter('ta')">🇮🇳 Tamil</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span style="font-size:12px;font-weight:700;color:var(--muted);">Sort:</span>
+            <select id="anSortBy" class="custom-select-wrap select" style="padding:5px 8px;font-size:12px;border-radius:8px;border:1px solid var(--card-border);" onchange="renderAnalyticsFiltered()">
+              <option value="latest">Latest First</option>
+              <option value="best_speed">Best Speed (High → Low)</option>
+              <option value="worst_speed">Lowest Speed (Worst → Best)</option>
+              <option value="best_acc">Best Accuracy</option>
+            </select>
           </div>
         </div>
-        <div class="rr-list" id="rrList">No tests recorded yet. Complete a test in Studio to generate your scorecard!</div>
       </div>
+
+      <!-- DETAILED TEST ATTEMPTS LIST WITH QUESTION & ANSWER TYPED -->
+      <div class="glass-card">
+        <div class="card-header-bar">
+          <h2>📜 Previous Test Submissions</h2>
+          <span style="color:var(--coral);font-size:12px;font-weight:800;cursor:pointer;" onclick="clearResults()">🧹 Clear History</span>
+        </div>
+        <div id="analyticsListContainer">
+          <div class="rr-list" id="rrList">No tests recorded yet. Complete a test in Studio to generate your scorecard!</div>
+        </div>
+      </div>
+
+      <footer class="app-footer powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></footer>
+      <div style="height:24px;width:100%;"></div>
     </div>
 
     <!-- ---------------- TAB 4: ACADEMY (INSTITUTE HUB & SHORTHAND) ---------------- -->
@@ -1534,10 +1818,63 @@ body {
         </div>
       </div>
 
+      <footer class="app-footer powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></footer>
+      <div style="height:24px;width:100%;"></div>
     </div>
 
-    <!-- ---------------- TAB 5: PROFILE (STUDENT CREDENTIALS) ---------------- -->
+    <!-- ---------------- TAB 5: PROFILE (STUDENT CREDENTIALS & SETTINGS) ---------------- -->
     <div class="tab-content" id="tab-profile">
+      
+      <!-- THEME SETTINGS (LIGHT / DARK MODE) -->
+      <div class="glass-card">
+        <div class="card-header-bar">
+          <h2>🎨 Appearance &amp; Theme</h2>
+          <span class="card-badge" id="lblThemeBadge">Light</span>
+        </div>
+        <div class="seg-control" style="margin-bottom:8px;">
+          <button class="seg-btn active" id="btnThemeLight" type="button" onclick="setAppTheme('white')">
+            <span>☀️</span> Light Mode
+          </button>
+          <button class="seg-btn" id="btnThemeDark" type="button" onclick="setAppTheme('dark')">
+            <span>🌙</span> Dark Mode
+          </button>
+        </div>
+        <div class="form-hint">Theme choice persists across sessions and device restarts.</div>
+      </div>
+
+      <!-- EXAM TARGET & TIME PERIOD SETTINGS -->
+      <div class="glass-card">
+        <div class="card-header-bar">
+          <h2>🎯 Government Exam Preparation</h2>
+        </div>
+
+        <div class="form-field">
+          <div class="form-label">Exam Preparation Course:</div>
+          <div class="custom-select-wrap">
+            <select id="profExamCourse" onchange="syncExamCourseWithConfig()">
+              <option value="typing_both" selected>Both Typewriting Exams (Tamil &amp; English) — 100 Marks each</option>
+              <option value="typing_tamil">Typewriting Exam (Tamil Alone) — 100 Marks</option>
+              <option value="typing_english">Typewriting Exam (English Alone) — 100 Marks</option>
+              <option value="coa_both">COA Exam (Tamil &amp; English) — 50 Marks each</option>
+            </select>
+          </div>
+          <div class="form-hint" id="lblExamCourseHint">Full government examination syllabus with official stroke deduction formulas.</div>
+        </div>
+
+        <div class="form-field">
+          <div class="form-label">Exam Time Period / Target Session:</div>
+          <div class="custom-select-wrap">
+            <select id="profExamPeriod" onchange="syncExamPeriod()">
+              <option value="November 2026" selected>November 2026</option>
+              <option value="June 2027">June 2027</option>
+              <option value="November 2027">November 2027</option>
+            </select>
+          </div>
+          <div class="form-hint">Official Tamil Nadu Technical Examinations timetable schedule.</div>
+        </div>
+      </div>
+
+      <!-- STUDENT PROFILE DETAILS -->
       <div class="glass-card">
         <div class="card-header-bar">
           <h2>👤 Student Profile &amp; Register</h2>
@@ -1563,6 +1900,7 @@ body {
         <button class="solidbtn" style="width:100%;margin-top:10px;" onclick="saveProfile()">💾 Save Student Details</button>
       </div>
 
+      <!-- PROFILE PHOTO UPLOAD -->
       <div class="glass-card" style="text-align:center;">
         <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:14px;">
           <div style="position:relative;width:96px;height:96px;margin:0 auto 12px;border-radius:50%;border:3px solid var(--primary);overflow:hidden;box-shadow:var(--card-shadow);background:var(--card-bg);">
@@ -1574,7 +1912,8 @@ body {
         </div>
       </div>
       
-      <div class="powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></div>
+      <footer class="app-footer powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></footer>
+      <div style="height:24px;width:100%;"></div>
     </div>
 
     <!-- BOTTOM NAVIGATION BAR (5 TABS) -->
@@ -1985,18 +2324,39 @@ function cycleAudioMode() {
   toast('Audio: ' + labels[next]);
 }
 
-// 5-Tab switching
+// 5-Tab switching - Guaranteed Single Active Navigation State
 function switchTab(name) {
   showScreen('screen-config');
   const validTabs = ['speed', 'practice', 'progress', 'academy', 'profile'];
-  validTabs.forEach(t => {
-    const el = $('tab-' + t);
-    if(el) el.classList.toggle('active', t === name);
-    const btn = $('btnTab' + t.charAt(0).toUpperCase() + t.slice(1));
-    if(btn) btn.classList.toggle('active', t === name);
+  
+  // Strict cleanup: remove active class and blur all tab buttons
+  document.querySelectorAll('.nav-tab-item, .nav-tab').forEach(btn => {
+    btn.classList.remove('active');
+    try { btn.blur(); } catch(e){}
   });
-  if(name === 'progress') loadRecentResults();
+  
+  // Hide all tab panes
+  document.querySelectorAll('.tab-content').forEach(tc => {
+    tc.classList.remove('active');
+  });
+
+  // Activate only target pane
+  const targetPane = $('tab-' + name);
+  if(targetPane) targetPane.classList.add('active');
+
+  // Activate only target button
+  const btnId = 'btnTab' + name.charAt(0).toUpperCase() + name.slice(1);
+  const activeBtn = $(btnId);
+  if(activeBtn) {
+    activeBtn.classList.add('active');
+  }
+
+  if(name === 'progress') {
+    loadRecentResults();
+    if(typeof renderAnalyticsPage === 'function') renderAnalyticsPage();
+  }
   if(name === 'profile') loadProfile();
+  if(name === 'speed' && typeof syncContinueCard === 'function') syncContinueCard();
 }
 
 const KEYMAP_TYPEWRITER = {"m": "அ", "M": "ஆ", ",": "இ", "<": "ஈ", "c": "உ", "C": "ஊ", "v": "எ", "V": "ஏ", "I": "ஐ", "x": "ஒ", "X": "ஓ", "xs": "ஔ", "`": "ஃ", "b": "◌ெ", "n": "◌ே", "i": "◌ை", "h": "◌ா", ";f": "க்", "f": "க", "fh": "கா", "pf": "கி", "Pf": "கீ", "F": "கு", "T": "கூ", "bf": "கெ", "nf": "கே", "if": "கை", "bfh": "கொ", "nfh": "கோ", "bfs": "கௌ", ";'": "ங்", "'": "ங", "'h": "ஙா", "p'": "ஙி", "P'": "ஙீ", "['": "ஙு", "{'": "ஙூ", "b'": "ஙெ", "n'": "ஙே", "i'": "ஙை", "b'h": "ஙொ", "n'h": "ஙோ", "b's": "ஙௌ", ";r": "ச்", "r": "ச", "rh": "சா", "pr": "சி", "Pr": "சீ", "R": "சு", "N": "சூ", "br": "செ", "nr": "சே", "ir": "சை", "brh": "சொ", "nrh": "சோ", "brs": "சௌ", ";\"": "ஞ்", "\"": "ஞ", "\"h": "ஞா", "p\"": "ஞி", "P\"": "ஞீ", "Q": "ஞு", "Q}": "ஞூ", "[\"": "ஞு", "{\"": "ஞூ", "b\"": "ஞெ", "n\"": "ஞே", "i\"": "ஞை", "b\"h": "ஞொ", "n\"h": "ஞோ", "b\"s": "ஞௌ", ";l": "ட்", "l": "ட", "lh": "டா", "o": "டி", "pl": "டி", "O": "டீ", "Pl": "டீ", "L": "டு", ":L": "டூ", "bl": "டெ", "nl": "டே", "il": "டை", "blh": "டொ", "nlh": "டோ", "bls": "டௌ", ";z": "ண்", "z": "ண", "zh": "ணா", "pz": "ணி", "Pz": "ணீ", "q": "ணு", "q}": "ணூ", "bz": "ணெ", "nz": "ணே", "iz": "ணை", "bzh": "ணொ", "nzh": "ணோ", "bzs": "ணௌ", ";j": "த்", "j": "த", "jh": "தா", "pj": "தி", "Pj": "தீ", "J": "து", "J}": "தூ", "bj": "தெ", "nj": "தே", "ij": "தை", "bjh": "தொ", "njh": "தோ", "bjs": "தௌ", ";e": "ந்", "e": "ந", "eh": "நா", "pe": "நி", "Pe": "நீ", "E": "நு", "E}": "நூ", "be": "நெ", "ne": "நே", "ie": "நை", "beh": "நொ", "neh": "நோ", "bes": "நௌ", ";g": "ப்", "g": "ப", "gh": "பா", "pg": "பி", "Pg": "பீ", "[g": "பு", "{g": "பூ", "bg": "பெ", "ng": "பே", "ig": "பை", "bgh": "பொ", "ngh": "போ", "bgs": "பௌ", ";k": "ம்", "k": "ம", "kh": "மா", "pk": "மி", "Pk": "மீ", "K": "மு", ":K": "மூ", "bk": "மெ", "nk": "மே", "ik": "மை", "bkh": "மொ", "nkh": "மோ", "bks": "மௌ", ";a": "ய்", "a": "ய", "ah": "யா", "pa": "யி", "Pa": "யீ", "[a": "யு", "{a": "யூ", "ba": "யெ", "na": "யே", "ia": "யை", "bah": "யொ", "nah": "யோ", "bas": "யௌ", ";u": "ர்", "u": "ர", "uh": "ரா", "pu": "ரி", "Pu": "ரீ", "U": "ரு", ":U": "ரூ", "bu": "ரெ", "nu": "ரே", "iu": "ரை", "buh": "ரொ", "nuh": "ரோ", "bns": "ரௌ", ";y": "ல்", "y": "ல", "yh": "லா", "py": "லி", "Py": "லீ", "Y": "லு", "Y}": "லூ", "by": "லெ", "ny": "லே", "iy": "லை", "byh": "லொ", "nyh": "லோ", "bys": "லௌ", ";t": "வ்", "t": "வ", "th": "வா", "pt": "வி", "Pt": "வீ", "[t": "வு", "{t": "வூ", "bt": "வெ", "nt": "வே", "it": "வை", "bth": "வொ", "nth": "வோ", "bts": "வௌ", ";H": "ழ்", "H": "ழ", "Hh": "ழா", "pH": "ழி", "PH": "ழீ", "G": "ழு", ":G": "ழூ", "{H": "ழூ", "bH": "ழெ", "nH": "ழே", "iH": "ழை", "bHh": "ழொ", "nHh": "ழோ", "bHs": "ழௌ", ";s": "ள்", "s": "ள", "sh": "ளா", "ps": "ளி", "Ps": "ளீ", "S": "ளு", ":S": "ளூ", "bs": "ளெ", "ns": "ளே", "is": "ளை", "]s": "ளை", "bsh": "ளொ", "nsh": "ளோ", "bss": "ளௌ", ";w": "ற்", "w": "ற", "wh": "றா", "pw": "றி", "Pw": "றீ", "W": "று", "W}": "றூ", "bw": "றெ", "nw": "றே", "iw": "றை", "bwh": "றொ", "nwh": "றோ", "bws": "றௌ", ";d": "ன்", "d": "ன", "dh": "னா", "pd": "னி", "Pd": "னீ", "D": "னு", "D}": "னூ", "bd": "னெ", "nd": "னே", "id": "னை", "bdh": "னொ", "ndh": "னோ", "bds": "னௌ", ";$": "ஜ்", "$": "ஜ", "$h": "ஜா", "p$": "ஜி", "P$": "ஜீ", "$%": "ஜு", "$^": "ஜூ", "b$": "ஜெ", "n$": "ஜே", "i$": "ஜை", "b$h": "ஜொ", "n$h": "ஜோ", "b$s": "ஜௌ", ";AY": "ஶ்", "AY": "ஶ", "AYh": "ஶா", "pAY": "ஶி", "PAY": "ஶீ", "AY%": "ஶு", "AY^": "ஶூ", "bAY": "ஶெ", "nAY": "ஶே", "iAY": "ஶை", "bAYh": "ஶொ", "nAYh": "ஶோ", "bAYs": "ஶௌ", ";Z": "ஷ்", "Z": "ஷ", "Zh": "ஷா", "pZ": "ஷி", "PZ": "ஷீ", "Z%": "ஷு", "Z^": "ஷூ", "bZ": "ஷெ", "nZ": "ஷே", "iZ": "ஷை", "bZh": "ஷொ", "nZh": "ஷோ", "bZs": "ஷௌ", ";!": "ஸ்", "!": "ஸ", "!h": "ஸா", "p!": "ஸி", "P!": "ஸீ", "!%": "ஸு", "!^": "ஸூ", "b!": "ஸெ", "n!": "ஸே", "i!": "ஸை", "b!h": "ஸொ", "n!h": "ஸோ", "b!s": "ஸௌ", ";]": "ஹ்", "]": "ஹ", "]h": "ஹா", "p]": "ஹி", "P]": "ஹீ", "]%": "ஹு", "]^": "ஹூ", "b]": "ஹெ", "n]": "ஹே", "i]": "ஹை", "b]h": "ஹொ", "n]h": "ஹோ", "b]s": "ஹௌ", ";f;": "க்", ";f;Z": "க்‌ஷ்", ";fZ": "க்‌ஷ", ";fZh": "க்‌ஷா", ";fp": "க்", ";fpZ": "க்‌ஷி", ";fP": "க்", ";fPZ": "க்‌ஷீ", ";fZ%": "க்‌ஷு", ";fZ^": "க்‌ஷூ", ";fb": "க்", ";fbZ": "க்‌ஷெ", ";fn": "க்", ";fnZ": "க்‌ஷே", ";fi": "க்", ";fiZ": "க்‌ஷை", ";fbZh": "க்‌ஷொ", ";fnZh": "க்‌ஷோ", ";fbZs": "க்‌ஷௌ", ";B": "க்ஷ்", "B": "க்ஷ", "Bh": "க்ஷா", "pB": "க்ஷி", "PB": "க்ஷீ", "B%": "க்ஷு", "B^": "க்ஷூ", "bB": "க்ஷெ", "nB": "க்ஷே", "iB": "க்ஷை", "bBh": "க்ஷொ", "nBh": "க்ஷோ", "bBs": "க்ஷௌ", "_": "ஶ்ரீ", "A": "}", "As": "\u00a0", "A_": "ஸ்ரீ", "AZ": "௳", "AX": "௴", "AC": "௵", "AV": "௶", "AB": "௷", "AD": "௸", "AA": "௹", "AS": "௺", "AF": "ௐ", "A[": "[", "A]": "]", "A\"": "\"", "A:": ":", "A;": ";", "A<": "<", "A>": ">", "A?": "?", "A2": "½", "A3": "¾", "A4": "¼", "AO": "‘", "AP": "’", "AU": "“", "AI": "”", "A.": "•", "Ac": "©", "A^": "^", "Al": "◌்", "Ah": "◌ா", "Ap": "◌ி", "Ao": "◌ீ", "Au": "◌ு", "Ay": "◌ூ", "Ab": "◌ெ", "An": "◌ே", "Ai": "◌ை", "Ax": "◌ொ", "Az": "◌ோ", "Av": "◌ௌ", "A~": "~", "A`": "`", "~": "*", "@": "@", "&": "&", "*": "*", "-": "/", "(": "(", ")": ")", "+": "+", "1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "0": "0", "=": "=", "|": "|", "\\": "\\", ".": ",", "/": ".", ">": "?", "?": "-"};
@@ -2249,7 +2609,7 @@ if(document.readyState === 'loading'){
    window.storage (personal, not shared) and used app-wide as the source
    of truth for the student's name (replaces the old Speed-tab field).
 ===================================================================== */
-let STUDENT_PROFILE = { name:'', address:'', mobile:'', institute:'' };
+let STUDENT_PROFILE = { name:'', address:'', mobile:'', institute:'', examCourse:'typing_both', examPeriod:'November 2026' };
 
 async function loadProfile(){
   try{
@@ -2261,15 +2621,29 @@ async function loadProfile(){
   if($('profMobile')) $('profMobile').value = STUDENT_PROFILE.mobile || '';
   if($('profInstitute')) $('profInstitute').value = STUDENT_PROFILE.institute || '';
   if($('studentName')) $('studentName').value = STUDENT_PROFILE.name || 'Student';
+  
+  const savedCourse = localStorage.getItem('exam_prep_course') || STUDENT_PROFILE.examCourse || 'typing_both';
+  const savedPeriod = localStorage.getItem('exam_time_period') || STUDENT_PROFILE.examPeriod || 'November 2026';
+  if($('profExamCourse')) $('profExamCourse').value = savedCourse;
+  if($('profExamPeriod')) $('profExamPeriod').value = savedPeriod;
+  
   updateVannakam();
+  updateHeroTrackLabel();
 }
 
 async function saveProfile(){
+  const chosenCourse = $('profExamCourse') ? $('profExamCourse').value : 'typing_both';
+  const chosenPeriod = $('profExamPeriod') ? $('profExamPeriod').value : 'November 2026';
+  localStorage.setItem('exam_prep_course', chosenCourse);
+  localStorage.setItem('exam_time_period', chosenPeriod);
+
   STUDENT_PROFILE = {
     name: ($('profName').value || '').trim(),
     address: ($('profAddress').value || '').trim(),
     mobile: ($('profMobile').value || '').trim(),
-    institute: ($('profInstitute').value || '').trim()
+    institute: ($('profInstitute').value || '').trim(),
+    examCourse: chosenCourse,
+    examPeriod: chosenPeriod
   };
   if($('studentName')) $('studentName').value = STUDENT_PROFILE.name || 'Student';
   try{
@@ -2277,6 +2651,7 @@ async function saveProfile(){
     toast('✅ Profile saved');
   }catch(e){ toast('⚠️ Could not save profile'); }
   updateVannakam();
+  updateHeroTrackLabel();
 }
 
 function updateVannakam(){
@@ -3597,6 +3972,8 @@ function drawChart(samples){
 /* =====================================================================
    RECENT RESULTS (persistent storage)
 ===================================================================== */
+let RECENT_RESULTS_CACHE = [];
+
 async function saveResult(r){
   try{
     let list = [];
@@ -3605,15 +3982,38 @@ async function saveResult(r){
       const val = (res && typeof res === 'object' && res.value !== undefined) ? res.value : res;
       if(val) list = typeof val === 'string' ? JSON.parse(val) : val;
     }catch(e){ list = []; }
+    
     const passageTitle = (PASSAGES[CFG.lang] && PASSAGES[CFG.lang][CFG.passageIdx]) ? PASSAGES[CFG.lang][CFG.passageIdx].title : '';
-    list.unshift({
-      name: CFG.name, lang: CFG.lang, layout: CFG.layout, passage: passageTitle,
-      grossWpm: r.grossWpm, netWpm: r.netWpm, marks: r.marks, accuracy: r.accuracy, passed: r.passed,
-      date: new Date().toLocaleDateString()
-    });
-    list = list.slice(0, 15);
+    const now = new Date();
+    const weakKeys = extractMistakeKeys(r.ops || []);
+
+    const newEntry = {
+      name: CFG.name || 'Student',
+      lang: CFG.lang,
+      layout: CFG.layout,
+      passage: passageTitle,
+      grossWpm: r.grossWpm || 0,
+      netWpm: r.netWpm || 0,
+      marks: r.marks,
+      accuracy: r.accuracy || 0,
+      passed: !!r.passed,
+      errors: r.errors || 0,
+      mistakes: r.errors || 0,
+      elapsed: secsElapsed || 0,
+      date: now.toLocaleDateString(),
+      isoDate: now.toISOString(),
+      timestamp: Date.now(),
+      questionText: passageText || (typeof window !== 'undefined' && window.passageText) || ((PASSAGES[CFG.lang] && PASSAGES[CFG.lang][CFG.passageIdx]) ? PASSAGES[CFG.lang][CFG.passageIdx].text : '') || '',
+      typedText: (window.TA && window.TA.value) ? window.TA.value : '',
+      weakKeys: weakKeys
+    };
+
+    list.unshift(newEntry);
+    list = list.slice(0, 50); // Store up to 50 runs for rich analytics
+    RECENT_RESULTS_CACHE = list;
     await window.storage.set('recent-results', JSON.stringify(list), false);
     renderRecentResults(list);
+    renderAnalyticsPage();
   }catch(e){ console.error('storage error', e); }
 }
 
@@ -3622,9 +4022,13 @@ async function loadRecentResults(){
     const res = await window.storage.get('recent-results', false);
     const val = (res && typeof res === 'object' && res.value !== undefined) ? res.value : res;
     const list = val ? (typeof val === 'string' ? JSON.parse(val) : val) : [];
+    RECENT_RESULTS_CACHE = list;
     renderRecentResults(list);
+    renderAnalyticsPage();
   }catch(e){
+    RECENT_RESULTS_CACHE = [];
     renderRecentResults([]);
+    renderAnalyticsPage();
   }
 }
 
@@ -3633,9 +4037,10 @@ function renderRecentResults(list){
   try {
     updateDashboardStats(list);
   } catch(e) {}
-  if(!list || list.length===0){ el.textContent = 'No results yet.'; return; }
+  if(!el) return;
+  if(!list || list.length===0){ el.textContent = 'No tests recorded yet. Complete a test in Studio to generate your scorecard!'; return; }
   el.innerHTML = list.map(r=>
-    `<div class="rr-row"><span>${esc(r.name)} · ${r.lang==='ta'?('Tamil/'+(LAYOUT_LABEL_SHORT[r.layout]||'99')):'English'} · ${esc((r.passage||'').replace(/^(English|Tamil) Passage \d+ . /,''))}</span><b>${r.netWpm} wpm${r.marks!==null&&r.marks!==undefined?(' / '+r.marks+'m'):''} · ${r.passed?'Pass':'Fail'}</b></div>`
+    `<div class="rr-row"><span>${esc(r.name || 'Student')} · ${r.lang==='ta'?('Tamil/'+(LAYOUT_LABEL_SHORT[r.layout]||'99')):'English'} · ${esc((r.passage||'').replace(/^(English|Tamil) Passage \d+ [·-]?\s*/,''))}</span><b>${r.netWpm} wpm${r.marks!==null&&r.marks!==undefined?(' / '+r.marks+'m'):''} · ${r.passed?'Pass':'Fail'}</b></div>`
   ).join('');
 }
 
@@ -3644,7 +4049,9 @@ async function clearResults(){
   try{
     await window.storage.set('recent-results', JSON.stringify([]), false);
   }catch(e){}
+  RECENT_RESULTS_CACHE = [];
   renderRecentResults([]);
+  renderAnalyticsPage();
   toast('Recent results cleared');
 }
 
@@ -4108,33 +4515,29 @@ function openWordPracticeForLesson(){
 /* =====================================================================
    TYPING THALAIVA GAMIFIED HELPER FUNCTIONS
 ===================================================================== */
-function switchTab(tabId){
-  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
-  const target = $('tab-' + tabId);
-  if(target) target.classList.add('active');
-  
-  document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
-  const btnId = 'btnTab' + tabId.charAt(0).toUpperCase() + tabId.slice(1);
-  if($(btnId)) $(btnId).classList.add('active');
-}
+// (Duplicate switchTab removed in favor of single-active switchTab)
 
 function syncContinueCard(){
-  readConfig();
-  const isTA = CFG.lang === 'ta';
-  const layoutStr = isTA ? (LAYOUT_LABEL[CFG.layout]||'Typewriter') : 'English';
-  
-  let speedText = 'Junior';
-  if(CFG.speedType === 'senior') speedText = 'Senior';
-  else if(CFG.speedType === 'unlimited') speedText = 'Unlimited';
-  
-  $('lblContinueTitle').textContent = `${layoutStr} · ${speedText}`;
-  
-  const list = isTA ? PASSAGES.ta : PASSAGES.en;
-  const pTitle = (list[CFG.passageIdx] && list[CFG.passageIdx].title) || 'Passage 1';
-  const cleanTitle = pTitle.replace(/^(English|Tamil) Passage \d+ -?\s*/, '');
-  
-  $('lblContinueDesc').textContent = `${cleanTitle} · ${CFG.time}s`;
-  updateVannakam();
+  try {
+    readConfig();
+    const isTA = CFG.lang === 'ta';
+    const layoutStr = isTA ? (LAYOUT_LABEL[CFG.layout]||'Typewriter') : 'English';
+    
+    let speedText = 'Junior';
+    if(CFG.speedType === 'senior') speedText = 'Senior';
+    else if(CFG.speedType === 'unlimited') speedText = 'Unlimited';
+    
+    const elTitle = $('lblContinueTitle');
+    if(elTitle) elTitle.textContent = layoutStr + ' · ' + speedText;
+    
+    const list = isTA ? PASSAGES.ta : PASSAGES.en;
+    const pTitle = (list && list[CFG.passageIdx] && list[CFG.passageIdx].title) || 'Passage 1';
+    const cleanTitle = pTitle.replace(/^(English|Tamil) Passage \d+ -?\s*/, '');
+    
+    const elDesc = $('lblContinueDesc');
+    if(elDesc) elDesc.textContent = cleanTitle + ' · ' + (CFG.time || 600) + 's';
+    updateVannakam();
+  } catch(e) {}
 }
 
 function quickSelect(type, val){
@@ -4173,50 +4576,580 @@ function quickSelect(type, val){
   toast('Configured layout updated!');
 }
 
+function calculateDailyStreak(list) {
+  if(!list || list.length === 0) return 0;
+  const dateSet = new Set();
+  list.forEach(r => {
+    if(r.isoDate) {
+      dateSet.add(r.isoDate.split('T')[0]);
+    } else if(r.timestamp) {
+      const d = new Date(r.timestamp);
+      dateSet.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+    } else if(r.date) {
+      try {
+        const d = new Date(r.date);
+        if(!isNaN(d.getTime())) {
+          dateSet.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+        }
+      } catch(e) {}
+    }
+  });
+
+  if(dateSet.size === 0) return 0;
+
+  const formatDate = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const today = new Date();
+  const todayStr = formatDate(today);
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = formatDate(yesterday);
+
+  let currentCheck = null;
+  if(dateSet.has(todayStr)) {
+    currentCheck = new Date(today);
+  } else if(dateSet.has(yesterdayStr)) {
+    currentCheck = new Date(yesterday);
+  } else {
+    return 0;
+  }
+
+  let streak = 0;
+  while(true) {
+    const checkStr = formatDate(currentCheck);
+    if(dateSet.has(checkStr)) {
+      streak++;
+      currentCheck.setDate(currentCheck.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+function extractMistakeKeys(ops) {
+  const counts = {};
+  if(!ops || !Array.isArray(ops)) return counts;
+  ops.forEach(op => {
+    if(op.type === 'sub' && op.orig && op.typed) {
+      const maxLen = Math.max(op.orig.length, op.typed.length);
+      for(let i=0; i<maxLen; i++) {
+        const o = op.orig[i];
+        const t = op.typed[i];
+        if(o && t && o !== t) {
+          const k = o.toLowerCase();
+          if(k.trim()) counts[k] = (counts[k] || 0) + 1;
+        } else if(o && !t) {
+          const k = o.toLowerCase();
+          if(k.trim()) counts[k] = (counts[k] || 0) + 1;
+        }
+      }
+    }
+  });
+  return counts;
+}
+
+function updateFrequentMistakesDisplay(list) {
+  const container = $('homeWeakKeysContainer');
+  if(!container) return;
+  if(!list || list.length === 0) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0;">Complete your first typing test to analyze your frequent mistakes.</div>';
+    return;
+  }
+
+  const agg = {};
+  list.forEach(r => {
+    if(r.weakKeys && typeof r.weakKeys === 'object') {
+      Object.entries(r.weakKeys).forEach(([k, count]) => {
+        if(k && k.trim()) agg[k] = (agg[k] || 0) + count;
+      });
+    }
+  });
+
+  const sortedKeys = Object.entries(agg)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  if(sortedKeys.length === 0) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--emerald);font-weight:600;padding:4px 0;">🎉 Great job! No frequent keystroke errors detected in recent tests.</div>';
+    return;
+  }
+
+  let html = `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">`;
+  sortedKeys.forEach(([key, count]) => {
+    html += `<div style="background:var(--bg-main);border:1.5px solid var(--card-border);border-radius:10px;padding:6px 12px;display:flex;align-items:center;gap:6px;">
+      <span style="font-family:var(--font-mono);font-size:14px;font-weight:800;color:var(--coral);background:rgba(239,68,68,0.1);padding:2px 8px;border-radius:6px;">${esc(key)}</span>
+      <span style="font-size:11px;font-weight:600;color:var(--muted);">${count} mistake${count > 1 ? 's' : ''}</span>
+    </div>`;
+  });
+  html += `</div>`;
+  html += `<button class="ghostbtn" type="button" style="width:100%;font-size:12px;padding:8px 12px;" onclick="switchTab('practice')">🎯 Practice Weak Keys in Drills</button>`;
+
+  container.innerHTML = html;
+}
+
 function updateDashboardStats(list){
+  const streak = calculateDailyStreak(list);
+  if($('hdrStreakVal')) $('hdrStreakVal').textContent = streak.toString();
+  if($('homeStreakBadge')) $('homeStreakBadge').textContent = `${streak} day${streak === 1 ? '' : 's'} streak`;
+  updateFrequentMistakesDisplay(list);
+
   if(!list || list.length === 0){
-    $('statAcc').textContent = '—';
-    $('statSpeed').textContent = '—';
-    $('statMistakes').textContent = '—';
-    $('statTime').textContent = '0m';
-    
-    $('hdrStreakVal').textContent = '0';
-    $('lblProfileLvl').textContent = '1';
-    $('lblProfileProgPct').textContent = '0%';
-    $('lblProfileProgCircle').setAttribute('stroke-dasharray', '0, 100');
-    $('lblContinuePct').textContent = '0%';
-    $('lblContinueBar').style.width = '0%';
+    if($('statAcc')) $('statAcc').textContent = '—';
+    if($('statSpeed')) $('statSpeed').textContent = '—';
+    if($('statMistakes')) $('statMistakes').textContent = '—';
+    if($('statTime')) $('statTime').textContent = '0m';
+    if($('lblProfileLvl')) $('lblProfileLvl').textContent = '1';
+    if($('lblProfileProgPct')) $('lblProfileProgPct').textContent = '0%';
+    if($('lblProfileProgCircle')) $('lblProfileProgCircle').setAttribute('stroke-dasharray', '0, 100');
+    if($('lblContinuePct')) $('lblContinuePct').textContent = '0%';
+    if($('lblContinueBar')) $('lblContinueBar').style.width = '0%';
     return;
   }
   
   const totalAcc = list.reduce((sum, r) => sum + (r.accuracy || 0), 0);
   const avgAcc = Math.round(totalAcc / list.length);
-  $('statAcc').textContent = avgAcc + '%';
+  if($('statAcc')) $('statAcc').textContent = avgAcc + '%';
   
   const totalWpm = list.reduce((sum, r) => sum + (r.netWpm || 0), 0);
   const avgWpm = Math.round(totalWpm / list.length);
-  $('statSpeed').textContent = avgWpm;
+  if($('statSpeed')) $('statSpeed').textContent = avgWpm;
   
-  const totalMistakes = list.reduce((sum, r) => sum + (r.mistakes || 0), 0);
+  const totalMistakes = list.reduce((sum, r) => sum + (r.mistakes || r.errors || 0), 0);
   const avgMistakes = Math.round(totalMistakes / list.length);
-  $('statMistakes').textContent = avgMistakes;
+  if($('statMistakes')) $('statMistakes').textContent = avgMistakes;
   
   const totalSecs = list.reduce((sum, r) => sum + (r.elapsed || 0), 0);
   const totalMins = Math.ceil(totalSecs / 60);
-  $('statTime').textContent = totalMins + 'm';
+  if($('statTime')) $('statTime').textContent = totalMins + 'm';
   
   const runs = list.length;
   const level = Math.min(10, 1 + Math.floor(runs / 2));
   const progPct = Math.round(((runs % 2) / 2) * 100);
   
-  $('hdrStreakVal').textContent = Math.min(30, 2 + runs);
-  $('lblProfileLvl').textContent = level;
-  $('lblProfileProgPct').textContent = progPct + '%';
-  $('lblProfileProgCircle').setAttribute('stroke-dasharray', `${progPct}, 100`);
+  if($('lblProfileLvl')) $('lblProfileLvl').textContent = level;
+  if($('lblProfileProgPct')) $('lblProfileProgPct').textContent = progPct + '%';
+  if($('lblProfileProgCircle')) $('lblProfileProgCircle').setAttribute('stroke-dasharray', `${progPct}, 100`);
   
   const continuePct = Math.min(100, Math.round(avgAcc));
-  $('lblContinuePct').textContent = continuePct + '%';
-  $('lblContinueBar').style.width = continuePct + '%';
+  if($('lblContinuePct')) $('lblContinuePct').textContent = continuePct + '%';
+  if($('lblContinueBar')) $('lblContinueBar').style.width = continuePct + '%';
+}
+
+
+/* =====================================================================
+   THEME SETTINGS & PERSISTENCE (Light Mode / Dark Mode)
+===================================================================== */
+function setAppTheme(theme) {
+  if(!theme || (theme !== 'dark' && theme !== 'white')) theme = 'white';
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('app_theme', theme);
+  
+  const btnLight = $('btnThemeLight');
+  const btnDark = $('btnThemeDark');
+  const lblBadge = $('lblThemeBadge');
+  if(btnLight && btnDark) {
+    btnLight.classList.toggle('active', theme === 'white');
+    btnDark.classList.toggle('active', theme === 'dark');
+  }
+  if(lblBadge) {
+    lblBadge.textContent = theme === 'dark' ? 'Dark' : 'Light';
+  }
+}
+
+function initAppTheme() {
+  const saved = localStorage.getItem('app_theme') || 'white';
+  setAppTheme(saved);
+}
+
+/* =====================================================================
+   TOTAL & DAILY APP USAGE TRACKER
+===================================================================== */
+let appUsageTimer = null;
+function initAppUsageTracker() {
+  const getTodayStr = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  };
+
+  const formatUsage = (secs) => {
+    if(!secs || secs < 60) return `${secs || 0}s`;
+    const m = Math.floor(secs / 60);
+    if(m < 60) return `${m}m`;
+    const h = Math.floor(m / 60);
+    const remM = m % 60;
+    return remM > 0 ? `${h}h ${remM}m` : `${h}h`;
+  };
+
+  const updateDisplay = () => {
+    try {
+      const today = getTodayStr();
+      let total = parseInt(localStorage.getItem('app_usage_total_secs') || '0', 10);
+      let storedDate = localStorage.getItem('app_usage_today_date') || today;
+      let todaySecs = parseInt(localStorage.getItem('app_usage_today_secs') || '0', 10);
+      if(storedDate !== today) {
+        storedDate = today;
+        todaySecs = 0;
+      }
+      const elTot = $('homeUsageTotal');
+      const elToday = $('homeUsageToday');
+      if(elTot) elTot.textContent = formatUsage(total);
+      if(elToday) elToday.textContent = formatUsage(todaySecs);
+    } catch(e) {}
+  };
+
+  const tick = () => {
+    if(document.visibilityState && document.visibilityState !== 'visible') return;
+    try {
+      const today = getTodayStr();
+      let total = parseInt(localStorage.getItem('app_usage_total_secs') || '0', 10);
+      let storedDate = localStorage.getItem('app_usage_today_date') || today;
+      let todaySecs = parseInt(localStorage.getItem('app_usage_today_secs') || '0', 10);
+
+      if(storedDate !== today) {
+        storedDate = today;
+        todaySecs = 0;
+      }
+
+      total += 5;
+      todaySecs += 5;
+
+      localStorage.setItem('app_usage_total_secs', total.toString());
+      localStorage.setItem('app_usage_today_date', storedDate);
+      localStorage.setItem('app_usage_today_secs', todaySecs.toString());
+
+      updateDisplay();
+    } catch(e) {}
+  };
+
+  if(!appUsageTimer) {
+    appUsageTimer = setInterval(tick, 5000);
+  }
+  updateDisplay();
+}
+
+/* =====================================================================
+   EXAM COURSE & TIME PERIOD SYNCING
+===================================================================== */
+function syncExamCourseWithConfig() {
+  const course = $('profExamCourse') ? $('profExamCourse').value : 'typing_both';
+  localStorage.setItem('exam_prep_course', course);
+  const hintEl = $('lblExamCourseHint');
+  
+  if(course === 'coa_both') {
+    if($('selCategory')) {
+      $('selCategory').value = 'coa';
+      $('selCategory').dispatchEvent(new Event('change'));
+    }
+    CFG.category = 'coa';
+    CFG.totalMarks = 50;
+    if(hintEl) hintEl.textContent = 'COA Examination Prep · Tamil (50 Marks) & English (50 Marks) evaluated under DoTE syllabus.';
+  } else if(course === 'typing_tamil') {
+    if($('selCategory')) {
+      $('selCategory').value = 'typing';
+      $('selCategory').dispatchEvent(new Event('change'));
+    }
+    CFG.category = 'typing';
+    CFG.totalMarks = 100;
+    if(hintEl) hintEl.textContent = 'DoTE Government Typewriting Exam (Tamil Alone) — 100 Marks with strict stroke evaluation.';
+    if(CFG.lang !== 'ta') {
+      quickSelectLanguage('ta', 'tamil99');
+    }
+  } else if(course === 'typing_english') {
+    if($('selCategory')) {
+      $('selCategory').value = 'typing';
+      $('selCategory').dispatchEvent(new Event('change'));
+    }
+    CFG.category = 'typing';
+    CFG.totalMarks = 100;
+    if(hintEl) hintEl.textContent = 'DoTE Government Typewriting Exam (English Alone) — 100 Marks standard benchmark.';
+    if(CFG.lang !== 'en') {
+      quickSelectLanguage('en');
+    }
+  } else {
+    if($('selCategory')) {
+      $('selCategory').value = 'typing';
+      $('selCategory').dispatchEvent(new Event('change'));
+    }
+    CFG.category = 'typing';
+    CFG.totalMarks = 100;
+    if(hintEl) hintEl.textContent = 'Both Typewriting Exams (Tamil & English) — 100 Marks each for comprehensive mastery.';
+  }
+  updateHeroTrackLabel();
+}
+
+function syncExamPeriod() {
+  const period = $('profExamPeriod') ? $('profExamPeriod').value : 'November 2026';
+  localStorage.setItem('exam_time_period', period);
+  updateHeroTrackLabel();
+}
+
+function updateHeroTrackLabel() {
+  const course = localStorage.getItem('exam_prep_course') || 'typing_both';
+  const period = localStorage.getItem('exam_time_period') || 'November 2026';
+  const heroLabel = $('lblHeroTargetTrack');
+  if(!heroLabel) return;
+  
+  let courseStr = 'Tamil Nadu Technical Exam Prep';
+  if(course === 'coa_both') courseStr = 'COA Exam Prep (50m)';
+  else if(course === 'typing_tamil') courseStr = 'Tamil Typewriting Exam (100m)';
+  else if(course === 'typing_english') courseStr = 'English Typewriting Exam (100m)';
+  else courseStr = 'DoTE Typewriting Prep (100m)';
+  
+  heroLabel.textContent = `${courseStr} · ${period}`;
+}
+
+/* =====================================================================
+   QUICK LANGUAGE SHORTCUTS
+===================================================================== */
+function quickSelectLanguage(lang, layout) {
+  if(typeof setLanguage === 'function') {
+    setLanguage(lang);
+  } else {
+    if($('selLang')) $('selLang').value = lang;
+  }
+  if(lang === 'ta' && layout) {
+    if($('selLayout')) $('selLayout').value = layout;
+    CFG.layout = layout;
+  }
+  readConfig();
+  switchTab('speed');
+  const deck = document.querySelector('.launch-card-deck');
+  if(deck) {
+    if(typeof deck.scrollIntoView === 'function') deck.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  toast(`Selected ${lang === 'ta' ? (layout === 'tamil99' ? 'Tamil99' : 'Tamil Typewriter') : 'English QWERTY'}! Choose mode below.`);
+}
+
+/* =====================================================================
+   ANALYTICS: KPI STATS, FILTERING, SORTING, PROGRESS GRAPH & Q&A
+===================================================================== */
+let currentAnalyticsFilter = 'all';
+
+function setAnalyticsLangFilter(filter) {
+  currentAnalyticsFilter = filter;
+  const pills = { all: $('fltAll'), en: $('fltEn'), ta: $('fltTa') };
+  Object.entries(pills).forEach(([k, btn]) => {
+    if(btn) btn.classList.toggle('active', k === filter);
+  });
+  renderAnalyticsFiltered();
+}
+
+function renderAnalyticsPage() {
+  renderAnalyticsFiltered();
+}
+
+function renderAnalyticsFiltered() {
+  const list = Array.isArray(RECENT_RESULTS_CACHE) ? RECENT_RESULTS_CACHE : [];
+  
+  // Filter by language
+  let filtered = list.filter(r => {
+    if(currentAnalyticsFilter === 'en') return r.lang === 'en';
+    if(currentAnalyticsFilter === 'ta') return r.lang === 'ta';
+    return true;
+  });
+
+  // Calculate KPIs
+  const avgEl = $('anAvgSpeed');
+  const peakEl = $('anPeakSpeed');
+  const accEl = $('anAvgAcc');
+  const testsEl = $('anTotalTests');
+
+  if(filtered.length === 0) {
+    if(avgEl) avgEl.textContent = '—';
+    if(peakEl) peakEl.textContent = '—';
+    if(accEl) accEl.textContent = '—';
+    if(testsEl) testsEl.textContent = '0';
+  } else {
+    const sumWpm = filtered.reduce((s, r) => s + (r.netWpm || 0), 0);
+    const avgWpm = Math.round(sumWpm / filtered.length);
+    const peakWpm = Math.max(...filtered.map(r => r.netWpm || 0));
+    const sumAcc = filtered.reduce((s, r) => s + (r.accuracy || 0), 0);
+    const avgAcc = Math.round(sumAcc / filtered.length);
+
+    if(avgEl) avgEl.textContent = avgWpm.toString();
+    if(peakEl) peakEl.textContent = peakWpm.toString();
+    if(accEl) accEl.textContent = avgAcc + '%';
+    if(testsEl) testsEl.textContent = filtered.length.toString();
+  }
+
+  // Draw Speed Progress Canvas Chart (chronological order)
+  drawAnalyticsChart(filtered);
+
+  // Sort results
+  const sortMode = $('anSortBy') ? $('anSortBy').value : 'latest';
+  let sorted = [...filtered];
+  if(sortMode === 'best_speed') {
+    sorted.sort((a, b) => (b.netWpm || 0) - (a.netWpm || 0));
+  } else if(sortMode === 'worst_speed') {
+    sorted.sort((a, b) => (a.netWpm || 0) - (b.netWpm || 0));
+  } else if(sortMode === 'best_acc') {
+    sorted.sort((a, b) => (b.accuracy || 0) - (a.accuracy || 0));
+  } else {
+    // 'latest'
+    sorted.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  }
+
+  // Render submissions list with Question & Answer
+  const listEl = $('analyticsListContainer');
+  if(!listEl) return;
+  if(sorted.length === 0) {
+    listEl.innerHTML = `<div class="rr-list" style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No ${currentAnalyticsFilter === 'all' ? '' : (currentAnalyticsFilter === 'ta' ? 'Tamil ' : 'English ')}tests recorded yet. Complete a test in Studio to generate your scorecard!</div>`;
+    return;
+  }
+
+  listEl.innerHTML = sorted.map((r, idx) => {
+    const isTa = r.lang === 'ta';
+    const langLabel = isTa ? ('Tamil (' + (LAYOUT_LABEL_SHORT[r.layout] || '99') + ')') : 'English QWERTY';
+    const cleanPassage = (r.passage || (isTa ? 'Tamil Passage' : 'English Passage')).replace(/^(English|Tamil) Passage \d+ [·-]?\s*/, '');
+    return `
+      <div class="history-item-card">
+        <div class="history-item-header" onclick="toggleHistoryItem(${idx})">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="font-size:20px;">${isTa ? '🇮🇳' : '🇬🇧'}</div>
+            <div>
+              <div style="font-weight:700;font-size:13px;color:var(--ink);">${esc(cleanPassage)}</div>
+              <div style="font-size:11px;color:var(--muted);">${r.date || 'Recent'} · ${langLabel}</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:14px;font-weight:800;color:var(--primary);">${r.netWpm || 0} WPM</div>
+            <div style="font-size:11px;font-weight:700;color:${r.passed ? 'var(--emerald)' : 'var(--coral)'};">
+              ${r.accuracy || 0}% Acc · ${r.passed ? 'PASS' : 'FAIL'}
+            </div>
+          </div>
+        </div>
+        <div class="history-item-body" id="histBody${idx}">
+          <div style="font-weight:700;font-size:11.5px;color:var(--muted);margin-bottom:4px;">
+            📝 Exam Question / Reference Passage:
+          </div>
+          <div class="qa-box">${esc(r.questionText || '(Original passage text was not recorded for this test)')}</div>
+          <div style="font-weight:700;font-size:11.5px;color:var(--muted);margin-top:10px;margin-bottom:4px;">
+            ⌨️ Student Answer Typed:
+          </div>
+          <div class="qa-box" style="color:var(--primary);">${esc(r.typedText || '(No typed input recorded)')}</div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--muted);">
+            <span>Errors: <b>${r.mistakes !== undefined ? r.mistakes : (r.errors || 0)}</b></span>
+            <span>Gross: <b>${r.grossWpm || r.netWpm || 0} WPM</b></span>
+            ${r.marks !== null && r.marks !== undefined ? `<span>Marks: <b>${r.marks}</b></span>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleHistoryItem(idx) {
+  const body = $('histBody' + idx);
+  if(body) body.classList.toggle('open');
+}
+
+function drawAnalyticsChart(records) {
+  const canvas = $('analyticsGraphCanvas');
+  if(!canvas || !canvas.getContext) return;
+  const ctx = canvas.getContext('2d');
+  if(!ctx) return;
+  const dpr = window.devicePixelRatio || 1;
+  
+  const rect = canvas.getBoundingClientRect();
+  const width = rect.width || 360;
+  const height = rect.height || 150;
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  ctx.scale(dpr, dpr);
+
+  ctx.clearRect(0, 0, width, height);
+
+  if(!records || records.length === 0) {
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '12px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Complete typing tests to see your speed progress trendline.', width / 2, height / 2);
+    return;
+  }
+
+  // Chronological order (oldest to newest, max 20 data points)
+  const chronological = [...records].reverse().slice(-20);
+  const speeds = chronological.map(r => r.netWpm || 0);
+  const maxSpeed = Math.max(60, Math.ceil((Math.max(...speeds) + 10) / 10) * 10);
+
+  const padL = 36;
+  const padR = 18;
+  const padT = 20;
+  const padB = 26;
+  const chartW = width - padL - padR;
+  const chartH = height - padT - padB;
+
+  // Grid lines & Y-axis labels
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '10px system-ui, sans-serif';
+  ctx.textAlign = 'right';
+  ctx.lineWidth = 1;
+
+  const gridSteps = 4;
+  for(let i=0; i<=gridSteps; i++) {
+    const val = Math.round((maxSpeed / gridSteps) * i);
+    const y = padT + chartH - (i / gridSteps) * chartH;
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(width - padR, y);
+    ctx.stroke();
+    ctx.fillText(val.toString(), padL - 6, y + 3);
+  }
+
+  // Points
+  const points = chronological.map((r, i) => {
+    const x = chronological.length === 1 ? (padL + chartW / 2) : (padL + (i / (chronological.length - 1)) * chartW);
+    const y = padT + chartH - ((r.netWpm || 0) / maxSpeed) * chartH;
+    return { x, y, wpm: r.netWpm || 0 };
+  });
+
+  if(points.length > 1) {
+    // Area fill under curve
+    const grad = ctx.createLinearGradient(0, padT, 0, padT + chartH);
+    grad.addColorStop(0, 'rgba(37, 99, 235, 0.25)');
+    grad.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
+
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, padT + chartH);
+    points.forEach(pt => ctx.lineTo(pt.x, pt.y));
+    ctx.lineTo(points[points.length - 1].x, padT + chartH);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Trendline stroke
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    points.forEach(pt => ctx.lineTo(pt.x, pt.y));
+    ctx.strokeStyle = '#2563eb';
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+  }
+
+  // Data point circles & WPM badges
+  ctx.textAlign = 'center';
+  points.forEach((pt, i) => {
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#2563eb';
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+
+    if(i === points.length - 1 || pt.wpm === Math.max(...speeds)) {
+      ctx.fillStyle = '#1e293b';
+      ctx.font = 'bold 10px system-ui, sans-serif';
+      ctx.fillText(pt.wpm + ' wpm', pt.x, Math.max(12, pt.y - 8));
+    }
+  });
+
+  // Bottom axis caption
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '10px system-ui, sans-serif';
+  ctx.fillText('Test Attempts →', width / 2, height - 6);
 }
 
 /* =====================================================================
@@ -4245,8 +5178,11 @@ document.addEventListener('click', e=>{
   if(e.target.closest('.solidbtn, .service-btn, .modebtn, .nav-tab, .continue-card-btn')) haptic();
 }, true);
 
+initAppTheme();
+initAppUsageTracker();
 loadRecentResults();
 loadProfile();
+updateHeroTrackLabel();
 if($('btnHomeStartTest')){
   $('btnHomeStartTest').addEventListener('click', () => {
     readConfig();
