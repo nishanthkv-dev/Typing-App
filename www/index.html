@@ -188,7 +188,8 @@ body {
   color: var(--ink);
   min-height: 100vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 .app {
@@ -1518,8 +1519,6 @@ body {
           <div class="tile-desc">Access official syllabus, model question papers, and theory notes.</div>
         </div>
 
-        </div>
-
         <div class="academy-tile mentor" onclick="openHelpWhatsApp()">
           <div class="tile-badge">Direct Help</div>
           <div class="tile-icon">💬</div>
@@ -1879,16 +1878,7 @@ body {
 
 
 
-    <div class="glass-card" style="text-align:center;margin-top:14px;padding:16px;">
-      <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;">Metronome Beat Indicator</div>
-      <div style="font-size:36px;font-weight:800;color:var(--primary);margin:6px 0;" id="stenoBpmDisplay">80 WPM</div>
-      <div style="font-size:12px;color:var(--muted);" id="stenoIntervalDesc">1 beat every 0.75 seconds</div>
-      <button class="solidbtn" style="width:100%;margin-top:12px;" id="btnToggleMetronome" onclick="toggleStenoMetronome()">▶ Start Audio Metronome</button>
-    </div>
 
-    <button class="ghostbtn modalclose" onclick="closeShorthandStudio()">Close Studio</button>
-  </div>
-</div>
 
 <script>
 /* window.storage shim */
@@ -1993,6 +1983,7 @@ function cycleAudioMode() {
 
 // 5-Tab switching
 function switchTab(name) {
+  showScreen('screen-config');
   const validTabs = ['speed', 'practice', 'progress', 'academy', 'profile'];
   validTabs.forEach(t => {
     const el = $('tab-' + t);
