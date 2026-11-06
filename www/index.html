@@ -105,7 +105,7 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
   
   --passtext: #1e293b;
   --font-main: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'Courier New', monospace;
+  --font-mono: 'Inter', 'Roboto', monospace;
   --font-tamil: 'Noto Sans Tamil', sans-serif;
   --typesize: 20px;
 }
@@ -120,7 +120,7 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
   
   --primary: #38bdf8;
   --primary-hover: #0ea5e9;
-  --primary-gradient: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+  --primary-gradient: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
   --primary-light: #1e293b;
   --primary-text: #7dd3fc;
   
@@ -150,7 +150,7 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
   
   --primary: #b45309;
   --primary-hover: #92400e;
-  --primary-gradient: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  --primary-gradient: linear-gradient(135deg, #b45309 0%, #92400e 100%);
   --primary-light: #fef3c7;
   --primary-text: #78350f;
   
@@ -194,9 +194,10 @@ body {
 
 .app {
   width: 100%;
-  max-width: 480px;
+  max-width: 1400px;
   min-height: 100vh;
-  padding: calc(14px + env(safe-area-inset-top)) 16px calc(110px + env(safe-area-inset-bottom));
+  margin: 0 auto;
+  padding: calc(14px + env(safe-area-inset-top)) 16px calc(100px + env(safe-area-inset-bottom));
   box-sizing: border-box;
   position: relative;
   display: flex;
@@ -323,14 +324,7 @@ body {
   background: rgba(255, 255, 255, 0.1);
   pointer-events: none;
 }
-.hero-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  opacity: 0.85;
-  margin-bottom: 4px;
-}
+/* hero-label updated above */
 .hero-title {
   font-size: 19px;
   font-weight: 800;
@@ -349,15 +343,30 @@ body {
   align-items: center;
 }
 .hero-badge-pill {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(8px);
   padding: 5px 12px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 700;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   gap: 5px;
+}
+[data-theme="golden"] .hero-badge-pill {
+  background: rgba(69, 26, 3, 0.45);
+}
+.hero-label {
+  font-size: 11px;
+  font-weight: 800 !important;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  margin-bottom: 4px;
 }
 
 /* Glass cards */
@@ -459,6 +468,43 @@ body {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
+
+/* Dark & Golden select dropdown styling (Item 11) */
+select {
+  color-scheme: light;
+}
+[data-theme="black"] select,
+[data-theme="dark"] select,
+body[data-theme="black"] select,
+body[data-theme="dark"] select,
+html[data-theme="black"] select,
+html[data-theme="dark"] select {
+  color-scheme: dark !important;
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="black"] select option,
+[data-theme="dark"] select option,
+body[data-theme="black"] select option,
+body[data-theme="dark"] select option {
+  color-scheme: dark !important;
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="golden"] select,
+body[data-theme="golden"] select,
+html[data-theme="golden"] select {
+  color-scheme: dark !important;
+  background-color: #26201a !important;
+  color: #fef3c7 !important;
+}
+[data-theme="golden"] select option,
+body[data-theme="golden"] select option {
+  color-scheme: dark !important;
+  background-color: #26201a !important;
+  color: #fef3c7 !important;
+}
+
 .custom-select-wrap::after {
   content: '▾';
   position: absolute;
@@ -729,8 +775,9 @@ body {
   justify-content: space-around;
   padding: 6px 12px calc(8px + env(safe-area-inset-bottom));
   z-index: 90;
-  max-width: 480px;
+  max-width: 1400px;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 .nav-tab-item {
   background: none;
@@ -908,16 +955,8 @@ body {
   white-space: pre-wrap;
 }
 
-/* Landscape / Horizontal Responsiveness */
-@media (orientation: landscape) and (min-width: 540px), (min-width: 768px) {
-  .app {
-    max-width: 920px !important;
-    padding-left: 28px !important;
-    padding-right: 28px !important;
-  }
-  .bottom-nav-bar {
-    max-width: 920px !important;
-  }
+/* Responsive Layout: Expanding Grids up to 1400px */
+@media (min-width: 600px) {
   .launch-card-deck {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
@@ -929,15 +968,394 @@ body {
   .analytics-kpi-grid {
     grid-template-columns: repeat(4, 1fr) !important;
   }
-  #screen-practice .passcard {
-    max-height: 220px;
+  .metrics-quad-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
   }
-  #screen-practice #practiceInput {
-    height: 130px;
-    font-size: 22px;
+  .academy-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }
 
+@media (min-width: 900px) {
+  .diploma-details-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  .academy-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .launch-card-deck {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+/* Two-column Test Screen on Wide Screens and Landscape Phones */
+@media (min-width: 740px), (orientation: landscape) and (min-width: 540px) {
+  #screen-test:not(.lm) .testpanels {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 12px !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+  #screen-test:not(.lm) .testpanels .passcard,
+  #screen-test:not(.lm) .testpanels .typewrap {
+    flex: 1 1 50% !important;
+    width: calc(50% - 6px) !important;
+    max-width: calc(50% - 6px) !important;
+    height: 100% !important;
+    max-height: none !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #screen-test:not(.lm) .testpanels .typewrap #typingArea {
+    flex: 1 1 auto !important;
+    height: 100% !important;
+  }
+}
+
+
+
+/* =====================================================================
+   TEST SCREEN ARCHITECTURE: Strict 100dvh, Zero Page Scroll
+===================================================================== */
+body.in-test,
+html.in-test,
+body:has(#screen-test.active),
+html:has(#screen-test.active) {
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+}
+
+body.in-test .app,
+body:has(#screen-test.active) .app {
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  min-height: 100dvh !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+body.in-test .app-header,
+body.in-test .bottom-nav-bar,
+body:has(#screen-test.active) .app-header,
+body:has(#screen-test.active) .bottom-nav-bar {
+  display: none !important;
+}
+
+#screen-test {
+  display: none;
+  flex-direction: column !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  width: 100% !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+  padding: calc(6px + env(safe-area-inset-top)) 12px calc(6px + env(safe-area-inset-bottom)) !important;
+  box-sizing: border-box !important;
+}
+#screen-test.active {
+  display: flex !important;
+}
+
+/* Compact Cockpit Bar (~44px) */
+.test-cockpit-bar {
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: 12px;
+  padding: 4px 10px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--card-shadow);
+  height: 44px;
+  max-height: 48px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+.cockpit-left-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.test-back-btn {
+  background: var(--bg-main);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+}
+.live-cockpit-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+.live-stat-pill {
+  background: var(--bg-main);
+  border: 1px solid var(--card-border);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.live-stat-pill b {
+  color: var(--ink);
+  font-weight: 800;
+}
+.timerbox {
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.timerbox.warn { color: var(--amber); }
+.timer-clock-icon { font-size: 15px; }
+
+/* Test Panels Container (Flex 1) */
+#screen-test .testpanels {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+#screen-test:not(.mode-parallel):not(.lm) .testpanels .passcard {
+  flex: 1 1 50%;
+  min-height: 60px;
+  max-height: none !important;
+  margin-bottom: 0;
+  overflow-y: auto;
+  position: relative;
+}
+
+#screen-test:not(.mode-parallel):not(.lm) .testpanels .typewrap {
+  flex: 1 1 50%;
+  min-height: 60px;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+#screen-test:not(.mode-parallel):not(.lm) .testpanels .typewrap #typingArea {
+  flex: 1 1 auto;
+  height: 100% !important;
+  min-height: 50px;
+  resize: none;
+}
+
+/* =====================================================================
+   PARALLEL MODE: Side-by-Side Question & Answer Panels (50% / 50%)
+===================================================================== */
+.testpanels.mode-parallel {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 8px !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  align-items: stretch !important;
+}
+.testpanels.mode-parallel .passcard {
+  flex: 1 1 50% !important;
+  width: calc(50% - 4px) !important;
+  max-width: calc(50% - 4px) !important;
+  height: 100% !important;
+  max-height: none !important;
+  margin: 0 !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+.testpanels.mode-parallel .typewrap {
+  flex: 1 1 50% !important;
+  width: calc(50% - 4px) !important;
+  max-width: calc(50% - 4px) !important;
+  height: 100% !important;
+  max-height: none !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+.testpanels.mode-parallel .panelhead {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 7px 12px 6px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  color: var(--primary) !important;
+  background: var(--card-bg) !important;
+  border-bottom: 1px solid var(--card-border) !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 5 !important;
+  flex-shrink: 0 !important;
+}
+.testpanels.mode-parallel #passDisplay {
+  padding: 10px 12px !important;
+  flex: 1 !important;
+  overflow-y: visible !important;
+}
+.testpanels.mode-parallel #typingArea {
+  flex: 1 1 auto !important;
+  height: 100% !important;
+  min-height: 60px !important;
+  padding: 10px 12px !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  color: var(--ink) !important;
+  resize: none !important;
+  box-sizing: border-box !important;
+}
+@media (max-width: 480px) and (orientation: portrait) {
+  .testpanels.mode-parallel #passDisplay,
+  .testpanels.mode-parallel #typingArea {
+    font-size: calc(var(--typesize) * 0.8) !important;
+  }
+}
+
+/* =====================================================================
+   LINE MODE: Single moving line with horizontal scroll
+===================================================================== */
+#screen-test.lm .passcard {
+  flex: 0 0 auto !important;
+  height: 56px !important;
+  max-height: 56px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  white-space: nowrap !important;
+  padding: 8px 14px !important;
+  box-sizing: border-box !important;
+  margin-bottom: 8px !important;
+}
+#screen-test.lm .passcard #passDisplay {
+  display: inline-block !important;
+  white-space: nowrap !important;
+  line-height: 38px !important;
+}
+#screen-test.lm .passcard .panelhead,
+#screen-test.lm .typewrap .panelhead {
+  display: none !important;
+}
+#screen-test.lm .typewrap {
+  flex: 0 0 auto !important;
+  height: 56px !important;
+  max-height: 56px !important;
+  padding: 4px 14px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  margin-bottom: 8px !important;
+}
+#screen-test.lm #typingArea {
+  height: 46px !important;
+  max-height: 46px !important;
+  line-height: 44px !important;
+  white-space: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  resize: none !important;
+  display: block !important;
+}
+#screen-test.lm .btn-row-dual {
+  flex-shrink: 0 !important;
+  height: 48px !important;
+}
+#screen-test.lm .btn-row-dual button {
+  height: 48px !important;
+  min-height: 48px !important;
+  font-size: 14px !important;
+  flex-shrink: 0 !important;
+}
+#screen-test.lm .timerbox {
+  font-size: 38px !important;
+}
+#screen-test.lm .timer-clock-icon {
+  font-size: 24px !important;
+}
+
+/* Compact Buttons (34px) */
+#screen-test .btn-row-dual {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+#screen-test:not(.lm) .btn-row-dual button {
+  height: 34px !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  padding: 0 12px !important;
+  border-radius: 10px !important;
+}
+
+/* Typography & Punctuation */
+#passDisplay {
+  font-family: 'Inter', 'Roboto', sans-serif !important;
+  font-size: var(--typesize);
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+  color: var(--passtext);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+#passDisplay.tamil {
+  font-family: 'Noto Sans Tamil', sans-serif !important;
+}
+#typingArea {
+  font-family: 'Inter', 'Roboto', sans-serif !important;
+  font-size: var(--typesize);
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+#typingArea.tamil {
+  font-family: 'Noto Sans Tamil', sans-serif !important;
+}
+#passDisplay .pn {
+  font-weight: 800 !important;
+  display: inline-block;
+}
+#passDisplay .pn.dot {
+  font-size: 1.3em !important;
+  line-height: 0.8 !important;
+  transform: scale(1.3);
+  vertical-align: baseline;
+}
+#passDisplay .pn.com {
+  font-size: 1.15em !important;
+  font-weight: 800 !important;
+}
 
 /* Test Screen Cockpit */
 .test-cockpit-bar {
@@ -1371,6 +1789,7 @@ body {
           <span class="streak-flame">🔥</span>
           <span id="hdrStreakVal">0</span>d
         </div>
+        <button class="tool-btn" id="btnFullscreen" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
         <button class="tool-btn" id="btnAudioToggle" onclick="cycleAudioMode()" title="Sound Effects">🔊</button>
         <div class="avatar-pill" id="hdrAvatarWrap" onclick="switchTab('profile')" title="Student Profile">
           <img id="hdrAvatarImg" alt="Profile" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232563eb'/%3E%3Cpath d='M14 54C14 46 22 42 32 42C42 42 50 46 50 54' fill='%2360a5fa' stroke='%23fff' stroke-width='2'/%3E%3Ccircle cx='32' cy='28' r='14' fill='%23fed7aa'/%3E%3C/svg%3E">
@@ -1771,7 +2190,6 @@ body {
       <div class="glass-card">
         <div class="card-header-bar">
           <h2>📜 Previous Test Submissions</h2>
-          <span style="color:var(--coral);font-size:12px;font-weight:800;cursor:pointer;" onclick="clearResults()">🧹 Clear History</span>
         </div>
         <div id="analyticsListContainer">
           <div class="rr-list" id="rrList">No tests recorded yet. Complete a test in Studio to generate your scorecard!</div>
@@ -1949,20 +2367,19 @@ body {
     
     <!-- TOP COCKPIT BAR -->
     <div class="test-cockpit-bar">
-      <button class="test-back-btn" onclick="confirmQuit()">‹ Exit</button>
-      
-      <div style="text-align:center;">
-        <div class="timerbox" id="timerBox">05:00</div>
-        <div id="kbBadge"></div>
+      <div class="cockpit-left-group">
+        <button class="test-back-btn" onclick="confirmQuit()">‹ Exit</button>
+        <span id="kbBadge"></span>
+        <div class="live-cockpit-stats">
+          <span class="live-stat-pill">Chars: <b id="liveChars">0</b></span>
+          <span class="live-stat-pill">⌫ <b id="liveBack">0</b></span>
+          <!-- Retain hidden values for internal calculation -->
+          <span style="display:none">Net: <b id="liveWpm">0</b></span>
+          <span style="display:none">Words: <b id="liveWords">0</b></span>
+          <span style="display:none">Errors: <b id="liveMistakes">0</b></span>
+        </div>
       </div>
-
-      <div class="live-cockpit-stats">
-        <div>Net: <b id="liveWpm">0</b> WPM</div>
-        <div style="display:none">Words: <b id="liveWords">0</b></div>
-        <div style="display:none">Chars: <b id="liveChars">0</b></div>
-        <div>Errors: <b id="liveMistakes" style="color:var(--coral);">0</b></div>
-        <div>⌫ Back: <b id="liveBack">0</b></div>
-      </div>
+      <div class="timerbox" id="timerBox"><span class="timer-clock-icon">⏱</span><span id="timerText">05:00</span></div>
     </div>
 
     <!-- PASSAGE DISPLAY CARD -->
@@ -2629,6 +3046,7 @@ async function loadProfile(){
   
   updateVannakam();
   updateHeroTrackLabel();
+updateFullscreenBtn();
 }
 
 async function saveProfile(){
@@ -2672,10 +3090,158 @@ function toast(msg){
   t._h = setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
+
+/* =====================================================================
+   FULLSCREEN TOGGLE (Web only, hidden in native Capacitor)
+===================================================================== */
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+  }
+}
+function updateFullscreenBtn() {
+  const btn = $('btnFullscreen');
+  if (!btn) return;
+  const isNative = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+  btn.style.display = isNative ? 'none' : 'inline-flex';
+}
+
+/* =====================================================================
+   HISTORICAL REPORT VIEW & OFFLINE PDF EXPORT
+===================================================================== */
+function viewHistoricalReport(idx) {
+  const list = Array.isArray(RECENT_RESULTS_CACHE) ? RECENT_RESULTS_CACHE : [];
+  if (idx < 0 || idx >= list.length) return;
+  const r = list[idx];
+
+  let existing = document.getElementById('reportViewOverlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'reportViewOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;padding:12px;overflow-y:auto;';
+
+  const isTa = r.lang === 'ta';
+  const langLabel = isTa ? ('Tamil · ' + (LAYOUT_LABEL[r.layout] || 'Tamil99')) : 'English QWERTY';
+  const cleanPassage = (r.passage || (isTa ? 'Tamil Passage' : 'English Passage')).replace(/^(English|Tamil) Passage \d+ [·\-]?\s*/, '');
+  const studentName = r.name || 'Student';
+  const netWpm = r.netWpm || 0;
+  const grossWpm = r.grossWpm || netWpm;
+  const acc = r.accuracy || 0;
+  const errors = r.mistakes !== undefined ? r.mistakes : (r.errors || 0);
+  const marks = r.marks;
+  const passed = !!r.passed;
+
+  // Question and Answer comparison rendering
+  const qText = r.questionText || '';
+  const aText = r.typedText || '';
+
+  // Generate comparison tokens
+  const qWords = qText.split(/\s+/).filter(Boolean);
+  const aWords = aText.split(/\s+/).filter(Boolean);
+
+  let qHtml = '';
+  qWords.forEach((qw, i) => {
+    const matched = (i < aWords.length && aWords[i] === qw);
+    qHtml += `<span style="${matched ? 'color:var(--emerald);' : 'color:var(--coral);text-decoration:underline;font-weight:700;'}">${esc(qw)}</span> `;
+  });
+
+  let aHtml = '';
+  aWords.forEach((aw, i) => {
+    const matched = (i < qWords.length && qWords[i] === aw);
+    aHtml += `<span style="${matched ? 'color:var(--ink);' : 'color:var(--coral);border:1.5px solid var(--coral);border-radius:4px;padding:1px 4px;font-weight:700;'}">${esc(aw)}</span> `;
+  });
+
+  overlay.innerHTML = `
+    <div style="background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:20px;max-width:760px;width:100%;max-height:90vh;overflow-y:auto;padding:20px;box-shadow:var(--card-shadow);position:relative;color:var(--ink);font-family:var(--font-main);">
+      <button type="button" onclick="document.getElementById('reportViewOverlay').remove()" style="position:absolute;top:14px;right:14px;background:var(--bg-main);border:1px solid var(--card-border);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);">✕ Close</button>
+
+      <div style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-radius:14px;padding:16px;color:#fff;margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:0.85;margin-bottom:2px;">Official Examination Scorecard</div>
+        <h2 style="margin:0 0 4px;font-size:18px;font-weight:800;">Typing Thalaiva</h2>
+        <div style="font-size:12px;opacity:0.85;">Sri Kalaimagal Technical Institute</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.15);font-size:12px;">
+          <span>Student: <b>${esc(studentName)}</b> · ${esc(langLabel)}</span>
+          <span style="background:${passed ? '#15803d' : '#c0151b'};color:#fff;font-weight:800;padding:3px 8px;border-radius:6px;">${passed ? 'PASS ✅' : 'FAIL ❌'}</span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;text-align:center;">
+        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:8px;">
+          <div style="font-size:20px;font-weight:800;color:var(--primary);">${netWpm}</div>
+          <div style="font-size:10.5px;color:var(--muted);font-weight:600;">Net WPM</div>
+        </div>
+        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:8px;">
+          <div style="font-size:20px;font-weight:800;">${grossWpm}</div>
+          <div style="font-size:10.5px;color:var(--muted);font-weight:600;">Gross WPM</div>
+        </div>
+        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:8px;">
+          <div style="font-size:20px;font-weight:800;color:var(--emerald);">${acc}%</div>
+          <div style="font-size:10.5px;color:var(--muted);font-weight:600;">Accuracy</div>
+        </div>
+        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:8px;">
+          <div style="font-size:20px;font-weight:800;color:${marks !== null ? 'var(--primary)' : 'var(--coral)'};">${marks !== null && marks !== undefined ? marks : errors}</div>
+          <div style="font-size:10.5px;color:var(--muted);font-weight:600;">${marks !== null ? 'Marks' : 'Errors'}</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <div style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:4px;">📝 Exam Question (Errors Underlined):</div>
+        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px;font-size:12.5px;line-height:1.7;max-height:140px;overflow-y:auto;white-space:pre-wrap;font-family:var(--font-mono);">${qHtml || esc(qText)}</div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:4px;">⌨️ Student Answer Typed (Wrong Words Boxed):</div>
+        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px;font-size:12.5px;line-height:1.7;max-height:140px;overflow-y:auto;white-space:pre-wrap;font-family:var(--font-mono);">${aHtml || esc(aText)}</div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button type="button" class="solidbtn" style="flex:1;" onclick="exportHistoricalPDF(${idx})">📄 Export Scorecard PDF</button>
+      </div>
+    </div>
+  `;
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+  document.body.appendChild(overlay);
+}
+
+function exportHistoricalPDF(idx) {
+  const overlay = document.getElementById('reportViewOverlay');
+  if (!overlay) return;
+  const printContent = overlay.querySelector('div');
+  const printWindow = window.open('', '_blank');
+  if (printWindow) {
+    printWindow.document.write('<!DOCTYPE html><html><head><title>Scorecard Report</title>');
+    printWindow.document.write('<style>body{font-family:Arial,sans-serif;padding:24px;color:#0f172a;}@media print{@page{margin:1cm;}}</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(printContent.innerHTML);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); }, 400);
+  } else {
+    window.print();
+  }
+}
+
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  $(id).classList.add('active');
-  window.scrollTo(0,0);
+  const target = $(id);
+  if(target) target.classList.add('active');
+  const isTest = (id === 'screen-test');
+  document.body.classList.toggle('in-test', isTest);
+  document.documentElement.classList.toggle('in-test', isTest);
+  const isPractice = (id === 'screen-practice');
+  document.body.classList.toggle('in-practice', isPractice);
+  document.documentElement.classList.toggle('in-practice', isPractice);
+  if(typeof updateFullscreenBtn === 'function') updateFullscreenBtn();
+  if(!isTest && typeof window.scrollTo === 'function') window.scrollTo(0,0);
 }
 
 /* =====================================================================
@@ -2888,23 +3454,31 @@ function renderPassage(typed){
 // passage card), never "by" a delta measured from the on-screen rect. A delta measured while a previous
 // smooth scroll is still animating (always the case with large text, where each word is a longer jump)
 // drifts and the current word ends up off-centre or out of view.
+function getElementOffsetInContainer(container, el) {
+  let top = 0, curr = el;
+  while(curr && curr !== container) {
+    top += curr.offsetTop || 0;
+    curr = curr.offsetParent;
+  }
+  return top;
+}
+function getElementOffsetLeftInContainer(container, el) {
+  let left = 0, curr = el;
+  while(curr && curr !== container) {
+    left += curr.offsetLeft || 0;
+    curr = curr.offsetParent;
+  }
+  return left;
+}
 function smoothScrollToCurrent(container, curEl){
   if(!curEl || !container) return;
-  const top = Math.max(0, curEl.offsetTop - (container.clientHeight - curEl.offsetHeight)/2);
-  if(typeof container.scrollTo === 'function'){
-    try { container.scrollTo({top: top, behavior:'smooth'}); } catch(e){ container.scrollTop = top; }
-  } else {
-    container.scrollTop = top;
-  }
+  const top = Math.max(0, getElementOffsetInContainer(container, curEl) - (container.clientHeight - curEl.offsetHeight) / 2);
+  container.scrollTop = top;
 }
 function smoothScrollToCurrentH(container, curEl){
   if(!curEl || !container) return;
-  const left = Math.max(0, curEl.offsetLeft - (container.clientWidth - curEl.offsetWidth)/2);
-  if(typeof container.scrollTo === 'function'){
-    try { container.scrollTo({left: left, behavior:'smooth'}); } catch(e){ container.scrollLeft = left; }
-  } else {
-    container.scrollLeft = left;
-  }
+  const left = Math.max(0, getElementOffsetLeftInContainer(container, curEl) - (container.clientWidth - curEl.offsetWidth) / 2);
+  container.scrollLeft = left;
 }
 function smoothScrollIntoViewIfNeeded(container, curEl){
   if(!curEl || !container) return;
@@ -2948,7 +3522,12 @@ function updateTimerDisplay(secsLeft){
   secsLeft = Math.max(0, Math.ceil(secsLeft));
   const mm = String(Math.floor(secsLeft/60)).padStart(2,'0');
   const ss = String(secsLeft%60).padStart(2,'0');
-  $('timerBox').textContent = mm+':'+ss;
+  const txt = `${mm}:${ss}`;
+  const tEl = $('timerText');
+  if(tEl) tEl.textContent = txt;
+  else if($('timerBox')) $('timerBox').innerHTML = `<span class="timer-clock-icon">⏱</span>${txt}`;
+  if(secsLeft <= 10) $('timerBox').classList.add('warn');
+  else $('timerBox').classList.remove('warn');
 }
 
 function startTimer(){
@@ -3331,6 +3910,15 @@ TA.addEventListener('input', e=>{
 });
 
 TA.addEventListener('paste', e=>{ e.preventDefault(); toast('⛔ Paste disabled during test'); });
+
+$('passCard').addEventListener('wheel', function(e) {
+  if(mode === 'line') {
+    if(e.deltaY !== 0) {
+      this.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }
+  }
+}, { passive: false });
 
 function onTypingChanged(){
   if(submitted) return;
@@ -4044,16 +4632,7 @@ function renderRecentResults(list){
   ).join('');
 }
 
-async function clearResults(){
-  if(!confirm('Clear all recent results?')) return;
-  try{
-    await window.storage.set('recent-results', JSON.stringify([]), false);
-  }catch(e){}
-  RECENT_RESULTS_CACHE = [];
-  renderRecentResults([]);
-  renderAnalyticsPage();
-  toast('Recent results cleared');
-}
+// clearResults permanently removed: student test attempts persist across sessions
 
 /* =====================================================================
    MODALS
@@ -5027,10 +5606,11 @@ function renderAnalyticsFiltered() {
             ⌨️ Student Answer Typed:
           </div>
           <div class="qa-box" style="color:var(--primary);">${esc(r.typedText || '(No typed input recorded)')}</div>
-          <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--muted);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;color:var(--muted);">
             <span>Errors: <b>${r.mistakes !== undefined ? r.mistakes : (r.errors || 0)}</b></span>
             <span>Gross: <b>${r.grossWpm || r.netWpm || 0} WPM</b></span>
             ${r.marks !== null && r.marks !== undefined ? `<span>Marks: <b>${r.marks}</b></span>` : ''}
+            <button class="ghostbtn" type="button" style="padding:4px 10px;font-size:11px;font-weight:700;height:auto;" onclick="event.stopPropagation();viewHistoricalReport(${idx})">📋 View</button>
           </div>
         </div>
       </div>
@@ -5191,28 +5771,45 @@ if($('btnHomeStartTest')){
 }
 
 function registerBackButton() {
-  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
-    window.Capacitor.Plugins.App.addListener('backButton', () => {
-      const activeScreen = document.querySelector('.screen.active');
-      if (activeScreen && activeScreen.id === 'screen-test') {
-        if (confirm('Do you Want to Exit?')) {
-          clearInterval(timerInt);
-          showScreen('screen-config');
-        }
-      } else if (activeScreen && activeScreen.id === 'screen-practice') {
-        if (confirm('Do you Want to Exit?')) {
-          closePractice();
-        }
-      } else if (activeScreen && activeScreen.id === 'screen-results') {
-        showScreen('screen-config');
-      } else if (activeScreen && activeScreen.id === 'screen-config') {
-        if (confirm('Do you Want to Exit?')) {
-          window.Capacitor.Plugins.App.exitApp();
-        }
-      } else {
+  const handleBack = () => {
+    // 1. Close historical report overlay first if open
+    const reportOverlay = document.getElementById('reportViewOverlay');
+    if (reportOverlay) {
+      reportOverlay.remove();
+      return;
+    }
+    // 2. Close modal dialogs if open
+    const openModal = document.querySelector('.modalbg.open');
+    if (openModal) {
+      closeModal();
+      return;
+    }
+    // 3. Screen navigation
+    const activeScreen = document.querySelector('.screen.active');
+    if (activeScreen && activeScreen.id === 'screen-test') {
+      if (confirm('Do you Want to Exit?')) {
+        clearInterval(timerInt);
         showScreen('screen-config');
       }
-    });
+    } else if (activeScreen && activeScreen.id === 'screen-practice') {
+      if (confirm('Do you Want to Exit?')) {
+        closePractice();
+      }
+    } else if (activeScreen && activeScreen.id === 'screen-results') {
+      showScreen('screen-config');
+    } else if (activeScreen && activeScreen.id === 'screen-config') {
+      if (confirm('Do you Want to Exit?')) {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+          window.Capacitor.Plugins.App.exitApp();
+        }
+      }
+    } else {
+      showScreen('screen-config');
+    }
+  };
+
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+    window.Capacitor.Plugins.App.addListener('backButton', handleBack);
   }
 }
 if (window.Capacitor) {

@@ -3,14 +3,12 @@
   "appName": "Typing Thalaiva",
   "webDir": "www",
   "android": {
-    "allowMixedContent": true,
     "captureInput": true,
     "webContentsDebuggingEnabled": false,
     "initialFocus": true,
     "backgroundColor": "#f8fafc"
   },
   "server": {
-    "cleartext": true,
     "androidScheme": "https"
   },
   "plugins": {

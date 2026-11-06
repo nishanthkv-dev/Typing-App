@@ -30,8 +30,14 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
       - name: Run Senior QA Automated Test Suite
         run: node run_senior_qa_tests.js
+
+      - name: Run Playwright Layout & Responsiveness QA Suite
+        run: npm run qa
 
       - name: Sync Capacitor
         run: npx cap sync android
