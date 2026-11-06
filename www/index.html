@@ -61,6 +61,35 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
 .rp-formula{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-family:'Courier New',monospace;font-size:12px;line-height:1.7;color:#1e293b;margin-bottom:8px;word-break:break-word;}
 .rp-formula b{color:#4c1d95;}
 
+
+/* Practice Screen Dual-Split Styling */
+.practice-split-container {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin-bottom: 12px !important;
+  align-items: stretch !important;
+}
+.practice-split-container .practice-panel-left,
+.practice-split-container .practice-panel-right {
+  flex: 1 1 50% !important;
+  width: calc(50% - 5px) !important;
+  max-width: calc(50% - 5px) !important;
+  min-height: 220px !important;
+  max-height: 380px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+@media (max-width: 480px) {
+  .practice-split-container .practice-panel-left,
+  .practice-split-container .practice-panel-right {
+    min-height: 180px !important;
+    max-height: 320px !important;
+  }
+}
 </style>
 <style>
 
@@ -209,7 +238,16 @@ body {
 @keyframes screenFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 .tab-content { display: none; padding-bottom: 50px; }
-.tab-content.active { display: block; animation: screenFadeIn .2s ease-out; }
+.tab-content.active {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: calc(100vh - 180px);
+  animation: screenFadeIn .2s ease-out;
+}
+.tab-content.active > .app-footer,
+.tab-content > .app-footer {
+  margin-top: auto !important;
+}
 
 /* Header */
 .app-header {
@@ -339,8 +377,19 @@ body {
 }
 .hero-stats-row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.hero-stats-row .hero-badge-pill {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 .hero-badge-pill {
   background: rgba(0, 0, 0, 0.35);
@@ -1967,7 +2016,6 @@ body:has(#screen-test.active) .bottom-nav-bar {
         <div class="hero-stats-row">
           <div class="hero-badge-pill">🔥 <span id="homeStreakBadge">0 days streak</span></div>
           <div class="hero-badge-pill">⏱️ Total: <span id="homeUsageTotal">0m</span> (Today: <span id="homeUsageToday">0m</span>)</div>
-          <div class="hero-badge-pill">⭐ Level <span id="lblProfileLvl">1</span></div>
         </div>
       </div>
 
@@ -2412,6 +2460,25 @@ body:has(#screen-test.active) .bottom-nav-bar {
         </div>
       </div>
 
+      <div class="glass-card" style="margin-top:14px;border:1.5px solid var(--primary-glow);background:linear-gradient(135deg,rgba(99,102,241,0.06),rgba(59,130,246,0.04));">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <span style="font-size:24px;">🤝</span>
+          <div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--primary);">Institute Collaboration</div>
+            <div style="font-size:15px;font-weight:800;color:var(--ink);">In collaboration with Sri Kalaimagal Institute</div>
+          </div>
+        </div>
+        <div style="font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:8px;line-height:1.5;">
+          🎓 <b>Courses Offered:</b> Typewriting &amp; CoA (Computer On Office Automation)
+        </div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px;">
+          📍 <b>Address:</b> Near K.L.K Boys High School, Gummidipoondi, Tamil Nadu, India
+        </div>
+        <button class="solidbtn" style="width:100%;padding:10px 14px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="window.open('https://www.google.com/url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=/maps/dir//1st%2BFloor,%2BSRI%2BKALAIMAGAL%2BTYPEWRITING%2BINSTITUTE,%2BGummidipoondi%2B(CoA%2B%2526%2BTypewriting),%2B161,%2BGNT%2BRd,%2Bnear%2BKLK%2BBoys%2BSchool,%2BGummidipoondi,%2BTamil%2BNadu%2B601201/data%3D!4m6!4m5!1m1!4e2!1m2!1m1!1s0x3a4d816c390ccd9f:0xe22c1320b56d4f1%3Fsa%3DX%26ved%3D1t:57443%26ictx%3D111&amp;ved=2ahUKEwisxKjSo_OXAxWWjuEIHV99HUcQ48ADegQIIxAR&amp;usg=AOvVaw2W9_8FX1dlr8FlBVemZ6Fs', '_system')">
+          <span>📍</span> View on Google Maps
+        </button>
+      </div>
+
       <footer class="app-footer powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></footer>
       <div style="height:24px;width:100%;"></div>
     </div>
@@ -2766,32 +2833,40 @@ body:has(#screen-test.active) .bottom-nav-bar {
       </div>
     </div>
 
-    <div class="passcard" style="margin-bottom:12px;">
-      <div class="modelabel">
-        <span id="pracLessonTitle">Lesson 1</span>
-        <span id="pracProgressPct">0%</span>
+    <div class="dash-metrics-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:10px;">
+      <div class="metric-card" style="padding:8px 12px;">
+        <div class="metric-label" style="font-size:11px;">Accuracy</div>
+        <div class="metric-val" id="pracAcc" style="font-size:18px;">—</div>
       </div>
-      <div id="pracSub" style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;"></div>
-      <div id="pracExText" style="font-family:var(--font-mono);font-size:20px;line-height:1.8;"></div>
-    </div>
-
-    <div class="dash-metrics-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;">
-      <div class="metric-card">
-        <div class="metric-label">Accuracy</div>
-        <div class="metric-val" id="pracAcc">—</div>
+      <div class="metric-card" style="padding:8px 12px;">
+        <div class="metric-label" style="font-size:11px;">Correct</div>
+        <div class="metric-val" id="pracCorrect" style="font-size:18px;color:var(--emerald);">0</div>
       </div>
-      <div class="metric-card">
-        <div class="metric-label">Correct</div>
-        <div class="metric-val" id="pracCorrect" style="color:var(--emerald);">0</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Mistakes</div>
-        <div class="metric-val" id="pracMistakes" style="color:var(--rose);">0</div>
+      <div class="metric-card" style="padding:8px 12px;">
+        <div class="metric-label" style="font-size:11px;">Mistakes</div>
+        <div class="metric-val" id="pracMistakes" style="font-size:18px;color:var(--rose);">0</div>
       </div>
     </div>
 
-    <div class="inputcard">
-      <textarea id="practiceInput" placeholder="Type the exercise above..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%;height:100px;border:none;background:transparent;outline:none;font-family:var(--font-mono);font-size:20px;line-height:1.8;resize:none;"></textarea>
+    <div class="practice-split-container">
+      <div class="passcard practice-panel-left" style="margin:0;display:flex;flex-direction:column;">
+        <div class="panelhead" style="display:flex;justify-content:space-between;align-items:center;padding:7px 12px 6px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--primary);background:var(--card-bg);border-bottom:1px solid var(--card-border);position:sticky;top:0;z-index:5;flex-shrink:0;">
+          <span id="pracLessonTitle">Lesson 1</span>
+          <span id="pracProgressPct">0%</span>
+        </div>
+        <div style="padding:10px 12px;flex:1;overflow-y:auto;display:flex;flex-direction:column;">
+          <div id="pracSub" style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;"></div>
+          <div id="pracExText" style="font-family:var(--font-mono);font-size:20px;line-height:1.8;overflow-y:auto;"></div>
+        </div>
+      </div>
+
+      <div class="inputcard practice-panel-right" style="margin:0;display:flex;flex-direction:column;">
+        <div class="panelhead" style="display:flex;justify-content:space-between;align-items:center;padding:7px 12px 6px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);background:var(--card-bg);border-bottom:1px solid var(--card-border);position:sticky;top:0;z-index:5;flex-shrink:0;">
+          <span>Your Typing</span>
+          <span style="font-size:10px;font-weight:600;color:var(--primary);">Active Input</span>
+        </div>
+        <textarea id="practiceInput" placeholder="Type the exercise..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%;flex:1 1 auto;min-height:120px;border:none;background:transparent;outline:none;font-family:var(--font-mono);font-size:20px;line-height:1.8;resize:none;padding:10px 12px;color:var(--ink);box-sizing:border-box;"></textarea>
+      </div>
     </div>
 
     <div class="btn-row-dual">
@@ -3615,6 +3690,10 @@ function confirmQuit(){
   if(confirm('Do you Want to Exit?')){
     clearInterval(timerInt);
     showScreen('screen-config');
+    setTimeout(() => {
+      const el = document.querySelector('.launch-modes-head') || document.getElementById('modeCardsRow');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 120);
   }
 }
 
@@ -6314,6 +6393,10 @@ function registerBackButton() {
       if (confirm('Do you Want to Exit?')) {
         clearInterval(timerInt);
         showScreen('screen-config');
+        setTimeout(() => {
+          const el = document.querySelector('.launch-modes-head') || document.getElementById('modeCardsRow');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 120);
       }
     } else if (activeScreen && activeScreen.id === 'screen-practice') {
       if (confirm('Do you Want to Exit?')) {
