@@ -1138,35 +1138,87 @@ body:has(#screen-test.active) .bottom-nav-bar {
   box-sizing: border-box;
 }
 
-#screen-test:not(.mode-parallel):not(.lm) .testpanels .passcard {
-  flex: 1 1 50%;
-  min-height: 60px;
+#screen-test:not(.split):not(.mode-parallel):not(.mode-manual):not(.lm) .testpanels .passcard {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
   max-height: none !important;
   margin-bottom: 0;
   overflow-y: auto;
   position: relative;
 }
 
-#screen-test:not(.mode-parallel):not(.lm) .testpanels .typewrap {
-  flex: 1 1 50%;
-  min-height: 60px;
+#screen-test:not(.split):not(.mode-parallel):not(.mode-manual):not(.lm) .testpanels .typewrap {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
   margin-bottom: 0;
   display: flex;
   flex-direction: column;
   position: relative;
 }
 
-#screen-test:not(.mode-parallel):not(.lm) .testpanels .typewrap #typingArea {
+#screen-test:not(.split):not(.mode-parallel):not(.mode-manual):not(.lm) .testpanels .typewrap #typingArea {
   flex: 1 1 auto;
   height: 100% !important;
-  min-height: 50px;
+  min-height: 0 !important;
   resize: none;
 }
 
 /* =====================================================================
-   PARALLEL MODE: Side-by-Side Question & Answer Panels (50% / 50%)
+   HALF & HALF PAGE MODE: 50/50 Vertical Split
 ===================================================================== */
-.testpanels.mode-parallel {
+.testpanels.mode-page {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+}
+.testpanels.mode-page .passcard {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0 !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+.testpanels.mode-page .typewrap {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+.testpanels.mode-page .typewrap #typingArea {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  resize: none !important;
+  padding: 10px 14px !important;
+  box-sizing: border-box !important;
+}
+.testpanels.mode-page #passDisplay {
+  padding: 10px 14px !important;
+  flex: 1 1 auto !important;
+  overflow-y: visible !important;
+}
+
+/* =====================================================================
+   DUAL SPLIT (AUTO & MANUAL) MODES: Side-by-Side Panels (50% / 50%)
+===================================================================== */
+.testpanels.split,
+.testpanels.mode-parallel,
+.testpanels.mode-manual {
   display: flex !important;
   flex-direction: row !important;
   gap: 8px !important;
@@ -1176,7 +1228,9 @@ body:has(#screen-test.active) .bottom-nav-bar {
   box-sizing: border-box !important;
   align-items: stretch !important;
 }
-.testpanels.mode-parallel .passcard {
+.testpanels.split .passcard,
+.testpanels.mode-parallel .passcard,
+.testpanels.mode-manual .passcard {
   flex: 1 1 50% !important;
   width: calc(50% - 4px) !important;
   max-width: calc(50% - 4px) !important;
@@ -1190,7 +1244,13 @@ body:has(#screen-test.active) .bottom-nav-bar {
   position: relative !important;
   box-sizing: border-box !important;
 }
-.testpanels.mode-parallel .typewrap {
+.testpanels.mode-manual .passcard {
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch;
+}
+.testpanels.split .typewrap,
+.testpanels.mode-parallel .typewrap,
+.testpanels.mode-manual .typewrap {
   flex: 1 1 50% !important;
   width: calc(50% - 4px) !important;
   max-width: calc(50% - 4px) !important;
@@ -1202,7 +1262,9 @@ body:has(#screen-test.active) .bottom-nav-bar {
   padding: 0 !important;
   box-sizing: border-box !important;
 }
-.testpanels.mode-parallel .panelhead {
+.testpanels.split .panelhead,
+.testpanels.mode-parallel .panelhead,
+.testpanels.mode-manual .panelhead {
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
@@ -1219,12 +1281,16 @@ body:has(#screen-test.active) .bottom-nav-bar {
   z-index: 5 !important;
   flex-shrink: 0 !important;
 }
-.testpanels.mode-parallel #passDisplay {
+.testpanels.split #passDisplay,
+.testpanels.mode-parallel #passDisplay,
+.testpanels.mode-manual #passDisplay {
   padding: 10px 12px !important;
   flex: 1 !important;
   overflow-y: visible !important;
 }
-.testpanels.mode-parallel #typingArea {
+.testpanels.split #typingArea,
+.testpanels.mode-parallel #typingArea,
+.testpanels.mode-manual #typingArea {
   flex: 1 1 auto !important;
   height: 100% !important;
   min-height: 60px !important;
@@ -1237,10 +1303,48 @@ body:has(#screen-test.active) .bottom-nav-bar {
   box-sizing: border-box !important;
 }
 @media (max-width: 480px) and (orientation: portrait) {
+  .testpanels.split #passDisplay,
   .testpanels.mode-parallel #passDisplay,
-  .testpanels.mode-parallel #typingArea {
+  .testpanels.mode-manual #passDisplay,
+  .testpanels.split #typingArea,
+  .testpanels.mode-parallel #typingArea,
+  .testpanels.mode-manual #typingArea {
     font-size: calc(var(--typesize) * 0.8) !important;
   }
+}
+
+/* Bottom Sheet Modal for Weak Keys */
+.bottom-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  padding: 0;
+}
+.bottom-sheet-card {
+  background: var(--card-bg);
+  border-top-left-radius: 22px;
+  border-top-right-radius: 22px;
+  border: 1.5px solid var(--card-border);
+  border-bottom: none;
+  width: 100%;
+  max-width: 520px;
+  padding: 16px 20px 24px;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+  box-sizing: border-box;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.bottom-sheet-drag-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--card-border);
+  border-radius: 2px;
+  margin: 0 auto 12px;
 }
 
 /* =====================================================================
@@ -2074,26 +2178,8 @@ body:has(#screen-test.active) .bottom-nav-bar {
         <div class="launch-mode-card" onclick="startTest('line')">
           <div class="mode-icon-circle">🎯</div>
           <div class="mode-details">
-            <h4>Sprint Line Mode</h4>
-            <p>Single streaming runner with horizon focus. Maximizes finger velocity and keystroke rhythm.</p>
-          </div>
-          <div class="mode-launch-arrow">▶</div>
-        </div>
-
-        <div class="launch-mode-card" onclick="startTest('scrolling')">
-          <div class="mode-icon-circle">📜</div>
-          <div class="mode-details">
-            <h4>Teleprompter Mode</h4>
-            <p>Dynamic scrolling window with fixed horizon focus. Keeps your eyes pinned to the typing line.</p>
-          </div>
-          <div class="mode-launch-arrow">▶</div>
-        </div>
-
-        <div class="launch-mode-card" onclick="startTest('page')">
-          <div class="mode-icon-circle">📖</div>
-          <div class="mode-details">
-            <h4>Continuous Page Mode</h4>
-            <p>Official examination paragraph view with book-style multi-line layout. Standard DoTE format.</p>
+            <h4>Sprint Line</h4>
+            <p>Single moving line with a fixed focus point. Builds finger speed and rhythm.</p>
           </div>
           <div class="mode-launch-arrow">▶</div>
         </div>
@@ -2101,8 +2187,27 @@ body:has(#screen-test.active) .bottom-nav-bar {
         <div class="launch-mode-card" onclick="startTest('parallel')">
           <div class="mode-icon-circle">🪟</div>
           <div class="mode-details">
-            <h4>Dual Split Mode</h4>
-            <p>Master reference passage above, student live typing mirror below for side-by-side verification.</p>
+            <h4>Dual Split (Auto-Scroll)</h4>
+            <p>Passage on the left, your typing on the right. The passage scrolls automatically to follow you.</p>
+            <span style="display:none;">Dual Split Mode</span>
+          </div>
+          <div class="mode-launch-arrow">▶</div>
+        </div>
+
+        <div class="launch-mode-card" onclick="startTest('manual')">
+          <div class="mode-icon-circle">📜</div>
+          <div class="mode-details">
+            <h4>Dual Split (Manual Scroll)</h4>
+            <p>Same side-by-side view, but the passage stays put. Scroll it yourself, like reading from a printed sheet.</p>
+          </div>
+          <div class="mode-launch-arrow">▶</div>
+        </div>
+
+        <div class="launch-mode-card" onclick="startTest('page')">
+          <div class="mode-icon-circle">📖</div>
+          <div class="mode-details">
+            <h4>Half &amp; Half Page</h4>
+            <p>Screen split in two: passage on top, your typing below. Closest to the exam layout.</p>
           </div>
           <div class="mode-launch-arrow">▶</div>
         </div>
@@ -2298,6 +2403,16 @@ body:has(#screen-test.active) .bottom-nav-bar {
           <h2>👤 Student Profile &amp; Register</h2>
         </div>
 
+        <!-- PROFILE PHOTO UPLOAD (Centred directly above Full Student Name) -->
+        <div style="display:flex;flex-direction:column;align-items:center;margin:6px 0 16px;text-align:center;">
+          <div style="position:relative;width:96px;height:96px;margin:0 auto 10px;border-radius:50%;border:3px solid var(--primary);overflow:hidden;box-shadow:var(--card-shadow);background:var(--card-bg);">
+            <img id="profileAvatarImg" alt="Profile" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232563eb'/%3E%3Cpath d='M14 54C14 46 22 42 32 42C42 42 50 46 50 54' fill='%2360a5fa' stroke='%23fff' stroke-width='2'/%3E%3Ccircle cx='32' cy='28' r='14' fill='%23fed7aa'/%3E%3C/svg%3E" style="width:100%;height:100%;object-fit:cover;">
+          </div>
+          <button class="ghostbtn" type="button" style="width:100%;max-width:240px;" onclick="openAvatarPicker()">📷 Update Profile Photo</button>
+          <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+          <div style="font-size:11.5px;color:var(--muted);margin-top:6px;">Select any photo from your phone or camera</div>
+        </div>
+
         <div class="form-field">
           <div class="form-label">Full Student Name:</div>
           <input type="text" id="profName" class="custom-select-wrap select" style="width:100%;border:1.5px solid var(--card-border);border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;outline:none;" placeholder="Enter student name" maxlength="40">
@@ -2316,18 +2431,6 @@ body:has(#screen-test.active) .bottom-nav-bar {
         </div>
 
         <button class="solidbtn" style="width:100%;margin-top:10px;" onclick="saveProfile()">💾 Save Student Details</button>
-      </div>
-
-      <!-- PROFILE PHOTO UPLOAD -->
-      <div class="glass-card" style="text-align:center;">
-        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:14px;">
-          <div style="position:relative;width:96px;height:96px;margin:0 auto 12px;border-radius:50%;border:3px solid var(--primary);overflow:hidden;box-shadow:var(--card-shadow);background:var(--card-bg);">
-            <img id="profileAvatarImg" alt="Profile" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232563eb'/%3E%3Cpath d='M14 54C14 46 22 42 32 42C42 42 50 46 50 54' fill='%2360a5fa' stroke='%23fff' stroke-width='2'/%3E%3Ccircle cx='32' cy='28' r='14' fill='%23fed7aa'/%3E%3C/svg%3E" style="width:100%;height:100%;object-fit:cover;">
-          </div>
-          <button class="ghostbtn" type="button" style="width:100%;max-width:240px;" onclick="openAvatarPicker()">📷 Update Profile Photo</button>
-          <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
-          <div style="font-size:11.5px;color:var(--muted);margin-top:6px;">Select any photo from your phone or camera</div>
-        </div>
       </div>
       
       <footer class="app-footer powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></footer>
@@ -2930,7 +3033,14 @@ function getPassageTitle(lang, idx){
    STATE
 ===================================================================== */
 let CFG = {}; window.CFG = CFG;
-let mode = 'scrolling';
+const MODE_LABEL = {
+  line: 'Sprint Line',
+  parallel: 'Dual Split (Auto-Scroll)',
+  manual: 'Dual Split (Manual Scroll)',
+  page: 'Half & Half Page'
+};
+window.MODE_LABEL = MODE_LABEL;
+let mode = 'parallel';
 let passageText = '';
 let started = false, submitted = false;
 let startTs = null, secsElapsed = 0, timeLimitSecs = 300;
@@ -3113,6 +3223,43 @@ function updateFullscreenBtn() {
 /* =====================================================================
    HISTORICAL REPORT VIEW & OFFLINE PDF EXPORT
 ===================================================================== */
+function buildComparisonHTML(typedText, questionText, elapsedSec) {
+  if (!typedText || typedText.trim() === '') {
+    return {
+      qHtml: esc(questionText || '(Original passage text was not recorded for this test)'),
+      aHtml: '<span style="color:var(--muted);font-style:italic;">Answer wasn\'t saved for this older test.</span>',
+      isOld: true
+    };
+  }
+  const evalResult = calcResults(typedText, questionText || '', elapsedSec || 300, false);
+  const origList = (evalResult.compare && evalResult.compare.origRender) || [];
+  const typedList = (evalResult.compare && evalResult.compare.typedRender) || [];
+
+  let qHtml = '';
+  origList.forEach(item => {
+    if (item.cls === 'ok') {
+      qHtml += `<span style="color:var(--ink);">${esc(item.text)}</span> `;
+    } else if (item.cls === 'tail-ignored') {
+      qHtml += `<span style="color:var(--muted);opacity:0.65;">${esc(item.text)}</span> `;
+    } else {
+      qHtml += `<span style="color:var(--coral);text-decoration:underline;font-weight:700;">${esc(item.text)}</span> `;
+    }
+  });
+
+  let aHtml = '';
+  typedList.forEach(item => {
+    if (item.cls === 'ok') {
+      aHtml += `<span style="color:var(--ink);">${esc(item.text)}</span> `;
+    } else if (item.cls === 'partial') {
+      aHtml += `<span style="color:var(--primary);">${esc(item.text)}</span> `;
+    } else {
+      aHtml += `<span style="color:var(--coral);border:1.5px solid var(--coral);border-radius:4px;padding:1px 4px;font-weight:700;display:inline-block;margin:1px 0;">${esc(item.text)}</span> `;
+    }
+  });
+
+  return { qHtml, aHtml, isOld: false, evalResult };
+}
+
 function viewHistoricalReport(idx) {
   const list = Array.isArray(RECENT_RESULTS_CACHE) ? RECENT_RESULTS_CACHE : [];
   if (idx < 0 || idx >= list.length) return;
@@ -3135,26 +3282,10 @@ function viewHistoricalReport(idx) {
   const errors = r.mistakes !== undefined ? r.mistakes : (r.errors || 0);
   const marks = r.marks;
   const passed = !!r.passed;
+  const modeName = MODE_LABEL[r.mode] || r.mode || 'Dual Split (Auto-Scroll)';
 
-  // Question and Answer comparison rendering
-  const qText = r.questionText || '';
-  const aText = r.typedText || '';
-
-  // Generate comparison tokens
-  const qWords = qText.split(/\s+/).filter(Boolean);
-  const aWords = aText.split(/\s+/).filter(Boolean);
-
-  let qHtml = '';
-  qWords.forEach((qw, i) => {
-    const matched = (i < aWords.length && aWords[i] === qw);
-    qHtml += `<span style="${matched ? 'color:var(--emerald);' : 'color:var(--coral);text-decoration:underline;font-weight:700;'}">${esc(qw)}</span> `;
-  });
-
-  let aHtml = '';
-  aWords.forEach((aw, i) => {
-    const matched = (i < qWords.length && qWords[i] === aw);
-    aHtml += `<span style="${matched ? 'color:var(--ink);' : 'color:var(--coral);border:1.5px solid var(--coral);border-radius:4px;padding:1px 4px;font-weight:700;'}">${esc(aw)}</span> `;
-  });
+  // Question and Answer comparison rendering via calcResults alignEdit
+  const { qHtml, aHtml } = buildComparisonHTML(r.typedText, r.questionText, r.elapsed);
 
   overlay.innerHTML = `
     <div style="background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:20px;max-width:760px;width:100%;max-height:90vh;overflow-y:auto;padding:20px;box-shadow:var(--card-shadow);position:relative;color:var(--ink);font-family:var(--font-main);">
@@ -3163,7 +3294,7 @@ function viewHistoricalReport(idx) {
       <div style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-radius:14px;padding:16px;color:#fff;margin-bottom:14px;">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:0.85;margin-bottom:2px;">Official Examination Scorecard</div>
         <h2 style="margin:0 0 4px;font-size:18px;font-weight:800;">Typing Thalaiva</h2>
-        <div style="font-size:12px;opacity:0.85;">Sri Kalaimagal Technical Institute</div>
+        <div style="font-size:12px;opacity:0.85;">Sri Kalaimagal Technical Institute · Mode: <b>${esc(modeName)}</b></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.15);font-size:12px;">
           <span>Student: <b>${esc(studentName)}</b> · ${esc(langLabel)}</span>
           <span style="background:${passed ? '#15803d' : '#c0151b'};color:#fff;font-weight:800;padding:3px 8px;border-radius:6px;">${passed ? 'PASS ✅' : 'FAIL ❌'}</span>
@@ -3191,12 +3322,12 @@ function viewHistoricalReport(idx) {
 
       <div style="margin-bottom:14px;">
         <div style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:4px;">📝 Exam Question (Errors Underlined):</div>
-        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px;font-size:12.5px;line-height:1.7;max-height:140px;overflow-y:auto;white-space:pre-wrap;font-family:var(--font-mono);">${qHtml || esc(qText)}</div>
+        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px;font-size:12.5px;line-height:1.7;max-height:140px;overflow-y:auto;white-space:pre-wrap;font-family:var(--font-mono);">${qHtml}</div>
       </div>
 
       <div style="margin-bottom:16px;">
         <div style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:4px;">⌨️ Student Answer Typed (Wrong Words Boxed):</div>
-        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px;font-size:12.5px;line-height:1.7;max-height:140px;overflow-y:auto;white-space:pre-wrap;font-family:var(--font-mono);">${aHtml || esc(aText)}</div>
+        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px;font-size:12.5px;line-height:1.7;max-height:140px;overflow-y:auto;white-space:pre-wrap;font-family:var(--font-mono);">${aHtml}</div>
       </div>
 
       <div style="display:flex;gap:10px;">
@@ -3301,6 +3432,8 @@ populatePassageDropdown();
 ===================================================================== */
 function startTest(m){
   readConfig();
+  if (m === 'scrolling') m = 'manual';
+  if (!m) m = 'parallel';
   mode = m;
   timeLimitSecs = CFG.time;
   const LV = getLevelText(CFG.lang, CFG.passageIdx, CFG.level==='full' ? 'full' : CFG.level);
@@ -3327,17 +3460,24 @@ function startTest(m){
   else $('typingArea').classList.remove('blind');
   $('kbBadge').innerHTML = isTA ? `<span class="kbbadge">${LAYOUT_LABEL_UPPER[CFG.layout]||'TYPEWRITER'}</span>` : `<span class="kbbadge">ENGLISH</span>`;
 
-  $('passCard').className = 'passcard mode-' + mode;
-  $('typeWrap').className = 'typewrap mode-' + mode;
-  $('testPanels').className = 'testpanels mode-' + mode;
+  const isSplit = (mode === 'parallel' || mode === 'manual');
+  $('passCard').className = 'passcard mode-' + mode + (isSplit ? ' split mode-parallel' : '');
+  $('typeWrap').className = 'typewrap mode-' + mode + (isSplit ? ' split mode-parallel' : '');
+  $('testPanels').className = 'testpanels mode-' + mode + (isSplit ? ' split mode-parallel' : '');
   $('screen-test').classList.toggle('lm', mode==='line');
-  $('modeTag').textContent = mode.charAt(0).toUpperCase()+mode.slice(1)+' mode';
+  $('modeTag').textContent = MODE_LABEL[mode] || (mode.charAt(0).toUpperCase()+mode.slice(1)+' mode');
   $('typeLabel').style.display = 'none';
-  $('passLabel').style.display = (mode==='parallel') ? 'none' : 'flex';
+  $('passLabel').style.display = isSplit ? 'none' : 'flex';
   const passTitle = getPassageTitle(CFG.lang, CFG.passageIdx);
   $('panelHeadTitle').textContent = passTitle;
-  $('panelHeadSub').textContent = mode.charAt(0).toUpperCase()+mode.slice(1)+' mode';
+  $('panelHeadSub').textContent = MODE_LABEL[mode] || mode;
   $('panelHeadStatus').textContent = 'Waiting for first keystroke…';
+
+  if (mode === 'manual') {
+    $('passCard').style.touchAction = 'pan-y';
+  } else {
+    $('passCard').style.touchAction = '';
+  }
 
   renderPassage('');
   // Every attempt (fresh start, Cancel->restart, "Try Again", or a newly
@@ -3427,26 +3567,23 @@ function renderPassage(typed){
   // the current word actually falls outside the visible area, so normal
   // reading/scanning within the page isn't interrupted.
   //
-  // Guard: skip all of this when curWordIdx === 0 (nothing typed yet, i.e. a
-  // fresh/just-reset attempt). Centering word #0 vertically/horizontally in
-  // the container is exactly what made a brand new paragraph appear to start
-  // from line 2 (or a mid-scrolled position) instead of the very top/left —
-  // the centering math scrolls the container down/right to put word 0 in the
-  // middle, then an async 'smooth' animation for that scroll can land AFTER
-  // startTest()'s scrollTop/scrollLeft=0 reset (especially on mobile, where
-  // layout/paint timing differs), silently overriding it. Once the user has
-  // actually typed something (curWordIdx > 0), auto-centering is exactly the
-  // desired behavior and runs as before.
+  // Manual mode NEVER auto-scrolls: student scrolls passage by hand
+  if(mode === 'manual') return;
+
   if(curWordIdx === 0) return;
+  followCurrent();
+}
+
+function followCurrent(){
+  if(mode === 'manual') return;
+  const curEl = $('passDisplay') ? $('passDisplay').querySelector('.w-cur') : null;
+  if(!curEl) return;
   if(mode === 'line'){
-    const curEl = $('passDisplay').querySelector('.w-cur');
     smoothScrollToCurrentH($('passCard'), curEl);
-  } else if(mode === 'scrolling' || mode === 'parallel'){
-    const curEl = $('passDisplay').querySelector('.w-cur');
-    smoothScrollToCurrent($('passCard'), curEl);
   } else if(mode === 'page'){
-    const curEl = $('passDisplay').querySelector('.w-cur');
     smoothScrollIntoViewIfNeeded($('passCard'), curEl);
+  } else if(mode === 'parallel' || mode === 'scrolling'){
+    smoothScrollToCurrent($('passCard'), curEl);
   }
 }
 
@@ -3481,22 +3618,16 @@ function smoothScrollToCurrentH(container, curEl){
   container.scrollLeft = left;
 }
 function smoothScrollIntoViewIfNeeded(container, curEl){
-  if(!curEl || !container) return;
-  const margin = 8, top = curEl.offsetTop, bottom = top + curEl.offsetHeight;
+  if(!curEl || !container || mode === 'manual') return;
+  const margin = 10;
+  const top = getElementOffsetInContainer(container, curEl);
+  const bottom = top + curEl.offsetHeight;
   if(top < container.scrollTop + margin){
     const targetTop = Math.max(0, top - margin);
-    if(typeof container.scrollTo === 'function'){
-      try { container.scrollTo({top: targetTop, behavior:'smooth'}); } catch(e){ container.scrollTop = targetTop; }
-    } else {
-      container.scrollTop = targetTop;
-    }
+    container.scrollTop = targetTop;
   } else if(bottom > container.scrollTop + container.clientHeight - margin){
     const targetTop = Math.max(0, bottom - container.clientHeight + margin);
-    if(typeof container.scrollTo === 'function'){
-      try { container.scrollTo({top: targetTop, behavior:'smooth'}); } catch(e){ container.scrollTop = targetTop; }
-    } else {
-      container.scrollTop = targetTop;
-    }
+    container.scrollTop = targetTop;
   }
 }
 function resetPassageScroll(){
@@ -3504,11 +3635,28 @@ function resetPassageScroll(){
   [pc,ta].forEach(el=>{ el.style.scrollBehavior='auto'; el.scrollTop=0; el.scrollLeft=0; });
   requestAnimationFrame(()=>{ pc.style.scrollBehavior=''; ta.style.scrollBehavior=''; });
 }
-// text size / orientation / window size changed: re-centre on the current word with the new layout
+// text size / orientation / window size changed: re-centre on the current word with the new layout (skip in manual mode)
 ['resize','orientationchange'].forEach(ev=>window.addEventListener(ev,()=>{
   const sc=$('screen-test'); if(!sc || !sc.classList.contains('active')) return;
+  if(mode === 'manual') return;
   setTimeout(()=>{ if(!started) resetPassageScroll(); else followCurrent(); },120);
 }));
+
+// Manual mode scroll/touch protection: scrolling passage doesn't steal focus or close keyboard
+$('passCard').addEventListener('mousedown', function(e) {
+  if (mode === 'manual' || mode === 'parallel') {
+    if (document.activeElement === TA) {
+      e.preventDefault();
+    }
+  }
+});
+$('passCard').addEventListener('touchend', function(e) {
+  if (mode === 'manual') {
+    if (started && !submitted && TA && document.activeElement !== TA) {
+      setTimeout(() => { TA.focus({ preventScroll: true }); }, 20);
+    }
+  }
+}, { passive: true });
 // line mode: mouse wheel / trackpad scroll the one-line paragraph sideways (touch swipe already does)
 $('passCard').addEventListener('wheel',e=>{
   if(mode!=='line') return;
@@ -4209,7 +4357,7 @@ function submitTest(auto){
   r.passed = CFG.level==='full' ? true : (r.completed && r.marks >= r.passMarks);
 
   renderResults(r, TA.value);
-  saveResult(r);
+  saveResult(r, TA.value, passageText, mode);
   showScreen('screen-results');
 }
 
@@ -4562,7 +4710,7 @@ function drawChart(samples){
 ===================================================================== */
 let RECENT_RESULTS_CACHE = [];
 
-async function saveResult(r){
+async function saveResult(r, typedText, questionText, testMode){
   try{
     let list = [];
     try{
@@ -4573,7 +4721,12 @@ async function saveResult(r){
     
     const passageTitle = (PASSAGES[CFG.lang] && PASSAGES[CFG.lang][CFG.passageIdx]) ? PASSAGES[CFG.lang][CFG.passageIdx].title : '';
     const now = new Date();
-    const weakKeys = extractMistakeKeys(r.ops || []);
+    const finalTyped = typedText !== undefined ? typedText : ((typeof TA !== 'undefined' && TA && TA.value) ? TA.value : ((window.TA && window.TA.value) ? window.TA.value : ''));
+    const finalQuestion = questionText !== undefined ? questionText : ((typeof window !== 'undefined' && window.passageText) ? window.passageText : (passageText || ((PASSAGES[CFG.lang] && PASSAGES[CFG.lang][CFG.passageIdx]) ? PASSAGES[CFG.lang][CFG.passageIdx].text : '') || ''));
+    const finalMode = testMode || mode || 'parallel';
+    
+    // Extract weak keys and examples from wordErrors / weakestKeys
+    const mistakeData = extractMistakeKeysWithExamples(r ? (r.wordErrors || r.ops || []) : [], CFG.lang);
 
     const newEntry = {
       name: CFG.name || 'Student',
@@ -4591,18 +4744,28 @@ async function saveResult(r){
       date: now.toLocaleDateString(),
       isoDate: now.toISOString(),
       timestamp: Date.now(),
-      questionText: passageText || (typeof window !== 'undefined' && window.passageText) || ((PASSAGES[CFG.lang] && PASSAGES[CFG.lang][CFG.passageIdx]) ? PASSAGES[CFG.lang][CFG.passageIdx].text : '') || '',
-      typedText: (window.TA && window.TA.value) ? window.TA.value : '',
-      weakKeys: weakKeys
+      mode: finalMode,
+      questionText: finalQuestion,
+      typedText: finalTyped,
+      weakKeys: mistakeData.counts,
+      weakKeyExamples: mistakeData.examples
     };
 
     list.unshift(newEntry);
     list = list.slice(0, 50); // Store up to 50 runs for rich analytics
     RECENT_RESULTS_CACHE = list;
-    await window.storage.set('recent-results', JSON.stringify(list), false);
+    try {
+      await window.storage.set('recent-results', JSON.stringify(list), false);
+    } catch(err) {
+      console.error('storage write failed', err);
+      toast('⚠️ Could not save test result to storage.');
+    }
     renderRecentResults(list);
     renderAnalyticsPage();
-  }catch(e){ console.error('storage error', e); }
+  }catch(e){
+    console.error('storage error', e);
+    toast('⚠️ Could not save test result to storage.');
+  }
 }
 
 async function loadRecentResults(){
@@ -5143,7 +5306,7 @@ function quickSelect(type, val){
       tlRadio.dispatchEvent(new Event('change'));
     }
     readConfig();
-    startTest(mode || 'scrolling');
+    startTest(mode || 'parallel');
     return;
   }
   
@@ -5205,27 +5368,89 @@ function calculateDailyStreak(list) {
   return streak;
 }
 
-function extractMistakeKeys(ops) {
+function extractMistakeKeysWithExamples(errorsList, lang) {
   const counts = {};
-  if(!ops || !Array.isArray(ops)) return counts;
-  ops.forEach(op => {
-    if(op.type === 'sub' && op.orig && op.typed) {
-      const maxLen = Math.max(op.orig.length, op.typed.length);
-      for(let i=0; i<maxLen; i++) {
-        const o = op.orig[i];
-        const t = op.typed[i];
-        if(o && t && o !== t) {
-          const k = o.toLowerCase();
-          if(k.trim()) counts[k] = (counts[k] || 0) + 1;
-        } else if(o && !t) {
-          const k = o.toLowerCase();
-          if(k.trim()) counts[k] = (counts[k] || 0) + 1;
+  const examples = {};
+  const isTA = lang === 'ta';
+  if(!errorsList || !Array.isArray(errorsList)) return { counts, examples };
+
+  errorsList.forEach(item => {
+    // Supports both wordErrors ({orig, typed, kind}) and legacy ops ({orig, typed, type})
+    const orig = (item.orig || '').trim();
+    const typed = (item.typed || '').trim();
+    const kind = item.kind || item.type;
+    const ex = { orig: orig || '(none)', typed: typed || '(omitted)' };
+
+    if(isTA) {
+      const origChars = orig.match(/[\u0B85-\u0BB9][\u0BBE-\u0BCD]?|[\u0B80-\u0BFF]/g) || [];
+      const typedChars = typed.match(/[\u0B85-\u0BB9][\u0BBE-\u0BCD]?|[\u0B80-\u0BFF]/g) || [];
+      if(typed === '' || kind === 'omit-mid' || kind === 'del') {
+        origChars.forEach(ch => {
+          counts[ch] = (counts[ch] || 0) + 1;
+          if(!examples[ch]) examples[ch] = [];
+          if(examples[ch].length < 5 && !examples[ch].some(e => e.orig === ex.orig && e.typed === ex.typed)) {
+            examples[ch].push(ex);
+          }
+        });
+      } else {
+        const maxLen = Math.max(origChars.length, typedChars.length);
+        for(let i=0; i<maxLen; i++) {
+          const o = origChars[i];
+          const t = typedChars[i];
+          if(o && o !== t) {
+            counts[o] = (counts[o] || 0) + 1;
+            if(!examples[o]) examples[o] = [];
+            if(examples[o].length < 5 && !examples[o].some(e => e.orig === ex.orig && e.typed === ex.typed)) {
+              examples[o].push(ex);
+            }
+          }
+        }
+      }
+    } else {
+      const origLetters = orig.toLowerCase().replace(/[^a-z]/g, '');
+      const typedLetters = typed.toLowerCase().replace(/[^a-z]/g, '');
+      if(typed === '' || kind === 'omit-mid' || kind === 'del') {
+        for(let i=0; i<origLetters.length; i++) {
+          const ch = origLetters[i];
+          counts[ch] = (counts[ch] || 0) + 1;
+          if(!examples[ch]) examples[ch] = [];
+          if(examples[ch].length < 5 && !examples[ch].some(e => e.orig === ex.orig && e.typed === ex.typed)) {
+            examples[ch].push(ex);
+          }
+        }
+      } else {
+        const maxL = Math.max(origLetters.length, typedLetters.length);
+        let foundMismatch = false;
+        for(let i=0; i<maxL; i++) {
+          const o = origLetters[i];
+          const t = typedLetters[i];
+          if(o && o !== t) {
+            foundMismatch = true;
+            counts[o] = (counts[o] || 0) + 1;
+            if(!examples[o]) examples[o] = [];
+            if(examples[o].length < 5 && !examples[o].some(e => e.orig === ex.orig && e.typed === ex.typed)) {
+              examples[o].push(ex);
+            }
+          }
+        }
+        if(!foundMismatch && origLetters.length > 0) {
+          const ch = origLetters[0];
+          counts[ch] = (counts[ch] || 0) + 1;
+          if(!examples[ch]) examples[ch] = [];
+          if(examples[ch].length < 5) examples[ch].push(ex);
         }
       }
     }
   });
-  return counts;
+
+  return { counts, examples };
 }
+
+function extractMistakeKeys(inputList, lang) {
+  return extractMistakeKeysWithExamples(inputList, lang).counts;
+}
+
+let AGGREGATED_WEAK_KEYS = {};
 
 function updateFrequentMistakesDisplay(list) {
   const container = $('homeWeakKeysContainer');
@@ -5238,14 +5463,31 @@ function updateFrequentMistakesDisplay(list) {
   const agg = {};
   list.forEach(r => {
     if(r.weakKeys && typeof r.weakKeys === 'object') {
-      Object.entries(r.weakKeys).forEach(([k, count]) => {
-        if(k && k.trim()) agg[k] = (agg[k] || 0) + count;
+      Object.entries(r.weakKeys).forEach(([k, val]) => {
+        if(!k || !k.trim()) return;
+        const count = typeof val === 'number' ? val : (val.count || 1);
+        if(!agg[k]) agg[k] = { count: 0, examples: [] };
+        agg[k].count += count;
+      });
+    }
+    if(r.weakKeyExamples && typeof r.weakKeyExamples === 'object') {
+      Object.entries(r.weakKeyExamples).forEach(([k, exList]) => {
+        if(!agg[k]) agg[k] = { count: 0, examples: [] };
+        if(Array.isArray(exList)) {
+          exList.forEach(ex => {
+            if(agg[k].examples.length < 5 && !agg[k].examples.some(e => e.orig === ex.orig && e.typed === ex.typed)) {
+              agg[k].examples.push(ex);
+            }
+          });
+        }
       });
     }
   });
 
+  AGGREGATED_WEAK_KEYS = agg;
+
   const sortedKeys = Object.entries(agg)
-    .sort((a, b) => b[1] - a[1])
+    .sort((a, b) => b[1].count - a[1].count)
     .slice(0, 5);
 
   if(sortedKeys.length === 0) {
@@ -5254,16 +5496,139 @@ function updateFrequentMistakesDisplay(list) {
   }
 
   let html = `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">`;
-  sortedKeys.forEach(([key, count]) => {
-    html += `<div style="background:var(--bg-main);border:1.5px solid var(--card-border);border-radius:10px;padding:6px 12px;display:flex;align-items:center;gap:6px;">
+  sortedKeys.forEach(([key, info]) => {
+    html += `<div class="weak-key-chip" onclick="openWeakKeyDetails('${esc(key)}')" style="background:var(--bg-main);border:1.5px solid var(--card-border);border-radius:10px;padding:6px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .15s ease;" title="Tap to view mistake examples and practice">
       <span style="font-family:var(--font-mono);font-size:14px;font-weight:800;color:var(--coral);background:rgba(239,68,68,0.1);padding:2px 8px;border-radius:6px;">${esc(key)}</span>
-      <span style="font-size:11px;font-weight:600;color:var(--muted);">${count} mistake${count > 1 ? 's' : ''}</span>
+      <span style="font-size:11.5px;font-weight:600;color:var(--muted);">${info.count} mistake${info.count > 1 ? 's' : ''}</span>
+      <span style="font-size:12px;color:var(--primary);opacity:0.8;">🔍</span>
     </div>`;
   });
   html += `</div>`;
-  html += `<button class="ghostbtn" type="button" style="width:100%;font-size:12px;padding:8px 12px;" onclick="switchTab('practice')">🎯 Practice Weak Keys in Drills</button>`;
+  html += `<button class="ghostbtn" type="button" style="width:100%;font-size:12px;padding:8px 12px;" onclick="practiceWeakKeys()">🎯 Practice Weak Keys in Drills</button>`;
 
   container.innerHTML = html;
+}
+
+let activeSheetKey = null;
+
+function openWeakKeyDetails(key) {
+  const info = AGGREGATED_WEAK_KEYS[key] || { count: 1, examples: [] };
+  activeSheetKey = key;
+  $('sheetKeyBadge').textContent = key;
+  $('sheetKeyTitle').textContent = `Key '${key}' Mistake Analysis`;
+  $('sheetKeySubtitle').textContent = `${info.count} mistake${info.count > 1 ? 's' : ''} across recent test submissions`;
+  
+  const exContainer = $('sheetKeyExamples');
+  if(!info.examples || info.examples.length === 0) {
+    exContainer.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:10px;text-align:center;">Detailed word examples were not recorded for this key in older test runs.</div>';
+  } else {
+    exContainer.innerHTML = info.examples.map(ex => `
+      <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:8px;padding:8px 12px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <span style="font-size:10.5px;color:var(--muted);display:block;">Original:</span>
+          <span style="font-weight:700;color:var(--ink);">${esc(ex.orig)}</span>
+        </div>
+        <span style="font-size:14px;color:var(--muted);">→</span>
+        <div style="text-align:right;">
+          <span style="font-size:10.5px;color:var(--coral);display:block;">Typed:</span>
+          <span style="font-weight:700;color:var(--coral);">${esc(ex.typed)}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  $('btnSheetPractice').textContent = `🎯 Practice Key '${key}' in Drills`;
+  $('weakKeySheetOverlay').style.display = 'flex';
+}
+
+function closeWeakKeySheet() {
+  const overlay = $('weakKeySheetOverlay');
+  if(overlay) overlay.style.display = 'none';
+  activeSheetKey = null;
+}
+
+function practiceSingleWeakKey() {
+  if(activeSheetKey) {
+    practiceWeakKeys([activeSheetKey]);
+  } else {
+    practiceWeakKeys();
+  }
+}
+
+function practiceWeakKeys(targetKeys) {
+  if(!targetKeys || targetKeys.length === 0) {
+    const sorted = Object.entries(AGGREGATED_WEAK_KEYS)
+      .sort((a,b) => b[1].count - a[1].count)
+      .slice(0, 5)
+      .map(e => e[0]);
+    targetKeys = sorted;
+  }
+  if(!targetKeys || targetKeys.length === 0) {
+    toast('No frequent weak keys recorded yet. Complete a test first!');
+    return;
+  }
+
+  const isTA = targetKeys.some(k => /[\u0B80-\u0BFF]/.test(k)) || (CFG.lang === 'ta');
+  const lang = isTA ? 'ta' : 'en';
+  pracLang = lang;
+  if($('pracLangSel')) $('pracLangSel').value = lang;
+
+  const targets = new Set(targetKeys.map(k => isTA ? k : k.toLowerCase()));
+
+  const pool = new Set();
+  (PRAC[lang] || []).forEach(l => {
+    l.text.split(/\s+/).forEach(w => { const c = cleanPracWord(w); if(c) pool.add(c); });
+  });
+  (PASSAGES[lang] || []).forEach(p => {
+    (p.text || '').split(/\s+/).forEach(w => { const c = cleanPracWord(w); if(c) pool.add(c); });
+  });
+  const words = [...pool];
+
+  const isSubset = w => {
+    const chars = pracLetterChars(w, isTA);
+    return chars.length > 0 && chars.every(ch => targets.has(isTA ? ch : ch.toLowerCase()));
+  };
+  const hasTarget = w => {
+    const chars = pracLetterChars(w, isTA);
+    return chars.some(ch => targets.has(isTA ? ch : ch.toLowerCase()));
+  };
+
+  let candidatePool = words.filter(isSubset);
+  if(candidatePool.length < 8) candidatePool = words.filter(hasTarget);
+  candidatePool.sort((a, b) => a.length - b.length);
+
+  const seen = new Set(), chosen = [];
+  candidatePool.forEach(w => {
+    if(chosen.length >= 30) return;
+    const chars = pracLetterChars(w, isTA).map(ch => isTA ? ch : ch.toLowerCase());
+    const fresh = chars.some(ch => targets.has(ch) && !seen.has(ch));
+    if(fresh || chosen.length < 24) { chosen.push(w); chars.forEach(ch => seen.add(ch)); }
+  });
+
+  if(chosen.length < 6) {
+    const fallbackWords = [...targets].map(k => isTA ? (k+' '+k+' ') : (k+k+' '+k+k+k));
+    chosen.push(...fallbackWords);
+  }
+
+  const rows = [];
+  for(let i = 0; i < chosen.length; i += 6) rows.push(chosen.slice(i, i + 6).join(' '));
+  const block = rows.join('\n');
+  const text = block ? (block + '\n\n' + block) : 'Practice Drill';
+
+  pracCustomLesson = {
+    lesson: (isTA ? 'பலவீன விசை பயிற்சி — ' : 'Weak Keys Practice — ') + [...targets].join(', '),
+    sub: (isTA ? 'பயிற்சி எழுத்துகள்: ' : 'Focus Keys: ') + [...targets].join(' '),
+    keyHint: '',
+    text: text
+  };
+  pracIdx = -1;
+  pracComposer.raw = ''; pracComposer.outLen = 0;
+
+  closeWeakKeySheet();
+  switchTab('practice');
+  openPractice();
+  buildPracLessonChips();
+  loadPracLesson();
 }
 
 function updateDashboardStats(list){
@@ -5580,6 +5945,8 @@ function renderAnalyticsFiltered() {
     const isTa = r.lang === 'ta';
     const langLabel = isTa ? ('Tamil (' + (LAYOUT_LABEL_SHORT[r.layout] || '99') + ')') : 'English QWERTY';
     const cleanPassage = (r.passage || (isTa ? 'Tamil Passage' : 'English Passage')).replace(/^(English|Tamil) Passage \d+ [·-]?\s*/, '');
+    const modeName = MODE_LABEL[r.mode] || r.mode || 'Dual Split (Auto-Scroll)';
+    const comp = buildComparisonHTML(r.typedText, r.questionText, r.elapsed);
     return `
       <div class="history-item-card">
         <div class="history-item-header" onclick="toggleHistoryItem(${idx})">
@@ -5587,7 +5954,7 @@ function renderAnalyticsFiltered() {
             <div style="font-size:20px;">${isTa ? '🇮🇳' : '🇬🇧'}</div>
             <div>
               <div style="font-weight:700;font-size:13px;color:var(--ink);">${esc(cleanPassage)}</div>
-              <div style="font-size:11px;color:var(--muted);">${r.date || 'Recent'} · ${langLabel}</div>
+              <div style="font-size:11px;color:var(--muted);">${r.date || 'Recent'} · ${langLabel} · <b>${esc(modeName)}</b></div>
             </div>
           </div>
           <div style="text-align:right;">
@@ -5601,11 +5968,11 @@ function renderAnalyticsFiltered() {
           <div style="font-weight:700;font-size:11.5px;color:var(--muted);margin-bottom:4px;">
             📝 Exam Question / Reference Passage:
           </div>
-          <div class="qa-box">${esc(r.questionText || '(Original passage text was not recorded for this test)')}</div>
+          <div class="qa-box">${comp.qHtml}</div>
           <div style="font-weight:700;font-size:11.5px;color:var(--muted);margin-top:10px;margin-bottom:4px;">
             ⌨️ Student Answer Typed:
           </div>
-          <div class="qa-box" style="color:var(--primary);">${esc(r.typedText || '(No typed input recorded)')}</div>
+          <div class="qa-box">${comp.aHtml}</div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;color:var(--muted);">
             <span>Errors: <b>${r.mistakes !== undefined ? r.mistakes : (r.errors || 0)}</b></span>
             <span>Gross: <b>${r.grossWpm || r.netWpm || 0} WPM</b></span>
@@ -5766,13 +6133,19 @@ updateHeroTrackLabel();
 if($('btnHomeStartTest')){
   $('btnHomeStartTest').addEventListener('click', () => {
     readConfig();
-    startTest(mode || 'scrolling');
+    startTest(mode || 'parallel');
   });
 }
 
 function registerBackButton() {
   const handleBack = () => {
-    // 1. Close historical report overlay first if open
+    // 1. Close weak key bottom sheet if open
+    const weakOverlay = document.getElementById('weakKeySheetOverlay');
+    if (weakOverlay && weakOverlay.style.display !== 'none') {
+      closeWeakKeySheet();
+      return;
+    }
+    // 2. Close historical report overlay first if open
     const reportOverlay = document.getElementById('reportViewOverlay');
     if (reportOverlay) {
       reportOverlay.remove();
@@ -5819,5 +6192,27 @@ if (window.Capacitor) {
 }
 
 </script>
+
+<!-- WEAK KEY DETAILS BOTTOM SHEET -->
+<div class="bottom-sheet-overlay" id="weakKeySheetOverlay" style="display:none;" onclick="if(event.target===this)closeWeakKeySheet()">
+  <div class="bottom-sheet-card" id="weakKeySheetCard">
+    <div class="bottom-sheet-drag-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span id="sheetKeyBadge" style="font-family:var(--font-mono);font-size:24px;font-weight:900;color:var(--coral);background:rgba(239,68,68,0.12);padding:4px 14px;border-radius:10px;">A</span>
+        <div>
+          <h3 id="sheetKeyTitle" style="margin:0;font-size:16px;font-weight:800;color:var(--ink);">Key 'A' Analysis</h3>
+          <div id="sheetKeySubtitle" style="font-size:12px;color:var(--muted);font-weight:600;margin-top:2px;">12 mistakes in recent tests</div>
+        </div>
+      </div>
+      <button type="button" onclick="closeWeakKeySheet()" style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:700;color:var(--ink);">✕</button>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">Recent Exam Mistakes (Original → Typed):</div>
+    <div id="sheetKeyExamples" style="display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;margin-bottom:16px;">
+    </div>
+    <button class="solidbtn" type="button" style="width:100%;" id="btnSheetPractice" onclick="practiceSingleWeakKey()">🎯 Practice This Key in Drills</button>
+  </div>
+</div>
+
 </body>
 </html>

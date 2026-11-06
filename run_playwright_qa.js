@@ -18,7 +18,7 @@ const VIEWPORTS = [
 ];
 
 const THEMES = ['white', 'black', 'golden'];
-const MODES = ['scrolling', 'page', 'line', 'parallel'];
+const MODES = ['page', 'line', 'parallel', 'manual'];
 const TEXT_SIZES = [20, 35];
 
 let totalTests = 0;
@@ -328,7 +328,7 @@ async function main() {
     // English font check
     await page.evaluate(() => {
       window.setLanguage('en');
-      window.startTest('scrolling');
+      window.startTest('page');
     });
     const enFonts = await page.evaluate(() => {
       const pd = document.getElementById('passDisplay');
@@ -346,7 +346,7 @@ async function main() {
     // Tamil font check
     await page.evaluate(() => {
       window.setLanguage('ta');
-      window.startTest('scrolling');
+      window.startTest('page');
     });
     const taFonts = await page.evaluate(() => {
       const pd = document.getElementById('passDisplay');

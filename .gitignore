@@ -1,4 +1,4 @@
-﻿# Node
+# Node
 node_modules/
 npm-debug.log*
 
@@ -9,6 +9,7 @@ android/build/
 android/local.properties
 android/.idea/
 *.iml
+*.apk
 
 # macOS
 .DS_Store
