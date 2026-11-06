@@ -773,7 +773,7 @@ body[data-theme="golden"] select option {
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
   display: flex;
   justify-content: space-around;
-  padding: 6px 12px calc(8px + env(safe-area-inset-bottom));
+  padding: 4px 4px calc(6px + env(safe-area-inset-bottom));
   z-index: 90;
   max-width: 1400px;
   margin: 0 auto;
@@ -786,22 +786,30 @@ body[data-theme="golden"] select option {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   color: var(--muted) !important;
   font-family: inherit;
-  font-size: 10.5px;
+  font-size: 10px !important;
   font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 12px;
+  padding: 3px 2px;
+  border-radius: 10px;
   transition: all .15s ease;
   outline: none !important;
   -webkit-tap-highlight-color: transparent !important;
+  flex: 1 1 0;
+  max-width: 58px;
+  min-width: 0;
 }
 .nav-tab-item svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   fill: var(--muted) !important;
   transition: transform .15s ease;
+}
+.nav-tab-item span {
+  font-size: 10px !important;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 .nav-tab-item.active {
   color: var(--primary) !important;
@@ -992,16 +1000,23 @@ body[data-theme="golden"] select option {
 }
 
 /* Two-column Test Screen on Wide Screens and Landscape Phones */
+/* Split Modes Side-by-Side on Wide Screens / Landscape Phones (Excluding Half & Half Page mode) */
 @media (min-width: 740px), (orientation: landscape) and (min-width: 540px) {
-  #screen-test:not(.lm) .testpanels {
+  #screen-test:not(.lm):not(.mode-page) .testpanels.split,
+  #screen-test:not(.lm):not(.mode-page) .testpanels.mode-parallel,
+  #screen-test:not(.lm):not(.mode-page) .testpanels.mode-manual {
     display: flex !important;
     flex-direction: row !important;
     gap: 12px !important;
     flex: 1 1 auto !important;
     min-height: 0 !important;
   }
-  #screen-test:not(.lm) .testpanels .passcard,
-  #screen-test:not(.lm) .testpanels .typewrap {
+  #screen-test:not(.lm):not(.mode-page) .testpanels.split .passcard,
+  #screen-test:not(.lm):not(.mode-page) .testpanels.split .typewrap,
+  #screen-test:not(.lm):not(.mode-page) .testpanels.mode-parallel .passcard,
+  #screen-test:not(.lm):not(.mode-page) .testpanels.mode-parallel .typewrap,
+  #screen-test:not(.lm):not(.mode-page) .testpanels.mode-manual .passcard,
+  #screen-test:not(.lm):not(.mode-page) .testpanels.mode-manual .typewrap {
     flex: 1 1 50% !important;
     width: calc(50% - 6px) !important;
     max-width: calc(50% - 6px) !important;
@@ -1011,7 +1026,9 @@ body[data-theme="golden"] select option {
     display: flex !important;
     flex-direction: column !important;
   }
-  #screen-test:not(.lm) .testpanels .typewrap #typingArea {
+  #screen-test:not(.lm):not(.mode-page) .testpanels.split .typewrap #typingArea,
+  #screen-test:not(.lm):not(.mode-page) .testpanels.mode-parallel .typewrap #typingArea,
+  #screen-test:not(.lm):not(.mode-page) .testpanels.mode-manual .typewrap #typingArea {
     flex: 1 1 auto !important;
     height: 100% !important;
   }
@@ -1070,19 +1087,25 @@ body:has(#screen-test.active) .bottom-nav-bar {
   border-radius: 12px;
   padding: 4px 10px;
   margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
   box-shadow: var(--card-shadow);
-  height: 44px;
-  max-height: 48px;
-  box-sizing: border-box;
-  flex-shrink: 0;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+  overflow: hidden !important;
 }
 .cockpit-left-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  flex-wrap: nowrap !important;
 }
 .test-back-btn {
   background: var(--bg-main);
@@ -1094,26 +1117,70 @@ body:has(#screen-test.active) .bottom-nav-bar {
   font-weight: 700;
   color: var(--ink);
   cursor: pointer;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 .live-cockpit-stats {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11.5px;
-  color: var(--muted);
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 11.5px !important;
+  color: var(--muted) !important;
+  white-space: nowrap !important;
+  flex-wrap: nowrap !important;
+  flex-shrink: 0 !important;
 }
 .live-stat-pill {
-  background: var(--bg-main);
-  border: 1px solid var(--card-border);
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 11.5px;
-  color: var(--muted);
-  font-weight: 600;
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  background: var(--bg-main) !important;
+  border: 1px solid var(--card-border) !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  font-size: 11.5px !important;
+  line-height: 1.2 !important;
+  color: var(--muted) !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
 }
 .live-stat-pill b {
-  color: var(--ink);
-  font-weight: 800;
+  color: var(--ink) !important;
+  font-weight: 800 !important;
+  font-size: 11.5px !important;
+  line-height: 1 !important;
+}
+
+@media (orientation: landscape), (max-height: 500px) {
+  .test-cockpit-bar {
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    padding: 2px 8px !important;
+    margin-bottom: 4px !important;
+  }
+  .cockpit-left-group {
+    gap: 6px !important;
+  }
+  .test-back-btn {
+    padding: 2px 8px !important;
+    font-size: 11px !important;
+  }
+  .live-stat-pill {
+    padding: 2px 6px !important;
+    font-size: 10.5px !important;
+  }
+  .live-stat-pill b {
+    font-size: 10.5px !important;
+  }
+  .live-stat-pill .pill-label {
+    display: none !important;
+  }
 }
 .timerbox {
   font-family: var(--font-mono);
@@ -1166,6 +1233,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
 /* =====================================================================
    HALF & HALF PAGE MODE: 50/50 Vertical Split
 ===================================================================== */
+#screen-test.mode-page .testpanels,
 .testpanels.mode-page {
   display: flex !important;
   flex-direction: column !important;
@@ -1173,14 +1241,18 @@ body:has(#screen-test.active) .bottom-nav-bar {
   min-height: 0 !important;
   height: 100% !important;
   width: 100% !important;
+  max-width: 100% !important;
   gap: 8px !important;
   box-sizing: border-box !important;
 }
+#screen-test.mode-page .testpanels .passcard,
 .testpanels.mode-page .passcard {
   flex: 1 1 0 !important;
   min-height: 0 !important;
   height: auto !important;
   max-height: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
   margin: 0 !important;
   overflow-y: auto !important;
   display: flex !important;
@@ -1188,17 +1260,21 @@ body:has(#screen-test.active) .bottom-nav-bar {
   position: relative !important;
   box-sizing: border-box !important;
 }
+#screen-test.mode-page .testpanels .typewrap,
 .testpanels.mode-page .typewrap {
   flex: 1 1 0 !important;
   min-height: 0 !important;
   height: auto !important;
   max-height: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
   margin: 0 !important;
   display: flex !important;
   flex-direction: column !important;
   position: relative !important;
   box-sizing: border-box !important;
 }
+#screen-test.mode-page .testpanels .typewrap #typingArea,
 .testpanels.mode-page .typewrap #typingArea {
   flex: 1 1 auto !important;
   min-height: 0 !important;
@@ -1207,6 +1283,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
   padding: 10px 14px !important;
   box-sizing: border-box !important;
 }
+#screen-test.mode-page #passDisplay,
 .testpanels.mode-page #passDisplay {
   padding: 10px 14px !important;
   flex: 1 1 auto !important;
@@ -1461,41 +1538,19 @@ body:has(#screen-test.active) .bottom-nav-bar {
   font-weight: 800 !important;
 }
 
-/* Test Screen Cockpit */
-.test-cockpit-bar {
-  background: var(--card-bg);
-  border: 1.5px solid var(--card-border);
-  border-radius: 18px;
-  padding: 14px 16px;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: var(--card-shadow);
-}
-.test-back-btn {
-  background: var(--bg-main);
-  border: 1px solid var(--card-border);
-  border-radius: 10px;
-  padding: 6px 12px;
-  font-family: inherit;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--ink);
-  cursor: pointer;
-}
-.digital-timer, .timerbox {
-  font-family: var(--font-mono);
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  color: var(--primary);
+/* Test Screen Cockpit Overrides */
+.script-tag-chip, .kbbadge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
 }
 .digital-timer.warn, .timerbox.warn { color: var(--amber); }
 .digital-timer.danger, .timerbox.danger { color: var(--coral); animation: timerBlink 0.6s infinite; }
 @keyframes timerBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-.live-cockpit-stats, .livestats {
+.livestats {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -1503,7 +1558,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
   font-size: 11px;
   color: var(--muted);
 }
-.live-cockpit-stats b, .livestats b { font-size: 14px; color: var(--ink); font-weight: 800; }
+.livestats b { font-size: 14px; color: var(--ink); font-weight: 800; }
 .script-tag-chip, .kbbadge {
   background: var(--primary-light);
   color: var(--primary-text);
@@ -2231,72 +2286,88 @@ body:has(#screen-test.active) .bottom-nav-bar {
       </div>
     </div>
 
-    <!-- ---------------- TAB 3: ANALYTICS (PERFORMANCE & TYPING HISTORY) ---------------- -->
+    <!-- ---------------- TAB 3: ANALYTICS (LIFETIME PROGRESS GRAPH & STAT CARDS ONLY) ---------------- -->
     <div class="tab-content" id="tab-progress">
       
-      <!-- KPI STATS SUMMARY -->
-      <div class="analytics-kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-icon">⚡</div>
-          <div class="kpi-val" id="anAvgSpeed">—</div>
-          <div class="kpi-label">Average Speed (WPM)</div>
-        </div>
-        <div class="kpi-card highlight">
-          <div class="kpi-icon">🏆</div>
-          <div class="kpi-val" id="anPeakSpeed">—</div>
-          <div class="kpi-label">Peak Speed (WPM)</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-icon">🎯</div>
-          <div class="kpi-val" id="anAvgAcc">—</div>
-          <div class="kpi-label">Average Accuracy</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-icon">📝</div>
-          <div class="kpi-val" id="anTotalTests">0</div>
-          <div class="kpi-label">Tests Completed</div>
-        </div>
-      </div>
-
-      <!-- SPEED PROGRESS TRENDLINE GRAPH -->
+      <!-- LIFETIME PROGRESS GRAPH (WPM & MARKS) -->
       <div class="glass-card" style="margin-bottom:14px;">
         <div class="card-header-bar">
-          <h2>📈 Speed Progress Trendline (WPM)</h2>
+          <h2>📈 Lifetime Progress Graph</h2>
         </div>
-        <div id="analyticsGraphContainer" style="width:100%;height:150px;position:relative;">
+        <div id="analyticsGraphContainer" style="width:100%;height:165px;position:relative;">
           <canvas id="analyticsGraphCanvas" style="width:100%;height:100%;display:block;"></canvas>
         </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:18px;margin-top:10px;font-size:11.5px;font-weight:700;">
+          <span style="color:#2563eb;display:inline-flex;align-items:center;gap:5px;">
+            <span style="width:12px;height:3px;background:#2563eb;border-radius:2px;display:inline-block;"></span> Net WPM
+          </span>
+          <span style="color:#7c3aed;display:inline-flex;align-items:center;gap:5px;">
+            <span style="width:12px;height:3px;background:#7c3aed;border-radius:2px;display:inline-block;"></span> Exam Marks
+          </span>
+        </div>
       </div>
 
-      <!-- FILTER & SORT CONTROLS -->
-      <div class="glass-card" style="margin-bottom:14px;padding:12px 14px;">
-        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
-          <div style="display:flex;gap:6px;align-items:center;">
-            <span style="font-size:12px;font-weight:700;color:var(--muted);">Language:</span>
-            <div class="filter-pills-row" id="anLangFilterPills">
-              <button class="filter-pill active" id="fltAll" type="button" onclick="setAnalyticsLangFilter('all')">All</button>
-              <button class="filter-pill" id="fltEn" type="button" onclick="setAnalyticsLangFilter('en')">🇬🇧 English</button>
-              <button class="filter-pill" id="fltTa" type="button" onclick="setAnalyticsLangFilter('ta')">🇮🇳 Tamil</button>
+      <!-- STAT CARDS FOR WPM AND MARKS (BEST, WORST, LIFETIME AVERAGE) -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:12px;margin-bottom:14px;">
+        <!-- NET WPM STAT CARD -->
+        <div class="glass-card">
+          <div class="card-header-bar">
+            <h2>⚡ Net Speed (WPM)</h2>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;text-align:center;padding:6px 0;">
+            <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px 4px;">
+              <div style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Best</div>
+              <div style="font-size:22px;font-weight:900;color:var(--primary);" id="anWpmBest">—</div>
+              <span id="anPeakSpeed" style="display:none;">—</span>
+            </div>
+            <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px 4px;">
+              <div style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Worst</div>
+              <div style="font-size:22px;font-weight:900;color:var(--coral);" id="anWpmWorst">—</div>
+            </div>
+            <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px 4px;">
+              <div style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Lifetime Avg</div>
+              <div style="font-size:22px;font-weight:900;color:var(--emerald);" id="anWpmAvg">—</div>
+              <span id="anAvgSpeed" style="display:none;">—</span>
             </div>
           </div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <span style="font-size:12px;font-weight:700;color:var(--muted);">Sort:</span>
-            <select id="anSortBy" class="custom-select-wrap select" style="padding:5px 8px;font-size:12px;border-radius:8px;border:1px solid var(--card-border);" onchange="renderAnalyticsFiltered()">
-              <option value="latest">Latest First</option>
-              <option value="best_speed">Best Speed (High → Low)</option>
-              <option value="worst_speed">Lowest Speed (Worst → Best)</option>
-              <option value="best_acc">Best Accuracy</option>
-            </select>
+        </div>
+
+        <!-- EXAM MARKS STAT CARD -->
+        <div class="glass-card">
+          <div class="card-header-bar">
+            <h2>🎯 Exam Marks</h2>
+            <span style="font-size:11px;color:var(--muted);font-weight:600;">10-min exams</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;text-align:center;padding:6px 0;">
+            <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px 4px;">
+              <div style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Best</div>
+              <div style="font-size:22px;font-weight:900;color:#7c3aed;" id="anMarksBest">—</div>
+            </div>
+            <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px 4px;">
+              <div style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Worst</div>
+              <div style="font-size:22px;font-weight:900;color:var(--coral);" id="anMarksWorst">—</div>
+            </div>
+            <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px 4px;">
+              <div style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Lifetime Avg</div>
+              <div style="font-size:22px;font-weight:900;color:var(--emerald);" id="anMarksAvg">—</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- DETAILED TEST ATTEMPTS LIST WITH QUESTION & ANSWER TYPED -->
+      <footer class="app-footer powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></footer>
+      <div style="height:24px;width:100%;"></div>
+    </div>
+
+    <!-- ---------------- TAB: HISTORY (TEST HISTORY & SCORECARDS) ---------------- -->
+    <div class="tab-content" id="tab-history">
       <div class="glass-card">
         <div class="card-header-bar">
-          <h2>📜 Previous Test Submissions</h2>
+          <h2>📜 Test History &amp; Scorecards</h2>
+          <span class="card-badge" id="historyCountBadge">0 tests</span>
         </div>
-        <div id="analyticsListContainer">
+        <p style="font-size:12px;color:var(--muted);margin:0 0 12px 0;">All recorded typing attempts. Tap any test to view its official scorecard and export PDF.</p>
+        <div id="historyListContainer">
           <div class="rr-list" id="rrList">No tests recorded yet. Complete a test in Studio to generate your scorecard!</div>
         </div>
       </div>
@@ -2451,6 +2522,10 @@ body:has(#screen-test.active) .bottom-nav-bar {
         <svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
         <span>Analytics</span>
       </button>
+      <button class="nav-tab-item" id="btnTabHistory" onclick="switchTab('history')">
+        <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+        <span>History</span>
+      </button>
       <button class="nav-tab-item" id="btnTabAcademy" onclick="switchTab('academy')">
         <svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6l9-4.91V17h2V9L12 3z M5 13.18v4L12 21l7-3.82v-4L12 17L5 13.18z"/></svg>
         <span>Academy</span>
@@ -2474,7 +2549,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
         <button class="test-back-btn" onclick="confirmQuit()">‹ Exit</button>
         <span id="kbBadge"></span>
         <div class="live-cockpit-stats">
-          <span class="live-stat-pill">Chars: <b id="liveChars">0</b></span>
+          <span class="live-stat-pill"><span class="pill-label">Chars: </span><b id="liveChars">0</b></span>
           <span class="live-stat-pill">⌫ <b id="liveBack">0</b></span>
           <!-- Retain hidden values for internal calculation -->
           <span style="display:none">Net: <b id="liveWpm">0</b></span>
@@ -2847,7 +2922,7 @@ function cycleAudioMode() {
 // 5-Tab switching - Guaranteed Single Active Navigation State
 function switchTab(name) {
   showScreen('screen-config');
-  const validTabs = ['speed', 'practice', 'progress', 'academy', 'profile'];
+  const validTabs = ['speed', 'practice', 'progress', 'history', 'academy', 'profile'];
   
   // Strict cleanup: remove active class and blur all tab buttons
   document.querySelectorAll('.nav-tab-item, .nav-tab').forEach(btn => {
@@ -2874,6 +2949,10 @@ function switchTab(name) {
   if(name === 'progress') {
     loadRecentResults();
     if(typeof renderAnalyticsPage === 'function') renderAnalyticsPage();
+  }
+  if(name === 'history') {
+    loadRecentResults();
+    if(typeof renderHistoryPage === 'function') renderHistoryPage();
   }
   if(name === 'profile') loadProfile();
   if(name === 'speed' && typeof syncContinueCard === 'function') syncContinueCard();
@@ -3260,105 +3339,121 @@ function buildComparisonHTML(typedText, questionText, elapsedSec) {
   return { qHtml, aHtml, isOld: false, evalResult };
 }
 
-function viewHistoricalReport(idx) {
+/* =====================================================================
+   OFFICIAL HISTORICAL REPORT OVERLAY & PDF EXPORT
+===================================================================== */
+function openHistoryReport(idx) {
   const list = Array.isArray(RECENT_RESULTS_CACHE) ? RECENT_RESULTS_CACHE : [];
   if (idx < 0 || idx >= list.length) return;
-  const r = list[idx];
+  const item = list[idx];
 
-  let existing = document.getElementById('reportViewOverlay');
-  if (existing) existing.remove();
+  // Older results with no saved answer
+  if (!item.typedText || item.typedText.trim() === '') {
+    showHistoryFallbackModal("Answer wasn't saved for this older test.");
+    return;
+  }
 
-  const overlay = document.createElement('div');
-  overlay.id = 'reportViewOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;padding:12px;overflow-y:auto;';
+  // Backup current globals
+  const savedCFG = JSON.parse(JSON.stringify(CFG));
+  const savedElapsed = secsElapsed;
+  const savedBack = backspaceCount;
 
-  const isTa = r.lang === 'ta';
-  const langLabel = isTa ? ('Tamil · ' + (LAYOUT_LABEL[r.layout] || 'Tamil99')) : 'English QWERTY';
-  const cleanPassage = (r.passage || (isTa ? 'Tamil Passage' : 'English Passage')).replace(/^(English|Tamil) Passage \d+ [·\-]?\s*/, '');
-  const studentName = r.name || 'Student';
-  const netWpm = r.netWpm || 0;
-  const grossWpm = r.grossWpm || netWpm;
-  const acc = r.accuracy || 0;
-  const errors = r.mistakes !== undefined ? r.mistakes : (r.errors || 0);
-  const marks = r.marks;
-  const passed = !!r.passed;
-  const modeName = MODE_LABEL[r.mode] || r.mode || 'Dual Split (Auto-Scroll)';
+  try {
+    const itemCfg = item.cfg || {};
+    const studentName = (itemCfg.name || item.name || CFG.name || 'Student').trim();
 
-  // Question and Answer comparison rendering via calcResults alignEdit
-  const { qHtml, aHtml } = buildComparisonHTML(r.typedText, r.questionText, r.elapsed);
+    // Older results without cfg: use defaults (time 300, level 'full', current profile name)
+    CFG.lang = itemCfg.lang || item.lang || 'en';
+    CFG.layout = itemCfg.layout || item.layout || 'typewriter';
+    CFG.passageIdx = itemCfg.passageIdx !== undefined ? itemCfg.passageIdx : 0;
+    CFG.speedType = itemCfg.speedType || 'senior';
+    CFG.category = itemCfg.category || 'exam';
+    CFG.totalMarks = itemCfg.totalMarks !== undefined ? itemCfg.totalMarks : (item.marks !== null && item.marks !== undefined ? 100 : 0);
+    CFG.level = itemCfg.level || 'full';
+    CFG.time = itemCfg.time !== undefined ? itemCfg.time : 300;
+    CFG.name = studentName;
 
-  overlay.innerHTML = `
-    <div style="background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:20px;max-width:760px;width:100%;max-height:90vh;overflow-y:auto;padding:20px;box-shadow:var(--card-shadow);position:relative;color:var(--ink);font-family:var(--font-main);">
-      <button type="button" onclick="document.getElementById('reportViewOverlay').remove()" style="position:absolute;top:14px;right:14px;background:var(--bg-main);border:1px solid var(--card-border);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);">✕ Close</button>
+    secsElapsed = item.elapsed !== undefined ? item.elapsed : 300;
+    backspaceCount = item.backspaces !== undefined ? item.backspaces : (item.errors || 0);
 
-      <div style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-radius:14px;padding:16px;color:#fff;margin-bottom:14px;">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:0.85;margin-bottom:2px;">Official Examination Scorecard</div>
-        <h2 style="margin:0 0 4px;font-size:18px;font-weight:800;">Typing Thalaiva</h2>
-        <div style="font-size:12px;opacity:0.85;">Sri Kalaimagal Technical Institute · Mode: <b>${esc(modeName)}</b></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.15);font-size:12px;">
-          <span>Student: <b>${esc(studentName)}</b> · ${esc(langLabel)}</span>
-          <span style="background:${passed ? '#15803d' : '#c0151b'};color:#fff;font-weight:800;padding:3px 8px;border-radius:6px;">${passed ? 'PASS ✅' : 'FAIL ❌'}</span>
-        </div>
-      </div>
+    // a. Rebuild r = calcResults(typedText, questionText, elapsed, false); set r.target and r.passed exactly like submitTest
+    const r = calcResults(item.typedText, item.questionText || '', secsElapsed, false);
+    r.target = CFG.level==='senior' ? 45 : (CFG.level==='junior' ? 30 : 0);
+    r.passed = CFG.level==='full' ? true : (r.completed && r.marks >= r.passMarks);
 
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;text-align:center;">
-        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:8px;">
-          <div style="font-size:20px;font-weight:800;color:var(--primary);">${netWpm}</div>
-          <div style="font-size:10.5px;color:var(--muted);font-weight:600;">Net WPM</div>
-        </div>
-        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:8px;">
-          <div style="font-size:20px;font-weight:800;">${grossWpm}</div>
-          <div style="font-size:10.5px;color:var(--muted);font-weight:600;">Gross WPM</div>
-        </div>
-        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:8px;">
-          <div style="font-size:20px;font-weight:800;color:var(--emerald);">${acc}%</div>
-          <div style="font-size:10.5px;color:var(--muted);font-weight:600;">Accuracy</div>
-        </div>
-        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:8px;">
-          <div style="font-size:20px;font-weight:800;color:${marks !== null ? 'var(--primary)' : 'var(--coral)'};">${marks !== null && marks !== undefined ? marks : errors}</div>
-          <div style="font-size:10.5px;color:var(--muted);font-weight:600;">${marks !== null ? 'Marks' : 'Errors'}</div>
-        </div>
-      </div>
+    // b. Call buildReportHTML(r)
+    const reportHtml = buildReportHTML(r);
 
-      <div style="margin-bottom:14px;">
-        <div style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:4px;">📝 Exam Question (Errors Underlined):</div>
-        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px;font-size:12.5px;line-height:1.7;max-height:140px;overflow-y:auto;white-space:pre-wrap;font-family:var(--font-mono);">${qHtml}</div>
-      </div>
-
-      <div style="margin-bottom:16px;">
-        <div style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:4px;">⌨️ Student Answer Typed (Wrong Words Boxed):</div>
-        <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:10px;padding:10px;font-size:12.5px;line-height:1.7;max-height:140px;overflow-y:auto;white-space:pre-wrap;font-family:var(--font-mono);">${aHtml}</div>
-      </div>
-
-      <div style="display:flex;gap:10px;">
-        <button type="button" class="solidbtn" style="flex:1;" onclick="exportHistoricalPDF(${idx})">📄 Export Scorecard PDF</button>
-      </div>
-    </div>
-  `;
-
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) overlay.remove();
-  });
-  document.body.appendChild(overlay);
+    // c. Show the result in full-screen overlay with identical .rp markup, Close button, and Export PDF button
+    showHistoryOverlay(reportHtml, studentName);
+  } catch(err) {
+    console.error('Failed to open history report', err);
+    toast('⚠️ Could not open report');
+  } finally {
+    // Restore globals
+    Object.assign(CFG, savedCFG);
+    secsElapsed = savedElapsed;
+    backspaceCount = savedBack;
+  }
 }
 
-function exportHistoricalPDF(idx) {
-  const overlay = document.getElementById('reportViewOverlay');
-  if (!overlay) return;
-  const printContent = overlay.querySelector('div');
-  const printWindow = window.open('', '_blank');
-  if (printWindow) {
-    printWindow.document.write('<!DOCTYPE html><html><head><title>Scorecard Report</title>');
-    printWindow.document.write('<style>body{font-family:Arial,sans-serif;padding:24px;color:#0f172a;}@media print{@page{margin:1cm;}}</style>');
-    printWindow.document.write('</head><body>');
-    printWindow.document.write(printContent.innerHTML);
-    printWindow.document.write('</body></html>');
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => { printWindow.print(); }, 400);
-  } else {
-    window.print();
+// Compatibility aliases & window bindings
+window.viewHistoricalReport = openHistoryReport;
+window.openHistoryReport = openHistoryReport;
+window.showHistoryOverlay = showHistoryOverlay;
+window.closeHistoryOverlay = closeHistoryOverlay;
+window.exportHistoryOverlayPDF = exportHistoryOverlayPDF;
+
+function showHistoryOverlay(reportHtml, studentName) {
+  let overlay = $('historyReportOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'historyReportOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.85);backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:12px 10px 40px;box-sizing:border-box;';
+    document.body.appendChild(overlay);
   }
+  overlay.innerHTML = `
+    <div style="width:100%;max-width:800px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;position:sticky;top:0;z-index:10;background:rgba(15,23,42,0.95);padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+      <button class="ghostbtn" type="button" onclick="closeHistoryOverlay()" style="color:#ffffff;border-color:rgba(255,255,255,0.3);background:transparent;padding:6px 14px;font-size:13px;font-weight:700;">✕ Close</button>
+      <button class="solidbtn" id="btnHistoryExportPdf" type="button" onclick="exportHistoryOverlayPDF('${esc(studentName)}')" style="padding:6px 16px;font-size:13px;font-weight:700;background:var(--primary);color:#ffffff;">📥 Export PDF</button>
+    </div>
+    <div id="historyReportContent" style="width:100%;max-width:800px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+      ${reportHtml}
+    </div>
+  `;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeHistoryOverlay() {
+  const overlay = $('historyReportOverlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+async function exportHistoryOverlayPDF(studentName) {
+  const el = document.querySelector('#historyReportContent .rp');
+  if (!el) return;
+  await downloadResultPDF(el, studentName);
+}
+
+function showHistoryFallbackModal(msg) {
+  let modal = $('historyFallbackModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'historyFallbackModal';
+    modal.className = 'bottom-sheet-overlay';
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = `
+    <div class="bottom-sheet-content" style="max-width:380px;text-align:center;padding:24px 20px;">
+      <div style="font-size:36px;margin-bottom:8px;">📜</div>
+      <h3 style="margin:0 0 8px;font-size:16px;font-weight:800;color:var(--ink);">Test Scorecard</h3>
+      <p style="font-size:13.5px;color:var(--muted);margin:0 0 18px;line-height:1.4;">${esc(msg)}</p>
+      <button class="solidbtn" type="button" onclick="$('historyFallbackModal').style.display='none'" style="width:100%;">OK</button>
+    </div>
+  `;
+  modal.style.display = 'flex';
 }
 
 function showScreen(id){
@@ -3464,6 +3559,9 @@ function startTest(m){
   $('passCard').className = 'passcard mode-' + mode + (isSplit ? ' split mode-parallel' : '');
   $('typeWrap').className = 'typewrap mode-' + mode + (isSplit ? ' split mode-parallel' : '');
   $('testPanels').className = 'testpanels mode-' + mode + (isSplit ? ' split mode-parallel' : '');
+  $('screen-test').classList.remove('mode-line', 'mode-parallel', 'mode-manual', 'mode-page', 'split');
+  $('screen-test').classList.add('mode-' + mode);
+  if(isSplit) $('screen-test').classList.add('split');
   $('screen-test').classList.toggle('lm', mode==='line');
   $('modeTag').textContent = MODE_LABEL[mode] || (mode.charAt(0).toUpperCase()+mode.slice(1)+' mode');
   $('typeLabel').style.display = 'none';
@@ -4728,8 +4826,20 @@ async function saveResult(r, typedText, questionText, testMode){
     // Extract weak keys and examples from wordErrors / weakestKeys
     const mistakeData = extractMistakeKeysWithExamples(r ? (r.wordErrors || r.ops || []) : [], CFG.lang);
 
+    const cfgSnapshot = {
+      lang: CFG.lang,
+      layout: CFG.layout,
+      passageIdx: CFG.passageIdx,
+      speedType: CFG.speedType,
+      category: CFG.category,
+      totalMarks: CFG.totalMarks,
+      level: CFG.level,
+      time: CFG.time,
+      name: (CFG.name || 'Student').trim()
+    };
+
     const newEntry = {
-      name: CFG.name || 'Student',
+      name: (CFG.name || 'Student').trim(),
       lang: CFG.lang,
       layout: CFG.layout,
       passage: passageTitle,
@@ -4740,7 +4850,9 @@ async function saveResult(r, typedText, questionText, testMode){
       passed: !!r.passed,
       errors: r.errors || 0,
       mistakes: r.errors || 0,
-      elapsed: secsElapsed || 0,
+      elapsed: (secsElapsed !== undefined && secsElapsed !== null) ? secsElapsed : 0,
+      backspaces: (backspaceCount !== undefined && backspaceCount !== null) ? backspaceCount : 0,
+      cfg: cfgSnapshot,
       date: now.toLocaleDateString(),
       isoDate: now.toISOString(),
       timestamp: Date.now(),
@@ -4752,7 +4864,7 @@ async function saveResult(r, typedText, questionText, testMode){
     };
 
     list.unshift(newEntry);
-    list = list.slice(0, 50); // Store up to 50 runs for rich analytics
+    list = list.slice(0, 100); // Store last 100 results
     RECENT_RESULTS_CACHE = list;
     try {
       await window.storage.set('recent-results', JSON.stringify(list), false);
@@ -4762,6 +4874,7 @@ async function saveResult(r, typedText, questionText, testMode){
     }
     renderRecentResults(list);
     renderAnalyticsPage();
+    renderHistoryPage();
   }catch(e){
     console.error('storage error', e);
     toast('⚠️ Could not save test result to storage.');
@@ -4776,24 +4889,31 @@ async function loadRecentResults(){
     RECENT_RESULTS_CACHE = list;
     renderRecentResults(list);
     renderAnalyticsPage();
+    renderHistoryPage();
+    return list;
   }catch(e){
     RECENT_RESULTS_CACHE = [];
     renderRecentResults([]);
     renderAnalyticsPage();
+    renderHistoryPage();
+    return [];
   }
 }
 
 function renderRecentResults(list){
-  const el = $('rrList');
   try {
-    updateDashboardStats(list);
+    updateDashboardStats(list || RECENT_RESULTS_CACHE);
   } catch(e) {}
-  if(!el) return;
-  if(!list || list.length===0){ el.textContent = 'No tests recorded yet. Complete a test in Studio to generate your scorecard!'; return; }
-  el.innerHTML = list.map(r=>
-    `<div class="rr-row"><span>${esc(r.name || 'Student')} · ${r.lang==='ta'?('Tamil/'+(LAYOUT_LABEL_SHORT[r.layout]||'99')):'English'} · ${esc((r.passage||'').replace(/^(English|Tamil) Passage \d+ [·-]?\s*/,''))}</span><b>${r.netWpm} wpm${r.marks!==null&&r.marks!==undefined?(' / '+r.marks+'m'):''} · ${r.passed?'Pass':'Fail'}</b></div>`
-  ).join('');
+  if(typeof renderHistoryPage === 'function') {
+    renderHistoryPage();
+  }
 }
+
+window.saveResult = saveResult;
+window.loadRecentResults = loadRecentResults;
+window.renderHistoryPage = renderHistoryPage;
+window.renderAnalyticsPage = renderAnalyticsPage;
+window.renderRecentResults = renderRecentResults;
 
 // clearResults permanently removed: student test attempts persist across sessions
 
@@ -4907,9 +5027,10 @@ if(window.Capacitor && window.Capacitor.isNativePlatform()){
    results card as a canvas via html2canvas, then either turns it into a
    PDF (jsPDF) or shares it as an image using the native Web Share API.
 ===================================================================== */
-async function captureResultsCanvas(){
-  const rp = document.querySelector('#reportCard .rp');
-  const clone = rp.cloneNode(true);
+async function captureResultsCanvas(customElement){
+  const target = customElement || document.querySelector('#reportCard .rp');
+  if(!target) return null;
+  const clone = target.cloneNode(true);
   clone.classList.add('pdfmode');
   clone.style.cssText = 'position:absolute;left:-10000px;top:0;';
   document.body.appendChild(clone);
@@ -4918,13 +5039,15 @@ async function captureResultsCanvas(){
   } finally { clone.remove(); }
 }
 
-async function downloadResultPDF(){
-  if(!document.querySelector('#reportCard .rp')){ toast('Finish a test first'); return; }
-  const btn = $('btnDownloadPdf');
+async function downloadResultPDF(customElement, studentName){
+  const target = customElement || document.querySelector('#reportCard .rp');
+  if(!target){ toast('Finish a test first'); return; }
+  const btn = customElement ? $('btnHistoryExportPdf') : $('btnDownloadPdf');
   const orig = btn ? btn.textContent : '';
   try{
-    if(btn){ btn.textContent = 'Preparing…'; btn.disabled = true; }
-    const canvas = await captureResultsCanvas();
+    if(btn){ btn.textContent = 'Preparing PDF…'; btn.disabled = true; }
+    const canvas = await captureResultsCanvas(target);
+    if(!canvas){ toast('⚠️ Could not capture report'); return; }
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'pt', 'a4');
     const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight(), m = 20;
@@ -4940,7 +5063,8 @@ async function downloadResultPDF(){
       if(p>0) pdf.addPage();
       pdf.addImage(part.toDataURL('image/jpeg',0.95), 'JPEG', m, m, canvas.width*k, h*k);
     }
-    const fname = `${(CFG.name||'Student').replace(/\s+/g,'_')}_Typing_Result.pdf`;
+    const sName = (studentName || CFG.name || 'Student').trim();
+    const fname = `${sName.replace(/\s+/g,'_')}_Typing_Result.pdf`;
     if(window.Capacitor && window.Capacitor.isNativePlatform()){
       const b64 = pdf.output('datauristring').split(',')[1];
       const { Filesystem, Share } = window.Capacitor.Plugins;
@@ -5869,125 +5993,107 @@ function quickSelectLanguage(lang, layout) {
 ===================================================================== */
 let currentAnalyticsFilter = 'all';
 
-function setAnalyticsLangFilter(filter) {
-  currentAnalyticsFilter = filter;
-  const pills = { all: $('fltAll'), en: $('fltEn'), ta: $('fltTa') };
-  Object.entries(pills).forEach(([k, btn]) => {
-    if(btn) btn.classList.toggle('active', k === filter);
-  });
-  renderAnalyticsFiltered();
-}
-
 function renderAnalyticsPage() {
-  renderAnalyticsFiltered();
-}
-
-function renderAnalyticsFiltered() {
   const list = Array.isArray(RECENT_RESULTS_CACHE) ? RECENT_RESULTS_CACHE : [];
   
-  // Filter by language
-  let filtered = list.filter(r => {
-    if(currentAnalyticsFilter === 'en') return r.lang === 'en';
-    if(currentAnalyticsFilter === 'ta') return r.lang === 'ta';
-    return true;
-  });
+  // WPM Statistics: Best, Worst, Lifetime Average
+  const wpmBestEl = $('anWpmBest');
+  const wpmWorstEl = $('anWpmWorst');
+  const wpmAvgEl = $('anWpmAvg');
+  const legacyPeak = $('anPeakSpeed');
+  const legacyAvg = $('anAvgSpeed');
 
-  // Calculate KPIs
-  const avgEl = $('anAvgSpeed');
-  const peakEl = $('anPeakSpeed');
-  const accEl = $('anAvgAcc');
-  const testsEl = $('anTotalTests');
-
-  if(filtered.length === 0) {
-    if(avgEl) avgEl.textContent = '—';
-    if(peakEl) peakEl.textContent = '—';
-    if(accEl) accEl.textContent = '—';
-    if(testsEl) testsEl.textContent = '0';
+  if(list.length === 0) {
+    if(wpmBestEl) wpmBestEl.textContent = '—';
+    if(wpmWorstEl) wpmWorstEl.textContent = '—';
+    if(wpmAvgEl) wpmAvgEl.textContent = '—';
+    if(legacyPeak) legacyPeak.textContent = '—';
+    if(legacyAvg) legacyAvg.textContent = '—';
   } else {
-    const sumWpm = filtered.reduce((s, r) => s + (r.netWpm || 0), 0);
-    const avgWpm = Math.round(sumWpm / filtered.length);
-    const peakWpm = Math.max(...filtered.map(r => r.netWpm || 0));
-    const sumAcc = filtered.reduce((s, r) => s + (r.accuracy || 0), 0);
-    const avgAcc = Math.round(sumAcc / filtered.length);
+    const speeds = list.map(r => r.netWpm || 0);
+    const bestSpeed = Math.max(...speeds);
+    const worstSpeed = Math.min(...speeds);
+    const avgSpeed = Math.round(speeds.reduce((s, v) => s + v, 0) / speeds.length);
 
-    if(avgEl) avgEl.textContent = avgWpm.toString();
-    if(peakEl) peakEl.textContent = peakWpm.toString();
-    if(accEl) accEl.textContent = avgAcc + '%';
-    if(testsEl) testsEl.textContent = filtered.length.toString();
+    if(wpmBestEl) wpmBestEl.textContent = bestSpeed.toString();
+    if(wpmWorstEl) wpmWorstEl.textContent = worstSpeed.toString();
+    if(wpmAvgEl) wpmAvgEl.textContent = avgSpeed.toString();
+    if(legacyPeak) legacyPeak.textContent = bestSpeed.toString();
+    if(legacyAvg) legacyAvg.textContent = avgSpeed.toString();
   }
 
-  // Draw Speed Progress Canvas Chart (chronological order)
-  drawAnalyticsChart(filtered);
+  // Marks Statistics: Best, Worst, Lifetime Average (10-minute exam tests only)
+  const marksBestEl = $('anMarksBest');
+  const marksWorstEl = $('anMarksWorst');
+  const marksAvgEl = $('anMarksAvg');
 
-  // Sort results
-  const sortMode = $('anSortBy') ? $('anSortBy').value : 'latest';
-  let sorted = [...filtered];
-  if(sortMode === 'best_speed') {
-    sorted.sort((a, b) => (b.netWpm || 0) - (a.netWpm || 0));
-  } else if(sortMode === 'worst_speed') {
-    sorted.sort((a, b) => (a.netWpm || 0) - (b.netWpm || 0));
-  } else if(sortMode === 'best_acc') {
-    sorted.sort((a, b) => (b.accuracy || 0) - (a.accuracy || 0));
+  const validMarks = list
+    .filter(r => r.marks !== null && r.marks !== undefined && !isNaN(r.marks))
+    .map(r => Number(r.marks));
+
+  if(validMarks.length === 0) {
+    if(marksBestEl) marksBestEl.textContent = '—';
+    if(marksWorstEl) marksWorstEl.textContent = '—';
+    if(marksAvgEl) marksAvgEl.textContent = '—';
   } else {
-    // 'latest'
-    sorted.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    const bestMark = Math.max(...validMarks);
+    const worstMark = Math.min(...validMarks);
+    const avgMark = Math.round((validMarks.reduce((s, v) => s + v, 0) / validMarks.length) * 10) / 10;
+
+    if(marksBestEl) marksBestEl.textContent = bestMark.toString();
+    if(marksWorstEl) marksWorstEl.textContent = worstMark.toString();
+    if(marksAvgEl) marksAvgEl.textContent = avgMark.toString();
   }
 
-  // Render submissions list with Question & Answer
-  const listEl = $('analyticsListContainer');
+  // Draw Lifetime Progress Chart (WPM and Marks over time)
+  drawAnalyticsChart(list);
+}
+
+function renderHistoryPage() {
+  const list = Array.isArray(RECENT_RESULTS_CACHE) ? RECENT_RESULTS_CACHE : [];
+  const countBadge = $('historyCountBadge');
+  if(countBadge) countBadge.textContent = `${list.length} test${list.length === 1 ? '' : 's'}`;
+
+  const listEl = $('historyListContainer');
   if(!listEl) return;
-  if(sorted.length === 0) {
-    listEl.innerHTML = `<div class="rr-list" style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No ${currentAnalyticsFilter === 'all' ? '' : (currentAnalyticsFilter === 'ta' ? 'Tamil ' : 'English ')}tests recorded yet. Complete a test in Studio to generate your scorecard!</div>`;
+  if(list.length === 0) {
+    listEl.innerHTML = `<div class="rr-list" id="rrList" style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No tests recorded yet. Complete a test in Studio to generate your scorecard!</div>`;
     return;
   }
 
-  listEl.innerHTML = sorted.map((r, idx) => {
-    const isTa = r.lang === 'ta';
-    const langLabel = isTa ? ('Tamil (' + (LAYOUT_LABEL_SHORT[r.layout] || '99') + ')') : 'English QWERTY';
-    const cleanPassage = (r.passage || (isTa ? 'Tamil Passage' : 'English Passage')).replace(/^(English|Tamil) Passage \d+ [·-]?\s*/, '');
-    const modeName = MODE_LABEL[r.mode] || r.mode || 'Dual Split (Auto-Scroll)';
-    const comp = buildComparisonHTML(r.typedText, r.questionText, r.elapsed);
-    return `
-      <div class="history-item-card">
-        <div class="history-item-header" onclick="toggleHistoryItem(${idx})">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="font-size:20px;">${isTa ? '🇮🇳' : '🇬🇧'}</div>
-            <div>
-              <div style="font-weight:700;font-size:13px;color:var(--ink);">${esc(cleanPassage)}</div>
-              <div style="font-size:11px;color:var(--muted);">${r.date || 'Recent'} · ${langLabel} · <b>${esc(modeName)}</b></div>
+  listEl.innerHTML = `
+    <div id="rrList" style="display:flex;flex-direction:column;gap:10px;">
+      ${list.map((r, idx) => {
+        const isTa = r.lang === 'ta';
+        const langLabel = isTa ? ('Tamil · ' + (LAYOUT_LABEL_SHORT[r.layout] || '99')) : 'English';
+        const cleanPassage = (r.passage || (isTa ? 'Tamil Passage' : 'English Passage')).replace(/^(English|Tamil) Passage \d+ [·\-]?\s*/, '');
+        const modeName = MODE_LABEL[r.mode] || r.mode || 'Dual Split (Auto-Scroll)';
+        const dateStr = r.date || 'Recent';
+        const hasMarks = r.marks !== null && r.marks !== undefined;
+        return `
+          <div class="history-item-card rr-row" onclick="openHistoryReport(${idx})" style="background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:12px;padding:12px 14px;cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;box-shadow:var(--card-shadow);" title="Tap to view official scorecard">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+              <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+                <div style="font-size:24px;flex-shrink:0;">${isTa ? '🇮🇳' : '🇬🇧'}</div>
+                <div style="min-width:0;">
+                  <div style="font-weight:700;font-size:13.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(cleanPassage)}</div>
+                  <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">
+                    ${dateStr} · ${langLabel} · <b style="color:var(--ink);">${esc(modeName)}</b>
+                  </div>
+                </div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;">
+                <div style="font-size:15px;font-weight:800;color:var(--primary);">${r.netWpm || 0} WPM</div>
+                <div style="font-size:11px;font-weight:700;color:${r.passed ? 'var(--emerald)' : 'var(--coral)'};margin-top:2px;">
+                  ${r.accuracy || 0}% Acc ${hasMarks ? ('· ' + r.marks + 'm') : ''} · ${r.passed ? 'PASS' : 'FAIL'}
+                </div>
+              </div>
             </div>
           </div>
-          <div style="text-align:right;">
-            <div style="font-size:14px;font-weight:800;color:var(--primary);">${r.netWpm || 0} WPM</div>
-            <div style="font-size:11px;font-weight:700;color:${r.passed ? 'var(--emerald)' : 'var(--coral)'};">
-              ${r.accuracy || 0}% Acc · ${r.passed ? 'PASS' : 'FAIL'}
-            </div>
-          </div>
-        </div>
-        <div class="history-item-body" id="histBody${idx}">
-          <div style="font-weight:700;font-size:11.5px;color:var(--muted);margin-bottom:4px;">
-            📝 Exam Question / Reference Passage:
-          </div>
-          <div class="qa-box">${comp.qHtml}</div>
-          <div style="font-weight:700;font-size:11.5px;color:var(--muted);margin-top:10px;margin-bottom:4px;">
-            ⌨️ Student Answer Typed:
-          </div>
-          <div class="qa-box">${comp.aHtml}</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;color:var(--muted);">
-            <span>Errors: <b>${r.mistakes !== undefined ? r.mistakes : (r.errors || 0)}</b></span>
-            <span>Gross: <b>${r.grossWpm || r.netWpm || 0} WPM</b></span>
-            ${r.marks !== null && r.marks !== undefined ? `<span>Marks: <b>${r.marks}</b></span>` : ''}
-            <button class="ghostbtn" type="button" style="padding:4px 10px;font-size:11px;font-weight:700;height:auto;" onclick="event.stopPropagation();viewHistoricalReport(${idx})">📋 View</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function toggleHistoryItem(idx) {
-  const body = $('histBody' + idx);
-  if(body) body.classList.toggle('open');
+        `;
+      }).join('')}
+    </div>
+  `;
 }
 
 function drawAnalyticsChart(records) {
@@ -5999,7 +6105,7 @@ function drawAnalyticsChart(records) {
   
   const rect = canvas.getBoundingClientRect();
   const width = rect.width || 360;
-  const height = rect.height || 150;
+  const height = rect.height || 165;
   canvas.width = width * dpr;
   canvas.height = height * dpr;
   ctx.scale(dpr, dpr);
@@ -6010,18 +6116,23 @@ function drawAnalyticsChart(records) {
     ctx.fillStyle = '#94a3b8';
     ctx.font = '12px system-ui, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Complete typing tests to see your speed progress trendline.', width / 2, height / 2);
+    ctx.fillText('Complete typing tests to see your speed and marks progress.', width / 2, height / 2);
     return;
   }
 
-  // Chronological order (oldest to newest, max 20 data points)
-  const chronological = [...records].reverse().slice(-20);
+  // Chronological order (oldest to newest, up to 25 data points)
+  const chronological = [...records].reverse().slice(-25);
   const speeds = chronological.map(r => r.netWpm || 0);
-  const maxSpeed = Math.max(60, Math.ceil((Math.max(...speeds) + 10) / 10) * 10);
+  const validMarks = chronological
+    .filter(r => r.marks !== null && r.marks !== undefined && !isNaN(r.marks))
+    .map(r => Number(r.marks));
+  const hasMarks = validMarks.length > 0;
+
+  const maxVal = Math.max(hasMarks ? 100 : 60, Math.ceil((Math.max(...speeds, ...(hasMarks ? validMarks : [0])) + 10) / 10) * 10);
 
   const padL = 36;
   const padR = 18;
-  const padT = 20;
+  const padT = 22;
   const padB = 26;
   const chartW = width - padL - padR;
   const chartH = height - padT - padB;
@@ -6035,7 +6146,7 @@ function drawAnalyticsChart(records) {
 
   const gridSteps = 4;
   for(let i=0; i<=gridSteps; i++) {
-    const val = Math.round((maxSpeed / gridSteps) * i);
+    const val = Math.round((maxVal / gridSteps) * i);
     const y = padT + chartH - (i / gridSteps) * chartH;
     ctx.beginPath();
     ctx.moveTo(padL, y);
@@ -6044,40 +6155,40 @@ function drawAnalyticsChart(records) {
     ctx.fillText(val.toString(), padL - 6, y + 3);
   }
 
-  // Points
-  const points = chronological.map((r, i) => {
+  // WPM Points
+  const wpmPoints = chronological.map((r, i) => {
     const x = chronological.length === 1 ? (padL + chartW / 2) : (padL + (i / (chronological.length - 1)) * chartW);
-    const y = padT + chartH - ((r.netWpm || 0) / maxSpeed) * chartH;
-    return { x, y, wpm: r.netWpm || 0 };
+    const y = padT + chartH - ((r.netWpm || 0) / maxVal) * chartH;
+    return { x, y, val: r.netWpm || 0 };
   });
 
-  if(points.length > 1) {
-    // Area fill under curve
+  if(wpmPoints.length > 1) {
+    // Area fill under WPM curve
     const grad = ctx.createLinearGradient(0, padT, 0, padT + chartH);
-    grad.addColorStop(0, 'rgba(37, 99, 235, 0.25)');
+    grad.addColorStop(0, 'rgba(37, 99, 235, 0.20)');
     grad.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
 
     ctx.beginPath();
-    ctx.moveTo(points[0].x, padT + chartH);
-    points.forEach(pt => ctx.lineTo(pt.x, pt.y));
-    ctx.lineTo(points[points.length - 1].x, padT + chartH);
+    ctx.moveTo(wpmPoints[0].x, padT + chartH);
+    wpmPoints.forEach(pt => ctx.lineTo(pt.x, pt.y));
+    ctx.lineTo(wpmPoints[wpmPoints.length - 1].x, padT + chartH);
     ctx.closePath();
     ctx.fillStyle = grad;
     ctx.fill();
 
-    // Trendline stroke
+    // WPM stroke
     ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    points.forEach(pt => ctx.lineTo(pt.x, pt.y));
+    ctx.moveTo(wpmPoints[0].x, wpmPoints[0].y);
+    wpmPoints.forEach(pt => ctx.lineTo(pt.x, pt.y));
     ctx.strokeStyle = '#2563eb';
     ctx.lineWidth = 2.5;
     ctx.lineJoin = 'round';
     ctx.stroke();
   }
 
-  // Data point circles & WPM badges
+  // WPM Point circles & labels
   ctx.textAlign = 'center';
-  points.forEach((pt, i) => {
+  wpmPoints.forEach((pt, i) => {
     ctx.beginPath();
     ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
     ctx.fillStyle = '#2563eb';
@@ -6086,17 +6197,57 @@ function drawAnalyticsChart(records) {
     ctx.strokeStyle = '#ffffff';
     ctx.stroke();
 
-    if(i === points.length - 1 || pt.wpm === Math.max(...speeds)) {
+    if(i === wpmPoints.length - 1 || pt.val === Math.max(...speeds)) {
       ctx.fillStyle = '#1e293b';
       ctx.font = 'bold 10px system-ui, sans-serif';
-      ctx.fillText(pt.wpm + ' wpm', pt.x, Math.max(12, pt.y - 8));
+      ctx.fillText(pt.val + ' wpm', pt.x, Math.max(12, pt.y - 7));
     }
   });
+
+  // Marks Points & Line (when marks exist)
+  if(hasMarks) {
+    const markPoints = [];
+    chronological.forEach((r, i) => {
+      if(r.marks !== null && r.marks !== undefined && !isNaN(r.marks)) {
+        const x = chronological.length === 1 ? (padL + chartW / 2) : (padL + (i / (chronological.length - 1)) * chartW);
+        const y = padT + chartH - (Number(r.marks) / maxVal) * chartH;
+        markPoints.push({ x, y, val: Number(r.marks) });
+      }
+    });
+
+    if(markPoints.length > 1) {
+      ctx.beginPath();
+      ctx.moveTo(markPoints[0].x, markPoints[0].y);
+      markPoints.forEach(pt => ctx.lineTo(pt.x, pt.y));
+      ctx.strokeStyle = '#7c3aed';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    markPoints.forEach((pt, i) => {
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#7c3aed';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+
+      if(i === markPoints.length - 1 || pt.val === Math.max(...validMarks)) {
+        ctx.fillStyle = '#7c3aed';
+        ctx.font = 'bold 10px system-ui, sans-serif';
+        ctx.fillText(pt.val + 'm', pt.x, Math.max(12, pt.y - 7));
+      }
+    });
+  }
 
   // Bottom axis caption
   ctx.fillStyle = '#94a3b8';
   ctx.font = '10px system-ui, sans-serif';
-  ctx.fillText('Test Attempts →', width / 2, height - 6);
+  ctx.textAlign = 'center';
+  ctx.fillText('Lifetime Test Attempts (Oldest → Latest)', padL + chartW / 2, height - 6);
 }
 
 /* =====================================================================

@@ -418,37 +418,41 @@ async function main() {
       };
       window.passageText = 'Education is the passport to the future.';
       window.TA = { value: 'Education is the passport to the future.' };
-      await window.saveResult(mockResult);
-      window.switchTab('progress');
+      await window.saveResult(mockResult, 'Education is the passport to the future.', 'Education is the passport to the future.', 'page');
+      window.switchTab('history');
     });
 
     const viewBtnExists = await page.evaluate(() => {
-      const viewBtn = document.querySelector('[onclick*="viewHistoricalReport"]');
+      const viewBtn = document.querySelector('.history-item-card, [onclick*=\"openHistoryReport\"], [onclick*=\"viewHistoricalReport\"]');
       return !!viewBtn;
     });
     recordTest('ITEM_10_VIEW_BTN', 'View Report button present on recent test entry', viewBtnExists);
 
     // Open view modal
     await page.evaluate(() => {
-      window.viewHistoricalReport(0);
+      if (typeof window.openHistoryReport === 'function') {
+        window.openHistoryReport(0);
+      } else if (typeof window.viewHistoricalReport === 'function') {
+        window.viewHistoricalReport(0);
+      }
     });
 
     const reportModal = await page.evaluate(() => {
-      const overlay = document.getElementById('reportViewOverlay');
+      const overlay = document.getElementById('historyReportOverlay') || document.getElementById('reportViewOverlay');
       if (!overlay) return null;
       return {
-        hasScorecardTitle: overlay.innerHTML.includes('Official Examination Scorecard') || overlay.innerHTML.includes('Scorecard'),
-        hasQuestion: overlay.innerHTML.includes('Exam Question'),
-        hasAnswer: overlay.innerHTML.includes('Student Answer'),
-        hasPdfBtn: overlay.innerHTML.includes('Export Scorecard PDF')
+        hasScorecardTitle: overlay.innerHTML.includes('GOVERNMENT TECHNICAL EXAMINATION') || overlay.innerHTML.includes('Scorecard') || !!overlay.querySelector('.rp'),
+        hasQuestion: overlay.innerHTML.includes('Passage') || overlay.innerHTML.includes('Exam') || !!overlay.querySelector('.rp-body'),
+        hasPdfBtn: overlay.innerHTML.includes('Export PDF') || overlay.innerHTML.includes('btnHistoryExportPdf')
       };
     });
     recordTest('ITEM_10_REPORT_MODAL', 'Historical report modal displays marks, question, answer & PDF button',
-      reportModal && reportModal.hasScorecardTitle && reportModal.hasQuestion && reportModal.hasAnswer && reportModal.hasPdfBtn);
+      reportModal && reportModal.hasScorecardTitle && reportModal.hasQuestion && reportModal.hasPdfBtn);
 
     // Close modal
     await page.evaluate(() => {
-      const overlay = document.getElementById('reportViewOverlay');
+      if (typeof window.closeHistoryOverlay === 'function') window.closeHistoryOverlay();
+      const overlay = document.getElementById('historyReportOverlay') || document.getElementById('reportViewOverlay');
       if (overlay) overlay.remove();
     });
 

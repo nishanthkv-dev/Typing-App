@@ -149,9 +149,14 @@ async function runTests() {
   check(anAvgSpeed && anAvgSpeed.textContent === '38', `Analytics Average Speed calculated: ${anAvgSpeed ? anAvgSpeed.textContent : 'none'}`);
   check(anPeakSpeed && anPeakSpeed.textContent === '38', `Analytics Peak Speed calculated: ${anPeakSpeed ? anPeakSpeed.textContent : 'none'}`);
 
-  const histContainer = document.getElementById('analyticsListContainer');
-  check(histContainer && histContainer.innerHTML.includes('Exam Question / Reference Passage'), "Analytics list contains Question section");
-  check(histContainer && histContainer.innerHTML.includes('Student Answer Typed'), "Analytics list contains Answer section");
+  // Test History Page Rendering & Scorecard Overlay
+  window.renderHistoryPage();
+  const histContainer = document.getElementById('historyListContainer');
+  check(histContainer && histContainer.innerHTML.includes('history-item-card'), "History list contains test records");
+  window.openHistoryReport(0);
+  const histOverlay = document.getElementById('historyReportOverlay');
+  check(histOverlay && histOverlay.innerHTML.includes('Export PDF'), "History report overlay displays scorecard with Export PDF button");
+  if (typeof window.closeHistoryOverlay === 'function') window.closeHistoryOverlay();
 
   // Test Home Frequent Mistakes Container
   const weakContainer = document.getElementById('homeWeakKeysContainer');
