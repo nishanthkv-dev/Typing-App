@@ -2470,16 +2470,55 @@ body:has(#screen-test.active) .bottom-nav-bar {
     <!-- ---------------- TAB 4: ACADEMY (INSTITUTE HUB & SHORTHAND) ---------------- -->
     <div class="tab-content" id="tab-academy">
       
-      <div class="glass-card" style="margin-bottom:14px;">
-        <div class="card-header-bar">
-          <h2>🏛️ Government Technical Exam Hub</h2>
-          <span class="card-badge" style="background:var(--primary-glow);color:var(--primary);font-weight:800;">DoTE Tamil Nadu</span>
+      <!-- CARD 1: GOVERNMENT TECHNICAL EXAM HUB -->
+      <div class="glass-card" style="margin-bottom:12px;padding:16px 18px;border-radius:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAYAAACohjseAAAOE0lEQVR4nO2a2W9c133HP+fcZebODIf7IlLUQq2UZC12UMVFgqZI0DRpHlwUBQoULVqgD0VR9L1AX/qS/hN9C1r0rUALuC9uXcWwLTtOqsVLLEULSZkSRXLI2e96TnHOcChKIikuUtoA+REXdzhz77m/7/lt399vBn4tv9oiXuXiSsf6xY+XSOG8Mj3Ey1xM6/A5QJrtMMpNVZDCf2l6iZexiNaZ3vvNBuTmIqTYt35iPzdrpbc30MsQsT+gYl/gzN2vGuCa7BWk2O0NWut1SOaF0KDF3s570UCI3QEVu7lYbQBn/19LE3s9d16p7lbt+CyFt2O9xV7BddV7ouTeoEqrdGel3YgU+R3pvqOLMqX11o6R7toCG8/7yXJiB+VE7AScCRixdunTN3R2XqP2BK8jW5eJnYh4AUnY9kOl1LpbdmJbbV7H9ma8X0qGlTtfZos42ajsbs8bZSf3PHvsQMROysF28qKLtDLW12seYNY1h0IISXffOy4uNzlv5tIbHiy6/6gtXVXsB1z3OWob1zBUx8TvxgeZ5bsu33nQdllUPnV+XmG1/mozkC4vQeS25aCz1U/YwWYVfn+JZjuR+7He0zu41bljxe7fhudsUKF7bFRJvhTS77IvMbGysyLdBadN7K1Z7/nYeh7ksxrrXdY5uT/r7UY6VhKv2DX1M1bcpwVfrKDNglrTrahSPkk53QT0tIZP3yyee3t3tM5lv7JVw9otAQacMgCVfW0OKTv3dF4726y9/5Zc7NtF9ZN6ZxeUG3RbB9k5DK407VzoupJWq4XnuIYx4bquBa4UOO6TTTP3ra9p/+kkK6VSHOlsSvk2lgv5MuLPgDOKdRVR2ZPPkiSzQA24MAwtsChqE8cxhUIBL+eCUAipEVJacEmcEseKLFvbpDXNTO00rm7c2oCLk/iFcSj2CzCOFI4jcTZ4mgG77nlrq65UKiidUiwWSVPTgaiOxdLEKu5IEy0SpEs+CJ56hrnc9daelyZ2sxy5GfnfQAjWrLjvGPR9aTt0AyRO0rX3Oss2GjUa9TqLiws8fvzYUrS7d+9iPNC45OpqhaGhIQYGhhgfP0h/3wDFYo/9zPU8VKaRjrCumSQKz3PwXI8kjex7rvNi9fdtQXOT8UhpXMeupgijkAdzM8zOzrBSWbLvBX6OKG7TaNTpKZY4f/48vu/TaDS4fv0GDx7MUyyVGRocZWRkjENHppiYmMD1c9ZicZwa18PP5dae0SKfy+/fgtvhNpZrhSH5vI/piM2VS4uPuHHzOndu3yKKm3zvu79LX38vUis++enHTJ8+T6VSYWiwRG9/P4uLPpOTB8nlcjiOR6aktXgrCllYWGBsfIIjRw5Zr0iSJ3DMtTvRef8uapIEmkqtwoPZWVYrSywsfIUmYXhkgHpjlcGBEmkS4bmC4cE+igWXQtBJLkHgkQ9cCoWAAwfGOXHyDEGhxJ27M3z26RfEaSdjTU5OWhdNso4ljRvrdTYl9u6i21tQUa9XcXM+X96+xdzcLGMjoxSKPsuLjwhbq+RdydlTx3FFSqO+gsk95d4ShXxAqjKSWPFwYQWlXEbGj9DTN4yWeQwurQXvv/8+7Xab48enmJ6e3lDwJfVGlZ5S4Tl21Kmv7tMu+hzHX0/NGm3Soq1xkiRJ8LyOe8RRTCEIuHX7Nh9d/QlTJ45z6fXLLFcfs7K6RF+5yFDZJ1yZpeRlDDgpaRLCiibxPJs9fQ3lLMIvjSLiFZpVl56hg6TCZXVlheOnT9FqrHLj5k/IFwRHDh+j0WpRKPRTLPU+M/Tq6ix24aJphnAcmwENUAPO7JCpY7mcx527d3jnnXeotdqcf+MNKo0a9UYT1/F4NHuX46MnUa0aqr1KqlpgMqCjUdKxBd6UDJ05uIUSjujnvz94j2aW481vfJuVeoMvPvsfLpw/y/TZ09y8eY1cPs+B0UnqrSb5fMEmoP2RSdexZu1QrjVLCkGUxKxUV/nXf/832mnM8PgYjutSqzX48MMPee/KFUaHhhno6yfv+WRRQtqOUHGISBJEHJKGTdI0xvN92lFIrpC3CWVp6TFXrrzLo4V5Zr96wPsffsC9uzNU63U++OADGq1GJynJzrdT28FY/0RuMzGOwhDpOBaAsZyRer3Ouz++Qt9AH1GWcvTYFBmaH/3zP/Gzn13j3LlzfP3yZWQQkDMMRSt7+EBOaDync2hTZISy1CtJIqYvXuDipfN8efvnfP7551y4cIFUK778xW2OnzxNtVrn6ocfWcqns83Hjhup2o6yaNdyXeu1wjbz8/P2uHj5Dc5+7ZJNCtduXLfF8OLFixycOITIFaBVs7toZtGu1Lgom2jMIMxkVU9CIhQ9/UWko9BRg3PnztCIMj766TX+893/IiiYpPXYspjJw0eZnZtnemmZiYkD29lsk/+2kKBQWI87wzCq1aqtZefOv8ali69zfvoCzbDNx598YjPe2dfOcfrUKVCp5W1CKzxX4nsujiMQwqT+1CYwP+/bWI7jCC/n2fJSKgR885vf4OTJ43YzhXT43u99n2MnTnH5zTfJ5/PMzc09mX5sI08BFC+wYpZltu0xAFdqVYIg4ItffMlCbZH7MzO28J84fYqpqSlyJtMay2cZmc5QxhVlBibBOAplXyuSLCYjYWV1kShsIHM+SRpaOnbm3FlGDxzgzv17DI2N0z8wbEgoQ4MjVodGvfEMlOft5T77zc2z9dBkznYYWuZvSLChYSaDGZbxaHmBi7/xBima69evW+udOXOaUq5AO1olyAlIIuIktMlEOBmusZ6dlGsbW1K6lgUNDPSRxi1yaQvPLVBrNpmcnEA4knv3Z7l2/bot7kkjoq+vj/m5eUvzyuXStt8+vdBFzeTeZKwu7g5JXuXw4cOUy2V7/uqreQv41KlT9PT0kJES5HxIWmQqQpvYy7kIV5CY3tCR6HwOy7wcaV3YuLMBraPIum9PsWjddmxshL7BAd798XvUGy1m5map1ms4jsPs7Kz1KkMItpLnAD67A2Yh85YJcJMlDUesNxo2o/q5gChOLGDb3+UDCnl/bXQbo7OMOG6j0qjj3kqhhESZ1ki4iDU+6QqJLxwM9xCWuqfr2bXc34cf5JlfeGRd1bCfUqlgKWIUtbfV3a69JfQNl9pG03TdCAvEWPPIkSOkdmLtUFmp2sa2p1zsEG8SlIpxRYxKQ9sBC52Z31PYvk8KB6kNoM5DTF8oHfOp7nTLxnW1sYy2xCIoFanPztEMI44eP8HE+EHiVpt6rfq8sjsBuDEWDTBD0YQp+KZDN92nCfTRETKhCXVmi7SJFZNtTYtmAKJisKAyfDNo0hKXDjCZSpQ5605GdY0jmUqUqU53q0xsavMYm6ByQd7qUOgpceLUSfqDIg+MNVc6NbkzDtm8jm8Zg11zm4W7u2zEuJqZpdy/f5+rH39MmmniTCFNQRPKFmthAGYxRG3LWDylcFKFbGc4kUC0QTYEbujipp25isgUKo7AjCGyzNZKR0gb80aVdhxZslEISnbg77rOOm10nK1Jyo7bJWNJ8wCzqJmt3Pj0Jp99+XOOnT9ni3umFZXVCrXqCqM9IxZg1m6QtVrIdpus0UYlMY4X2KSQZgqRl6iCKR8pWHeOkfnEumf3mYarhnFsY8/EZT2qEa3WbGZWG4c/ewForKh0pjMTQ2ub1O0kDMhyX6/tsPM9RaIksVZ9+PAYxw/0WteMwyYqNFZJ0K02qh2TuibMBGkiEUWHJE3QqZmoCbTvIaIYP4lICIlCZQlFFEW2+zfPuHXrFpWvHhIYr1ap0WfbweILLWh+ZhWnkfbNeG9tV41b9PaUOTR11JYKk9XipM3Dh/dYXpxBZJNIQlwTh0aJVKNiQWaSniHu5u1Y41pPTsFUBj9E5HPIQgOSus3AUZRRry+gdITrC2qNKtduLLP0YJ7XTpzgj//gT184Nd2Ri/puziYdlaWUCz2MDx+w07FLv/k1QikZHCozPlomp5s42TJxfYZAKlTrMWm7Do0I1dY4oY+KBE7qktM+yuSiSJOFCuEneOUmynkI+Qx/cIjKwjyf3rzC4+VV6u0aj5YfI1PNwUOTOwK3qxi07qqUbicJxSCwU7KwHaNKPqOjwxQCh+W5eZYezvBwtgQ5h3S5Qtkx7uehTf9nCnoqyGJT3CU6k6RZjCN88r4ZPfpkhvU0KsiiTzFvKkaLleWHTBw8xsTBA0xNHOX3X//tHc+75U4vtBebQAHGxsZYXFzk6tWrLFWWKBRKBLnAVDkKXp52I6ZZDxHaIWzF1tWiJCVUGS0UkSOJPEnsSUIFYZQQxWZy7BInimYrolZt4giPkcFRO/0+dGCCiZGxXYHb09c7xaAgzpyeFoa+vf3221y5coWZe/dJ44z+cj8Hxw+Tc/PEkeGbOZQyHYJLgkeMQywlbUdQR7GaxuAHtDNFtRXTaqe0Yk0Yaqq1lh0qTx2Zoq/Uy4/+/h/FH13+/q6/qRDsQ/7kL/9C63LA9NkTzN35DCdc4Q9/51sUVQjVCn4cU9IOfuIgY8eOJhydw3VyZNqxNRWREqVNMhlTHCrS0CH0FmjmPeTgMPeWGrz1nb/65f8Yb6P89Q//Vvs6xM9a/OC3LjMUeHjtFqpeg2ZE2StRcAI8ncd1zfwz6HyRoTIa7aZto2JCZF6yFK6SG+yl6btMf/3P/29/Tvms/N0P/0a/9d1vcXC4j5xKyFZrhMt1hkr95PK9kEpop50fRylTLxT4DmaOESctYhGz1K5x9Dt/9v/rB7FbyX/8yz/oqNLg0PA4E32jeJlENWPjlfjSR3gOTVcz+oO3XqkevxZ+heV/AU3ZY5u0Wpu1AAAAAElFTkSuQmCC" alt="Tamil Nadu State Emblem" style="width:42px;height:42px;border-radius:50%;object-fit:contain;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.12);background:#ffffff;padding:1px;" />
+            <div style="font-size:14.5px;font-weight:800;color:var(--ink);line-height:1.2;letter-spacing:0.2px;">
+              GOVERNMENT TECHNICAL<br>EXAM HUB
+            </div>
+          </div>
+          <div style="font-size:13.5px;font-weight:700;color:#1d4ed8;white-space:nowrap;margin-left:auto;">
+            DoTE Tamil Nadu
+          </div>
         </div>
-        <p style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin:4px 0 0;">
-          This application is specially designed for practicing for Government Technical Examinations conducted by <b>DoTE (Directorate of Technical Education, Tamil Nadu)</b> for <b>Typewriting (English &amp; Tamil)</b> and <b>COA (Computer on Office Automation)</b> examinations.
+        <p style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin:12px 0 0;font-weight:500;">
+          This application is specially designed for practicing &amp; preparing for Government Technical Examinations conducted by <b>DoTE (Directorate of Technical Education, Tamil Nadu)</b> for <b>Typewriting (English &amp; Tamil)</b> and <b>COA (Computer on Office Automation)</b> examinations.
         </p>
       </div>
 
+      <!-- CARD 2: APPROVED TRAINING HUB (SRI KALAIMAGAL TYPEWRITING INSTITUTE) -->
+      <div class="glass-card academy-institute-hub" style="margin-bottom:14px;background:linear-gradient(145deg, #0f1c34 0%, #162646 100%);border:1px solid rgba(251, 191, 36, 0.45);border-radius:16px;padding:16px 18px;box-shadow:0 6px 20px rgba(15,28,52,0.25);color:#ffffff;">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="#fbbf24" style="flex-shrink:0;margin-top:2px;" aria-hidden="true">
+            <path d="M12 2L2 7V9H22V7L12 2ZM4 11V18H7V11H4ZM9 11V18H12V11H9ZM14 11V18H17V11H14ZM19 11V18H22V11H19ZM2 20V22H22V20H2Z"/>
+          </svg>
+          <div style="min-width:0;flex:1;">
+            <div style="font-size:13.5px;font-weight:800;color:#ffffff;line-height:1.3;letter-spacing:0.2px;word-break:break-word;">
+              SRI KALAIMAGAL TYPEWRITING INSTITUTE, GUMMIDIPOONDI <span style="color:#fbbf24;font-weight:600;font-size:12.5px;">(Approved Training Hub)</span>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:#fbbf24;margin-top:4px;letter-spacing:0.2px;">
+              Govt. approval No.: 016427
+            </div>
+          </div>
+        </div>
+        
+        <div style="font-size:12.5px;color:#e2e8f0;margin-top:10px;line-height:1.5;">
+          🎓 <strong style="color:#ffffff;">Courses Offered:</strong> Typewriting (Junior &amp; Senior) &amp; COA (Computer on Office Automation)
+        </div>
+        <div style="font-size:12px;color:#cbd5e1;margin-top:6px;line-height:1.5;">
+          📍 <strong style="color:#ffffff;">Address:</strong> Near K.L.K Boys High School, Gummidipoondi, Tamil Nadu, India
+        </div>
+
+        <div style="display:flex;justify-content:center;margin-top:14px;">
+          <button class="solidbtn" style="background:#2563eb;color:#ffffff;font-weight:700;font-size:13px;padding:10px 24px;border-radius:9999px;border:none;box-shadow:0 4px 14px rgba(37,99,235,0.35);display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;width:auto;" onclick="window.open('https://www.google.com/url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=/maps/dir//1st%2BFloor,%2BSRI%2BKALAIMAGAL%2BTYPEWRITING%2BINSTITUTE,%2BGummidipoondi%2B(CoA%2B%2526%2BTypewriting),%2B161,%2BGNT%2BRd,%2Bnear%2BKLK%2BBoys%2BSchool,%2BGummidipoondi,%2BTamil%2BNadu%2B601201/data%3D!4m6!4m5!1m1!4e2!1m2!1m1!1s0x3a4d816c390ccd9f:0xe22c1320b56d4f1%3Fsa%3DX%26ved%3D1t:57443%26ictx%3D111&amp;ved=2ahUKEwisxKjSo_OXAxWWjuEIHV99HUcQ48ADegQIIxAR&amp;usg=AOvVaw2W9_8FX1dlr8FlBVemZ6Fs', '_system')">
+            <span>📍</span> View on Google Maps
+          </button>
+        </div>
+      </div>
+
+      <!-- TILES GRID -->
       <div class="academy-tile-grid">
         <div class="academy-tile lms" onclick="window.open('https://www.sri-kalaimagal-institute-gummidipoondi.in/', '_system')">
           <div class="tile-badge">E-Learning</div>
@@ -2501,25 +2540,6 @@ body:has(#screen-test.active) .bottom-nav-bar {
           <div class="tile-title">Marking Rules</div>
           <div class="tile-desc">Official government technical exam evaluation formulas &amp; limits.</div>
         </div>
-      </div>
-
-      <div class="glass-card" style="margin-top:14px;border:1.5px solid var(--primary-glow);background:linear-gradient(135deg,rgba(99,102,241,0.06),rgba(59,130,246,0.04));">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <span style="font-size:24px;">🏛️</span>
-          <div>
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--primary);">Examination Training Center</div>
-            <div style="font-size:15px;font-weight:800;color:var(--ink);">Government Technical Examination Prep Center</div>
-          </div>
-        </div>
-        <div style="font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:8px;line-height:1.5;">
-          🎓 <b>Courses Offered:</b> Typewriting (Junior &amp; Senior) &amp; CoA (Computer on Office Automation)
-        </div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px;">
-          📍 <b>Address:</b> Near K.L.K Boys High School, Gummidipoondi, Tamil Nadu, India
-        </div>
-        <button class="solidbtn" style="width:100%;padding:10px 14px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="window.open('https://www.google.com/url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=/maps/dir//1st%2BFloor,%2BSRI%2BKALAIMAGAL%2BTYPEWRITING%2BINSTITUTE,%2BGummidipoondi%2B(CoA%2B%2526%2BTypewriting),%2B161,%2BGNT%2BRd,%2Bnear%2BKLK%2BBoys%2BSchool,%2BGummidipoondi,%2BTamil%2BNadu%2B601201/data%3D!4m6!4m5!1m1!4e2!1m2!1m1!1s0x3a4d816c390ccd9f:0xe22c1320b56d4f1%3Fsa%3DX%26ved%3D1t:57443%26ictx%3D111&amp;ved=2ahUKEwisxKjSo_OXAxWWjuEIHV99HUcQ48ADegQIIxAR&amp;usg=AOvVaw2W9_8FX1dlr8FlBVemZ6Fs', '_system')">
-          <span>📍</span> View on Google Maps
-        </button>
       </div>
 
       <footer class="app-footer powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></footer>
