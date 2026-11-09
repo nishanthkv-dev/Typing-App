@@ -91,6 +91,124 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
   }
 }
 
+/* =====================================================================
+   GAMES MODULE & ANTI-CHOKE ARCADE STYLING
+===================================================================== */
+#screen-games-hub {
+  display: none;
+  padding: calc(14px + env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+#screen-games-hub.active {
+  display: block !important;
+  animation: screenFadeIn .22s ease-out;
+}
+#screen-games {
+  display: none;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: 9999;
+  background: #020617;
+  flex-direction: column;
+  overflow: hidden;
+  touch-action: none;
+  box-sizing: border-box;
+}
+#screen-games.active {
+  display: flex !important;
+}
+body.in-games .app-header,
+body.in-games .bottom-nav-bar,
+body:has(#screen-games.active) .app-header,
+body:has(#screen-games.active) .bottom-nav-bar {
+  display: none !important;
+}
+.game-hud-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(6px + env(safe-area-inset-top)) 12px 6px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  flex-shrink: 0;
+  z-index: 10;
+  gap: 8px;
+}
+.game-hud-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+.game-arena-wrap {
+  flex: 1 1 auto;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: none;
+  background: #020617;
+}
+#gameCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+.anti-choke-chip {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  margin: 3px;
+  font-weight: 700;
+}
+.game-arcade-card {
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: var(--card-shadow);
+  transition: all .2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.game-arcade-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+.arcade-launcher-banner {
+  cursor: pointer;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(236, 72, 153, 0.08));
+  border: 1.5px solid rgba(99, 102, 241, 0.35);
+  border-radius: 16px;
+  padding: 16px;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.arcade-launcher-banner:active {
+  transform: scale(0.985);
+}
+
 /* Body & Overlay scroll safety */
 body.overlay-open {
   overflow: hidden !important;
@@ -2316,6 +2434,26 @@ body:has(#screen-test.active) .bottom-nav-bar {
         </div>
       </div>
 
+      <!-- ARCADE GAMES HUB LAUNCHER CARD -->
+      <div class="glass-card arcade-launcher-banner" onclick="GamesEngine.openHub()" style="cursor:pointer;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="font-size:32px;filter:drop-shadow(0 2px 8px rgba(99,102,241,0.4));">🎮</div>
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#ffffff;padding:2px 8px;border-radius:9999px;">Arcade Arena</span>
+                <span style="font-size:10.5px;font-weight:700;color:var(--primary);">Bubble &amp; Falling Words</span>
+              </div>
+              <div style="font-size:15px;font-weight:800;color:var(--ink);margin-top:2px;">Touch Typing Games &amp; Anti-Choke Hub</div>
+              <div style="font-size:11.5px;color:var(--muted);line-height:1.4;">5-Heart arcade survival • Letter-by-letter lock • Personal best leaderboards</div>
+            </div>
+          </div>
+          <button class="solidbtn" style="padding:9px 18px;font-size:12.5px;font-weight:800;border-radius:9999px;white-space:nowrap;box-shadow:0 4px 14px rgba(99,102,241,0.4);">
+            PLAY ▶
+          </button>
+        </div>
+      </div>
+
       <!-- CARD 5: 3 ORIGINAL LAUNCH MODES -->
       <div class="launch-modes-head">
         <h3>🚀 Choose Typing Mode to Begin</h3>
@@ -2936,6 +3074,283 @@ body:has(#screen-test.active) .bottom-nav-bar {
     </div>
   </section>
 
+  <!-- ===================================================================
+       SCREEN 5: GAMES HUB (ARCADE ARENA)
+  =================================================================== -->
+  <section class="screen" id="screen-games-hub">
+    <div class="test-cockpit-bar" style="margin-bottom:16px;">
+      <button class="test-back-btn" onclick="showScreen('screen-config')">&lt; Back to App</button>
+      <div style="font-weight:800;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:6px;">
+        <span>🎮</span> Typing Arcade Arena
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="ghostbtn" style="padding:4px 10px;font-size:11.5px;font-weight:700;" onclick="openLeaderboardModal()">🏆 Hall of Legends</button>
+        <button class="ghostbtn" style="padding:4px 10px;font-size:11.5px;font-weight:700;" onclick="openGameHistoryModal()">📜 My History</button>
+      </div>
+    </div>
+
+    <!-- TRACK SELECTION CARD -->
+    <div class="glass-card" style="margin-bottom:16px;padding:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-size:11px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:0.8px;">Choose Your Track</div>
+          <div style="font-size:16px;font-weight:800;color:var(--ink);">Language &amp; Keyboard Layout</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div class="custom-select-wrap" style="min-width:140px;">
+            <select id="gameSetupLang" onchange="document.getElementById('gameSetupLayoutWrap').style.display = (this.value==='ta' ? 'block' : 'none');">
+              <option value="en" selected>English Track</option>
+              <option value="ta">Tamil Track (தமிழ்)</option>
+            </select>
+          </div>
+          <div class="custom-select-wrap" id="gameSetupLayoutWrap" style="min-width:170px;display:none;">
+            <select id="gameSetupLayout">
+              <option value="tamil99" selected>Tamil99 (DoTE Standard)</option>
+              <option value="typewriter">Tamil Typewriter (Mechanical)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME CARDS CONTAINER -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;margin-bottom:20px;">
+      
+      <!-- GAME 1: BUBBLE WORD CHALLENGE -->
+      <div class="game-arcade-card" style="background:linear-gradient(145deg,rgba(59,130,246,0.08),rgba(147,197,253,0.03));border:1.5px solid rgba(59,130,246,0.4);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="font-size:36px;">🫧</div>
+          <div>
+            <span style="font-size:10px;font-weight:800;background:#2563eb;color:#fff;padding:2px 8px;border-radius:9999px;text-transform:uppercase;">Flotation Defense</span>
+            <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:4px 0 0;">Bubble Word Challenge</h3>
+          </div>
+        </div>
+        <p style="font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:14px;">
+          Animated word bubbles float upward towards a high-voltage ceiling. Pop them letter-by-letter with pure precision before they burst!
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">
+          <span style="font-size:11px;font-weight:700;padding:3px 8px;background:rgba(16,185,129,0.12);color:#10b981;border-radius:6px;">+1 pt / letter</span>
+          <span style="font-size:11px;font-weight:700;padding:3px 8px;background:rgba(245,158,11,0.12);color:#f59e0b;border-radius:6px;">+5 bonus / word</span>
+          <span style="font-size:11px;font-weight:700;padding:3px 8px;background:rgba(239,68,68,0.12);color:#ef4444;border-radius:6px;">5 Hearts Survival</span>
+        </div>
+        <button class="solidbtn" style="width:100%;padding:12px;font-size:14px;font-weight:800;border-radius:12px;background:linear-gradient(135deg,#2563eb,#1d4ed8);box-shadow:0 6px 18px rgba(37,99,235,0.35);" onclick="launchGame('bubble')">
+          PLAY BUBBLE CHALLENGE ▶
+        </button>
+      </div>
+
+      <!-- GAME 2: FALLING WORDS CHALLENGE -->
+      <div class="game-arcade-card" style="background:linear-gradient(145deg,rgba(245,158,11,0.08),rgba(251,191,36,0.03));border:1.5px solid rgba(245,158,11,0.4);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="font-size:36px;">☄️</div>
+          <div>
+            <span style="font-size:10px;font-weight:800;background:#f59e0b;color:#000;padding:2px 8px;border-radius:9999px;text-transform:uppercase;">Cascade Velocity</span>
+            <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:4px 0 0;">Falling Words Challenge</h3>
+          </div>
+        </div>
+        <p style="font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:14px;">
+          Word meteors plunge continuously from the sky. Destroy them before they strike the defense barrier. Speed accelerates as your score surges!
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">
+          <span style="font-size:11px;font-weight:700;padding:3px 8px;background:rgba(245,158,11,0.12);color:#f59e0b;border-radius:6px;">Accelerating Speed</span>
+          <span style="font-size:11px;font-weight:700;padding:3px 8px;background:rgba(16,185,129,0.12);color:#10b981;border-radius:6px;">+1 pt / letter</span>
+          <span style="font-size:11px;font-weight:700;padding:3px 8px;background:rgba(239,68,68,0.12);color:#ef4444;border-radius:6px;">5 Hearts Survival</span>
+        </div>
+        <button class="solidbtn" style="width:100%;padding:12px;font-size:14px;font-weight:800;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 6px 18px rgba(245,158,11,0.35);color:#ffffff;" onclick="launchGame('falling')">
+          PLAY FALLING WORDS ▶
+        </button>
+      </div>
+
+    </div>
+
+    <!-- RULES & ANTI-CHOKE BANNER -->
+    <div class="glass-card" style="padding:16px;border-radius:16px;border:1px solid var(--primary-glow);">
+      <div style="font-size:13.5px;font-weight:800;color:var(--ink);margin-bottom:6px;">
+        🛡️ Anti-Choke Accuracy Engine Rules
+      </div>
+      <div style="font-size:12px;color:var(--ink-soft);line-height:1.6;">
+        • <b>Zero-Advance on Errors:</b> Mistyped letters will NOT advance the cursor until the exact correct letter is hit.<br>
+        • <b>5 Misses Max:</b> Every incomplete word reaching boundary costs 1 heart. Game ends on 5th miss.<br>
+        • <b>Zero Negative Scoring:</b> Earned letter points stay banked even if a word is missed at boundary.<br>
+        • <b>Intelligent Diagnosis:</b> Real-time tracking of weak finger slip-ups, mistake pairs, and choke words.
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       SCREEN 6: ACTIVE GAME ARENA (FULL-SCREEN 100DVH HUD & CANVAS)
+  =================================================================== -->
+  <section class="screen" id="screen-games">
+    <!-- TOP FLOATING HUD -->
+    <div class="game-hud-bar">
+      <button class="test-back-btn" style="background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.2);" onclick="pauseGame()">&lt; Pause</button>
+      
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="game-hud-pill">
+          🏆 <span id="gameScoreDisplay">0</span> pts
+        </div>
+        <div class="game-hud-pill">
+          🎯 <span id="gameAccuracyDisplay">100%</span>
+        </div>
+        <div class="game-hud-pill" id="gameHeartsDisplay">
+          ❤️❤️❤️❤️❤️
+        </div>
+      </div>
+
+      <button class="test-back-btn" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4);" onclick="quitGame()">Exit</button>
+    </div>
+
+    <!-- MAIN GAMING CANVAS ARENA -->
+    <div class="game-arena-wrap" id="gameArenaContainer">
+      <canvas id="gameCanvas"></canvas>
+      <input type="text" id="gameKeyInput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text" style="position:absolute;top:-200px;left:-200px;opacity:0;pointer-events:none;" />
+    </div>
+
+    <!-- BOTTOM KEYSTROKE STATUS BAR -->
+    <div style="padding:6px 14px;background:rgba(15,23,42,0.95);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#94a3b8;border-top:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
+      <div>Correct: <b id="gameCorrectStrokes" style="color:#10b981;">0</b> | Mistyped: <b id="gameWrongStrokes" style="color:#ef4444;">0</b></div>
+      <div style="color:#60a5fa;font-weight:600;">⌨️ Type the glowing letter</div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===================================================================
+     GAMES MODULE MODALS & DIALOGS
+=================================================================== -->
+<!-- GAME PAUSE MODAL -->
+<div class="modalbg" id="gamePauseModal" style="display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);z-index:10001;">
+  <div class="modalcard" style="text-align:center;max-width:340px;border:1.5px solid rgba(99,102,241,0.5);">
+    <div style="font-size:40px;margin-bottom:8px;">⏸️</div>
+    <h3 style="font-size:19px;font-weight:800;color:var(--ink);margin-bottom:6px;">Game Paused</h3>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:18px;">Take a breath, stretch your fingers, and jump right back into the flow!</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button class="solidbtn" style="padding:12px;font-size:14px;font-weight:800;border-radius:10px;" onclick="resumeGame()">▶ Resume Challenge</button>
+      <button class="ghostbtn" style="padding:10px;font-size:13px;font-weight:700;border-radius:10px;" onclick="restartGame()">🔄 Restart Run</button>
+      <button class="ghostbtn" style="padding:10px;font-size:13px;font-weight:700;border-radius:10px;color:#ef4444;border-color:rgba(239,68,68,0.3);" onclick="quitGame()">❌ Exit to Hub</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME OVER ANTI-CHOKE REPORT MODAL -->
+<div class="modalbg" id="gameOverModal" style="display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);z-index:10001;overflow-y:auto;padding:16px;">
+  <div class="modalcard" style="max-width:440px;width:100%;border:1.5px solid rgba(59,130,246,0.5);border-radius:20px;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:36px;margin-bottom:4px;">🚨</div>
+      <div id="goPbBanner" style="display:none;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#ffffff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:9999px;margin:0 auto 8px;display:inline-block;letter-spacing:0.8px;text-transform:uppercase;">
+        🎉 NEW PERSONAL BEST RECORD!
+      </div>
+      <h3 style="font-size:18px;font-weight:800;color:var(--ink);margin:0;" id="goGameTitle">Anti-Choke Diagnostic Report</h3>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;">5 Misses Reached • Match Analysis Complete</div>
+    </div>
+
+    <!-- STATS CARDS GRID -->
+    <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;margin-bottom:14px;text-align:center;">
+      <div style="background:var(--card-bg);border:1px solid var(--card-border);padding:10px 4px;border-radius:12px;">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;">Score</div>
+        <div style="font-size:18px;font-weight:800;color:#2563eb;" id="goScoreValue">0</div>
+      </div>
+      <div style="background:var(--card-bg);border:1px solid var(--card-border);padding:10px 4px;border-radius:12px;">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;">Accuracy</div>
+        <div style="font-size:18px;font-weight:800;color:#10b981;" id="goAccValue">100%</div>
+      </div>
+      <div style="background:var(--card-bg);border:1px solid var(--card-border);padding:10px 4px;border-radius:12px;">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;">Speed</div>
+        <div style="font-size:18px;font-weight:800;color:#f59e0b;" id="goWpmValue">0 WPM</div>
+      </div>
+    </div>
+
+    <div style="font-size:12px;color:var(--ink-soft);margin-bottom:12px;text-align:center;">
+      Words: <b id="goWordsCleared">0 Cleared / 5 Missed</b>
+    </div>
+
+    <!-- WEAK KEYS HEATMAP -->
+    <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:11.5px;font-weight:800;color:#ef4444;text-transform:uppercase;margin-bottom:6px;">
+        ⚠️ Your Weakest Keys (Mistake Friction)
+      </div>
+      <div id="goWeakKeysList" style="display:flex;flex-wrap:wrap;gap:4px;">
+        <span style="color:#10b981;font-size:12px;font-weight:700;">Zero mistyped keys!</span>
+      </div>
+    </div>
+
+    <!-- TROUBLE WORDS -->
+    <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.25);border-radius:12px;padding:12px;margin-bottom:16px;">
+      <div style="font-size:11.5px;font-weight:800;color:#2563eb;text-transform:uppercase;margin-bottom:6px;">
+        🔍 Hesitation Words (Choke Points)
+      </div>
+      <div id="goTroubleWords" style="font-size:12px;">
+        None
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div style="display:flex;gap:8px;">
+      <button class="solidbtn" style="flex:1;padding:11px;font-size:13px;font-weight:800;border-radius:10px;" onclick="restartGame()">🔄 Play Again</button>
+      <button class="ghostbtn" style="flex:1;padding:11px;font-size:13px;font-weight:700;border-radius:10px;" onclick="openLeaderboardModal()">🏆 Leaderboard</button>
+      <button class="ghostbtn" style="padding:11px 14px;font-size:13px;font-weight:700;border-radius:10px;" onclick="quitGame()">🏠 Exit</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEADERBOARD MODAL (HALL OF LEGENDS) -->
+<div class="modalbg" id="gamesLeaderboardModal" style="display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);z-index:10001;overflow-y:auto;padding:16px;">
+  <div class="modalcard" style="max-width:500px;width:100%;border-radius:20px;padding:20px;max-height:85vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:24px;">🏆</span>
+        <div>
+          <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:0;">Hall of Legends</h3>
+          <div style="font-size:11px;color:var(--muted);">Personal Best Records (Highest Scores Only)</div>
+        </div>
+      </div>
+      <button class="ghostbtn" style="padding:4px 10px;font-size:12px;" onclick="closeLeaderboardModal()">✕ Close</button>
+    </div>
+
+    <!-- GAME SWITCHER TABS -->
+    <div class="seg-control" style="margin-bottom:10px;">
+      <button class="seg-btn active" id="lbTabBubble" onclick="renderLeaderboard('bubble', 'en')">🫧 Bubble Challenge</button>
+      <button class="seg-btn" id="lbTabFalling" onclick="renderLeaderboard('falling', 'en')">☄️ Falling Words</button>
+    </div>
+
+    <!-- TRACK SWITCHER TABS -->
+    <div style="display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;">
+      <button class="ghostbtn active" id="lbTrackEn" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:6px;" onclick="renderLeaderboard(document.getElementById('lbTabBubble').classList.contains('active')?'bubble':'falling', 'en')">English</button>
+      <button class="ghostbtn" id="lbTrackTamil99" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:6px;" onclick="renderLeaderboard(document.getElementById('lbTabBubble').classList.contains('active')?'bubble':'falling', 'tamil99')">Tamil99</button>
+      <button class="ghostbtn" id="lbTrackTypewriter" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:6px;" onclick="renderLeaderboard(document.getElementById('lbTabBubble').classList.contains('active')?'bubble':'falling', 'typewriter')">Tamil Typewriter</button>
+    </div>
+
+    <!-- ENTRIES LIST -->
+    <div id="lbEntriesList" style="flex:1 1 auto;overflow-y:auto;max-height:360px;padding-right:4px;">
+      <!-- Populated via JS -->
+    </div>
+  </div>
+</div>
+
+<!-- GAMES HISTORY MODAL -->
+<div class="modalbg" id="gamesHistoryModal" style="display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);z-index:10001;overflow-y:auto;padding:16px;">
+  <div class="modalcard" style="max-width:500px;width:100%;border-radius:20px;padding:20px;max-height:85vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:24px;">📜</span>
+        <div>
+          <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:0;">Student Game History</h3>
+          <div style="font-size:11px;color:var(--muted);">Personal Typing Run Sessions &amp; Analytics</div>
+        </div>
+      </div>
+      <button class="ghostbtn" style="padding:4px 10px;font-size:12px;" onclick="closeGameHistoryModal()">✕ Close</button>
+    </div>
+
+    <!-- FILTER BUTTONS -->
+    <div style="display:flex;gap:6px;margin-bottom:12px;">
+      <button class="ghostbtn active" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="renderGameHistory('all')">All Games</button>
+      <button class="ghostbtn" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="renderGameHistory('bubble')">Bubble Only</button>
+      <button class="ghostbtn" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="renderGameHistory('falling')">Falling Only</button>
+    </div>
+
+    <div id="ghEntriesList" style="flex:1 1 auto;overflow-y:auto;max-height:380px;padding-right:4px;">
+      <!-- Populated via JS -->
+    </div>
+  </div>
 </div>
 
 <!-- MODAL DIALOG CONTAINER -->
@@ -3117,6 +3532,8 @@ function buildPrefixSet(map){
   return set;
 }
 const KEYMAP_PREFIXES = { typewriter: buildPrefixSet(KEYMAP_TYPEWRITER), tamil99: buildPrefixSet(KEYMAP_TAMIL99) };
+window.KEYMAPS = KEYMAPS;
+window.KEYMAP_PREFIXES = KEYMAP_PREFIXES;
 const PRAC = {"en":[{"lesson":"Lesson 1 — Home Keys","sub":"Keys: a s d f ; l k j","fingerGuide":{"left":["Little→a","Ring→s","Middle→d","Index→f"],"right":["Index→j","Middle→k","Ring→l","Little→;"],"homeKeys":true},"keyHint":"asdf ;lkj","text":"asdf ;lkj asdf ;lkj asdf ;lkj asdf ;lkj\nasdf ;lkj asdf ;lkj asdf ;lkj asdf ;lkj\nasdf ;lkj asdf ;lkj asdf ;lkj asdf ;lkj\nasdf ;lkj asdf ;lkj asdf ;lkj asdf ;lkj\n\na add adds; ask lad all falls a add adds; ask lad all falls a add adds;"},{"lesson":"Lesson 2 — G and H Keys","sub":"Keys: a s d f g h j k l ;","fingerGuide":{"left":["Little→a","Ring→s","Middle→d","Index→f,g"],"right":["Index→h,j","Middle→k","Ring→l","Little→;"],"homeKeys":true},"keyHint":"asdfgf ;lkjhj","text":"asdfgf ; lkjhj asdfgf ; lkjhj asdfgf ; lkjhj asdfgf ; lkjhj\nasdfgf ; lkjhj asdfgf ; lkjhj asdfgf ; lkjhj asdfgf ; lkjhj\nasdfgf ; lkjhj asdfgf ; lkjhj asdfgf ; lkjhj asdfgf ; lkjhj\n\nask fad alas asks shad lads flags flask glass\njag fag fall hash glad sags flash halls salad\njak has jags gaff hall dash galls slash flasks\nlad sad lash adds gall gash shall lakhs dhalls"},{"lesson":"Lesson 3 — Top Row Q W E R U I O P","sub":"Keys: q w e r u i o p","fingerGuide":{"left":["Little→q","Ring→w","Middle→e","Index→r"],"right":["Index→u","Middle→i","Ring→o","Little→p"],"homeKeys":false},"keyHint":"awerqfa ;oiupj;","text":"awerqfa ; oiupj; awerqfa ; oiupj; awerqfa ; oiupj;\nawerqfa ; oiupj; awerqfa ; oiupj; awerqfa ; oiupj;\nawerqfa ; oiupj; awerqfa ; oiupj; awerqfa ; oiupj;\n\njailer larger fiddle roses peaks fish sails\norders follow poorer folder dead skill dislike\napples jokers squeal refresh legal agile should"},{"lesson":"Lesson 4 — T Y Keys (Index Reach)","sub":"Keys: r t y u (index finger reach)","fingerGuide":{"left":["Index→f,g,t,r","Middle→d","Ring→s","Little→a"],"right":["Index→j,h,y,u","Middle→k","Ring→l","Little→;"],"homeKeys":false},"keyHint":"gftfrf hjyjuj","text":"gftfrf hjyjuj gftfrf hjyjuj gftfrf hjyjuj gftfrf hjyjuj\ngftfrf hjyjuj gftfrf hjyjuj gftfrf hjyjuj gftfrf hjyjuj\ngftfrf hjyjuj gftfrf hjyjuj gftfrf hjyjuj gftfrf hjyjuj\n\nlawyers prepare further alert regular yesterday struggles\nfreehold shippers goodwill forward kettles laughter waggish\nyouthful territory addressed quarter hillside proposals supplies"},{"lesson":"Lesson 5 — Bottom Row Z X C V B N M","sub":"Keys: z x c v b n m","fingerGuide":{"left":["Little→z","Ring→x","Middle→c","Index→v,b"],"right":["Index→n,m","Middle→,","Ring→.","Little→/"],"homeKeys":false},"keyHint":"azxcvf lkmnbj","text":"azxcvf lkmnbj azxcvf lkmnbj azxcvf lkmnbj azxcvf lkmnbj\nazxcvf lkmnbj azxcvf lkmnbj azxcvf lkmnbj azxcvf lkmnbj\nazxcvf lkmnbj azxcvf lkmnbj azxcvf lkmnbj azxcvf lkmnbj\n\njournal quantity fortress grizzled frequent sixfold spacing\nmovement student question materials service swivels gracious\nthousand cylinder except fixture western neither starting"},{"lesson":"Lesson 6 — Full Alphabet + Punctuation","sub":"Complete keyboard practice","fingerGuide":{"left":["All left-hand keys","a s d f g z x c v b"],"right":["All right-hand keys","h j k l ; y u i o p n m"],"homeKeys":true},"keyHint":"abcdefghijklmnopqrstuvwxyz.,","text":"abcdefghijklmnopqrstuvwxyz., ,.zyxwvutsrqponmlkjihgfedcba\nabcdefghijklmnopqrstuvwxyz., ,.zyxwvutsrqponmlkjihgfedcba\nabcdefghijklmnopqrstuvwxyz., ,.zyxwvutsrqponmlkjihgfedcba\n\nchildren regarding attractive summer competition\nbehalf requisite punctuation accompany adopting\ncitizens government exceeding transmitted points\nfoundation thunder negligence exhibition communicate"},{"lesson":"Lesson 7 — Capital Letters (Shift Key)","sub":"Use Left Shift for right-hand letters, Right Shift for left-hand","fingerGuide":{"left":["Little→Left Shift (for right-hand caps)"],"right":["Little→Right Shift (for left-hand caps)"],"homeKeys":false},"keyHint":"Shift key usage","text":"Budget Decrease Improvement Advantage Purchase\nEmployee Support Facilities Promotion Experience\nUmbrella Maximum Knowledge Limited Received\nDecember Shortage Remarkable Monday Honesty\nOperation Teacher Wonderful London Mountain\nTransport Foreign Hostel Imagine Friendly\n\nabcdefghijklmnopqrstuvwxyz., ,.zyxwvutsrqponmlkjihgfedcba\nThe quick brown fox jumps over the lazy little dog"},{"lesson":"Lesson 8 — Paragraph Spacing & Punctuation Rules","sub":"5 spaces before paragraph, 2 spaces after full stop","fingerGuide":{"left":["Practice all left-hand keys with correct posture"],"right":["Practice all right-hand keys with correct posture"],"homeKeys":true},"keyHint":"Punctuation spacing rules","text":"He came to me yesterday. He brought pens, pencils, books and bags with him. Did you see him? I did not. What a wonderful boy he was. He was nice.\n\nMy favourite colour is blue.\nI want to eat an apple.\nTypewriter was invented by Henry Mill.\nThank you for helping me.\nLook at the pretty flowers!\nThe Sun is shining bright.\nEmpty vessels make a lot of noise.\nThe train leaves in ten minutes.\nPlease join the meeting."},{"lesson":"Lesson 9 — Sentence Practice","sub":"Focus on rhythm, flow and punctuation","fingerGuide":{"left":["All left keys — maintain home position"],"right":["All right keys — maintain home position"],"homeKeys":true},"keyHint":"Sentence level practice","text":"He wants to swim at the beach.\nShe likes to read books before going to bed.\nWe need to replace the water filter.\nTomorrow early in the morning first I will go to morning walk.\nGeorge raised his son without any help.\nWe love peace, but not peace at any price.\nThe doctor is ready to see you now.\nShe listened to music on the way to work.\nOne enemy can do more harm than ten friends.\nHope for the best, but prepare for the worst.\nI need your help with my English assignment.\nHe was sad that he could not fulfil his dream.\nThe company is experiencing fast growth due to its innovative products.\nThe fast progress of science and technology is changing the world."},{"lesson":"Lesson 10 — Paragraph Practice (Speed & Accuracy)","sub":"Type full paragraphs maintaining consistent speed","fingerGuide":{"left":["All left-hand keys — never look at keyboard"],"right":["All right-hand keys — never look at keyboard"],"homeKeys":true},"keyHint":"Full paragraph typing","text":"Science has brought wonders to our world, changing lives in miraculous ways. Through science, we have conquered diseases, travelled to distant planets, and unlocked the mysteries of the universe. From the discovery of electricity to the invention of the internet, science has revolutionized communication, transportation and medicine. It has enabled us to understand the smallest particles and the vastness of space. With science, we can explore the depths of the ocean and reach the heights of the sky.\n\nNature is a beautiful gift, full of wonders. It includes trees, mountains, rivers and animals. The chirping of birds and rustling of leaves create soothing melodies. Flowers bloom, painting the world with vibrant colors. Nature provides us with fresh air to breathe and clean water to drink. It teaches us valuable lessons about harmony and balance. Taking a walk in the woods or sitting by a babbling brook can rejuvenate the soul."}],"ta":[{"lesson":"பாடம் 1 — அடிப்படை விசைகள்","sub":"அ இ உ f | ய ல ந க","fingerGuide":{"left":["இடக்கை விரல்கள்: அ இ உ f"],"right":["வலக்கை விரல்கள்: க ந ல ய"],"homeKeys":true},"keyHint":"அ இ உ ய ல ந க","text":"அஇஉஎ யலநக அஇஉஎ யலநக அஇஉஎ யலநக\nஅஈஊஐஏஐ யவரளழற அஈஊஐஏஐ யவரளழற\nஅஓஒவங தமபச அஓஒவங தமபச\nஅஇஉ யலநக அஇஉ யலநக அஇஉ யலநக அஇஉ யலநக"},{"lesson":"பாடம் 2 — ஆ கார எழுத்துகள்","sub":"அஆ | யா லா நா கா","fingerGuide":{"left":["இடக்கை: அ இ உ f"],"right":["வலக்கை: க ந ல ய"],"homeKeys":true},"keyHint":"அ ஆ ய ல ந க","text":"அஆஅ யாலாநாகா அஆஅ யாலாநாகா அஆஅ யாலாநாகா\nயானை யானை யானை யானை யானை யானை\nலாகிரி லாகிரி லாகிரி லாகிரி லாகிரி\nநாகம் நாகம் நாகம் நாகம் நாகம் நாகம்\nகால் கால் கால் கால் கால் கால்\nகலா கலா கலா கலா கலா கலா\nநலம் நலம் நலம் நலம் நலம் நலம்\nலயா லயா லயா லயா லயா லயா"},{"lesson":"பாடம் 3 — இ ஈ கார எழுத்துகள்","sub":"இ ஈ | த ட","fingerGuide":{"left":["இடக்கை: அ இ உ f"],"right":["வலக்கை: ட த ண ன"],"homeKeys":true},"keyHint":"இ ஈ த ட","text":"இஈஇ தடத இஈஇ தடத இஈஇ தடத இஈஇ தடத\nதினம் தினம் தினம் தினம் தினம் தினம்\nஇனம் இனம் இனம் இனம் இனம் இனம்\nபந்து பந்து பந்து பந்து பந்து பந்து\nதமிழ் தமிழ் தமிழ் தமிழ் தமிழ் தமிழ்"},{"lesson":"பாடம் 4 — உ ஊ கார எழுத்துகள்","sub":"உ ஊ | ம ன","fingerGuide":{"left":["இடக்கை: அ இ உ f"],"right":["வலக்கை: ம ந ன ண"],"homeKeys":true},"keyHint":"உ ஊ ம ன","text":"உஊஉ மனம உஊஉ மனம உஊஉ மனம உஊஉ மனம\nஉப்பு உப்பு உப்பு உப்பு உப்பு உப்பு\nமுந்து முந்து முந்து முந்து முந்து\nமனம் மனம் மனம் மனம் மனம் மனம்\nஉனது உனது உனது உனது உனது உனது\nஊனம் ஊனம் ஊனம் ஊனம் ஊனம் ஊனம்"},{"lesson":"பாடம் 5 — எ ஏ கார எழுத்துகள்","sub":"எ ஏ | க ள ப","fingerGuide":{"left":["இடக்கை: அ இ உ f"],"right":["வலக்கை: க ள ப"],"homeKeys":true},"keyHint":"எ ஏ க ள","text":"எஏ களப எஏ களப எஏ களப எஏ களப\nமெது மெது மெது மெது மெது மெது\nதெளிவ தெளிவ தெளிவ தெளிவ தெளிவ\nஎல்லை எல்லை எல்லை எல்லை எல்லை\nஏன்று ஏன்று ஏன்று ஏன்று ஏன்று\nதேன் தேன் தேன் தேன் தேன் தேன்"},{"lesson":"பாடம் 6 — ஐ ஔ கார எழுத்துகள்","sub":"ஐ ஔ | ய ழ ர ல","fingerGuide":{"left":["இடக்கை: அ இ உ f"],"right":["வலக்கை: ய ழ ர ல ங"],"homeKeys":false},"keyHint":"ஐ ஔ ய ழ","text":"ஐவர் றபலப ஐவர் றபலப ஐவர் றபலப\nஅஔஅ யழய அஔஅ யழய அஔஅ யழய\nஇஓஇ த,த இஓஇ த,த இஓஇ த,த\nஉஒஉ மரம உஒஉ மரம உஒஉ மரம"},{"lesson":"பாடம் 7 — அனைத்து உயிரெழுத்துகள்","sub":"முழு உயிரெழுத்து பயிற்சி","fingerGuide":{"left":["அ இ உ எ — இடக்கை நடுவிசை"],"right":["ப ம த ந — வலக்கை நடுவிசை"],"homeKeys":true},"keyHint":"அஆஇஈஉஊ...","text":"அஆஇஈஉஊஎஏஐஒஓஔஃ நதமபணடனறஙகஞச\nஅஆஇஈஉஊஎஏஐஒஓஔஃ நதமபணடனறங்கஞச\nஅஆஇஈஉஊஎஏஐஒஓஔஃ நதமபணடனறங்கஞச\nஅஆஇஈஉஊஎஏஐஒஓஔஃ நதமபணடனறங்கஞச"},{"lesson":"பாடம் 8 — வார்த்தை பயிற்சி","sub":"அன்றாட வார்த்தைகள்","fingerGuide":{"left":["அனைத்து இடக்கை விசைகள்"],"right":["அனைத்து வலக்கை விசைகள்"],"homeKeys":true},"keyHint":"வார்த்தை அளவில் பயிற்சி","text":"நான் தமிழ் எழுதுகிறேன்.\nஇன்று வானம் மழை பெய்கிறது.\nஅவன் பள்ளிக்கு சென்று வருகிறான்.\nஎன் பெயர் கோகுல்.\nதமிழ் ஒரு இனிய மொழி.\nபுத்தகம் படிப்பது அவசியம்.\nகல்வி கரையில் கடல் அளவு.\nநல்ல உள்ளம் கோயிலுக்கு சமம்."},{"lesson":"பாடம் 9 — பத்தி பயிற்சி","sub":"தமிழ் மொழியின் சிறப்பு","fingerGuide":{"left":["அனைத்து இடக்கை விசைகள் — விசைப்பலகையை பார்க்காமல்"],"right":["அனைத்து வலக்கை விசைகள் — விசைப்பலகையை பார்க்காமல்"],"homeKeys":true},"keyHint":"முழு பத்தி பயிற்சி","text":"தமிழ் உலகில் பழமையான ஒரு மொழியாகும். இது தமிழ்நாட்டின் முக்கிய மொழியாக மட்டுமின்றி இலங்கை, சிங்கப்பூர் மற்றும் மலேசியாவின் சில பகுதிகள் பரவலாக பேசப்படுகிறது. தமிழின் இலக்கிய வரலாறு அசைக்க முடியாதது. சங்க காலத்தில் எழுதப்பட்ட பாடல்கள் இருந்து நவீன கதைகள்வரை, தமிழ் மொழி எமை அழகும் ஆழமும் வெளிப்படுத்துகிறது.\n\nஅதற்கிடையில், தமிழ் மொழியை பாதுகாக்க நாம் அனைவரும் கடைமைப்பட்டவர்கள். மொழி என்பது வெறும் வார்த்தைகளின் தொகுப்பாக இல்லாமல், அது ஒரு சமூகத்தின் அடையாளம், அதன் பண்பாட்டு பாரம்பரியம், அதன் வரலாற்று பெருமை ஆகியவற்றை பிரதிபலிக்கிறது."}]};
 
 /* =====================================================================
@@ -3607,8 +4024,11 @@ function showScreen(id){
   const isPractice = (id === 'screen-practice');
   document.body.classList.toggle('in-practice', isPractice);
   document.documentElement.classList.toggle('in-practice', isPractice);
+  const isGame = (id === 'screen-games' || id === 'screen-games-hub');
+  document.body.classList.toggle('in-games', isGame);
+  document.documentElement.classList.toggle('in-games', isGame);
   if(typeof updateFullscreenBtn === 'function') updateFullscreenBtn();
-  if(!isTest && typeof window.scrollTo === 'function') window.scrollTo(0,0);
+  if(!isTest && id !== 'screen-games' && typeof window.scrollTo === 'function') window.scrollTo(0,0);
 }
 
 /* =====================================================================
@@ -6595,6 +7015,14 @@ function registerBackButton() {
       if (confirm('Do you Want to Exit?')) {
         closePractice();
       }
+    } else if (activeScreen && (activeScreen.id === 'screen-games' || activeScreen.id === 'screen-games-hub')) {
+      if (activeScreen.id === 'screen-games') {
+        if (confirm('Do you Want to Exit?')) {
+          GamesEngine.quit();
+        }
+      } else {
+        showScreen('screen-config');
+      }
     } else if (activeScreen && activeScreen.id === 'screen-results') {
       showScreen('screen-config');
     } else if (activeScreen && activeScreen.id === 'screen-config') {
@@ -6641,5 +7069,7 @@ if (window.Capacitor) {
   </div>
 </div>
 
+  <!-- GAMES MODULE ENGINE SCRIPT -->
+  <script src="js/games_engine.js"></script>
 </body>
 </html>
