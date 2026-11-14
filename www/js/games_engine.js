@@ -1092,6 +1092,10 @@
         }
 
         report.isNewPB = isNewPB;
+        if (isNewPB && window.NotificationService) {
+          const gameTitle = this.gameType === 'bubble' ? 'Bubble Word Challenge' : 'Falling Words Challenge';
+          NotificationService.notifyGamePB(gameTitle, report.score, report.accuracy);
+        }
       } catch (err) {
         console.error('Error updating leaderboard:', err);
       }

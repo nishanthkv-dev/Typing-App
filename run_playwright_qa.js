@@ -605,8 +605,19 @@ async function main() {
         }, { mode: m });
 
         const ssPath = path.join('screenshots', `screen_${m}_${th}_${ssVp.label}.png`);
-        await page.screenshot({ path: ssPath });
-        console.log(`  Saved screenshot: ${ssPath}`);
+        try {
+          await page.screenshot({ path: ssPath });
+          console.log(`  Saved screenshot: ${ssPath}`);
+        } catch(e) {
+          // Retry once after 200ms in case of Windows file indexing lock
+          await new Promise(r => setTimeout(r, 200));
+          try {
+            await page.screenshot({ path: ssPath });
+            console.log(`  Saved screenshot (retry): ${ssPath}`);
+          } catch(e2) {
+            console.warn(`  Warning saving screenshot ${ssPath}:`, e2.message);
+          }
+        }
       }
       await page.close();
     }

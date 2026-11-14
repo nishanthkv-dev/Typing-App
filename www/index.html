@@ -493,6 +493,31 @@ body {
 }
 .tool-btn:active { transform: scale(0.92); }
 
+.notif-bell-btn {
+  position: relative;
+  font-size: 16px;
+}
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--coral, #ef4444);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.45);
+  border: 1.5px solid var(--card-bg, #ffffff);
+  line-height: 1;
+  pointer-events: none;
+}
+
 .avatar-pill {
   width: 36px;
   height: 36px;
@@ -2159,6 +2184,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
           <span class="streak-flame">🔥</span>
           <span id="hdrStreakVal">0</span>d
         </div>
+        <button class="tool-btn notif-bell-btn" id="btnNotifCenter" onclick="NotificationService.openCenter()" title="Notifications">🔔<span class="notif-badge" id="hdrNotifBadge" style="display:none;">0</span></button>
         <button class="tool-btn" id="btnFullscreen" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
         <button class="tool-btn" id="btnAudioToggle" onclick="cycleAudioMode()" title="Sound Effects">🔊</button>
         <div class="avatar-pill" id="hdrAvatarWrap" onclick="switchTab('profile')" title="Student Profile">
@@ -2732,6 +2758,68 @@ body:has(#screen-test.active) .bottom-nav-bar {
             </select>
           </div>
           <div class="form-hint">Official Tamil Nadu Technical Examinations timetable schedule.</div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATION PREFERENCES -->
+      <div class="glass-card">
+        <div class="card-header-bar">
+          <h2>🔔 Notification &amp; Daily Reminders</h2>
+          <span class="card-badge" style="background:var(--emerald-light);color:var(--emerald);" id="lblNotifStatusBadge">Active</span>
+        </div>
+
+        <div class="form-field">
+          <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:4px 0;">
+            <div>
+              <b style="font-size:13.5px;color:var(--ink);">Daily Practice Reminders</b>
+              <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">Get a reminder on your phone to keep your streak alive</div>
+            </div>
+            <input type="checkbox" id="chkDailyReminder" checked style="width:20px;height:20px;accent-color:var(--primary);cursor:pointer;" onchange="saveNotificationPreferencesFromUI()">
+          </label>
+        </div>
+
+        <div class="form-field" id="wrapReminderTime">
+          <div class="form-label">Preferred Reminder Time:</div>
+          <div class="custom-select-wrap">
+            <select id="selReminderTime" onchange="saveNotificationPreferencesFromUI()">
+              <option value="07:00">07:00 AM — Early Morning Warmup</option>
+              <option value="09:00" selected>09:00 AM — Morning Speed Drill</option>
+              <option value="12:00">12:00 PM — Noon Quick Practice</option>
+              <option value="18:00">06:00 PM — Evening Speed Session</option>
+              <option value="20:00">08:00 PM — Night Exam Revision</option>
+              <option value="21:00">09:00 PM — Late Night Review</option>
+            </select>
+          </div>
+          <div class="form-hint">Notifications arrive locally even when offline or without internet.</div>
+        </div>
+
+        <div class="form-field">
+          <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:4px 0;">
+            <div>
+              <b style="font-size:13.5px;color:var(--ink);">Exam &amp; Speed Milestone Alerts</b>
+              <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">Instant alerts when you qualify or set a new Personal Best</div>
+            </div>
+            <input type="checkbox" id="chkExamAlerts" checked style="width:20px;height:20px;accent-color:var(--primary);cursor:pointer;" onchange="saveNotificationPreferencesFromUI()">
+          </label>
+        </div>
+
+        <div class="form-field">
+          <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:4px 0;">
+            <div>
+              <b style="font-size:13.5px;color:var(--ink);">Weak Key Focus Reminders</b>
+              <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">Targeted recommendations based on your mistyped keys</div>
+            </div>
+            <input type="checkbox" id="chkWeakKeyAlerts" checked style="width:20px;height:20px;accent-color:var(--primary);cursor:pointer;" onchange="saveNotificationPreferencesFromUI()">
+          </label>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+          <button class="solidbtn" type="button" style="flex:1;min-width:180px;padding:10px 14px;font-size:12.5px;font-weight:800;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="NotificationService.sendTestNotification()">
+            <span>🔔</span> Send Test Notification
+          </button>
+          <button class="ghostbtn" type="button" style="padding:10px 14px;font-size:12.5px;font-weight:700;border-radius:12px;" onclick="NotificationService.openCenter()">
+            📢 View All Alerts
+          </button>
         </div>
       </div>
 
@@ -3353,6 +3441,53 @@ body:has(#screen-test.active) .bottom-nav-bar {
   </div>
 </div>
 
+<!-- NOTIFICATION CENTER MODAL -->
+<div class="modalbg" id="notifCenterModal" style="display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);z-index:10002;overflow-y:auto;padding:16px;">
+  <div class="modalcard" style="max-width:520px;width:100%;border-radius:20px;padding:20px;max-height:85vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:24px;">🔔</span>
+        <div>
+          <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:0;">Notification Center</h3>
+          <div style="font-size:11px;color:var(--muted);">DoTE Alerts, Daily Practice &amp; Result Updates</div>
+        </div>
+      </div>
+      <button class="ghostbtn" style="padding:4px 10px;font-size:12px;" onclick="NotificationService.closeCenter()">✕ Close</button>
+    </div>
+
+    <!-- QUICK TEST & ACTIONS BAR -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="solidbtn" style="flex:1 1 auto;padding:7px 12px;font-size:12px;font-weight:700;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="NotificationService.sendTestNotification()">
+        <span>🔔</span> Send Test Notification
+      </button>
+      <button class="ghostbtn" style="padding:7px 12px;font-size:11.5px;font-weight:700;border-radius:8px;" onclick="NotificationService.markAllRead()">
+        ✓ Mark All Read
+      </button>
+      <button class="ghostbtn" style="padding:7px 10px;font-size:11.5px;font-weight:700;border-radius:8px;" onclick="NotificationService.clearAll()">
+        🗑️ Clear
+      </button>
+    </div>
+
+    <!-- FILTER TABS -->
+    <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;">
+      <button class="ghostbtn active" id="notifFilterAll" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="NotificationService.renderList('all'); document.querySelectorAll('[id^=notifFilter]').forEach(b=>b.classList.remove('active')); this.classList.add('active');">All</button>
+      <button class="ghostbtn" id="notifFilterPractice" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="NotificationService.renderList('practice'); document.querySelectorAll('[id^=notifFilter]').forEach(b=>b.classList.remove('active')); this.classList.add('active');">Practice ⏰</button>
+      <button class="ghostbtn" id="notifFilterResults" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="NotificationService.renderList('results'); document.querySelectorAll('[id^=notifFilter]').forEach(b=>b.classList.remove('active')); this.classList.add('active');">Results 🏆</button>
+      <button class="ghostbtn" id="notifFilterAnnounce" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="NotificationService.renderList('announcement'); document.querySelectorAll('[id^=notifFilter]').forEach(b=>b.classList.remove('active')); this.classList.add('active');">Announcements 📢</button>
+    </div>
+
+    <!-- SCROLLABLE NOTIFICATION LIST -->
+    <div id="notifCenterList" style="flex:1 1 auto;overflow-y:auto;max-height:380px;padding-right:4px;">
+      <!-- Populated via JS -->
+    </div>
+
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--card-border);display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:var(--muted);">
+      <span>Daily reminders run automatically</span>
+      <span style="color:var(--primary);font-weight:700;cursor:pointer;" onclick="NotificationService.closeCenter(); switchTab('profile');">⚙️ Manage Preferences</span>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL DIALOG CONTAINER -->
 <div class="modalbg" id="modalBg">
   <div class="modalcard">
@@ -3505,7 +3640,10 @@ function switchTab(name) {
     loadRecentResults();
     if(typeof renderHistoryPage === 'function') renderHistoryPage();
   }
-  if(name === 'profile') loadProfile();
+  if(name === 'profile') {
+    loadProfile();
+    if(typeof loadNotificationPreferencesToUI === 'function') loadNotificationPreferencesToUI();
+  }
   if(name === 'speed' && typeof syncContinueCard === 'function') syncContinueCard();
 }
 
@@ -5021,6 +5159,13 @@ function submitTest(auto){
 
   renderResults(r, TA.value);
   saveResult(r, TA.value, passageText, mode);
+  if(window.NotificationService) {
+    NotificationService.notifyTestResult(r.marks, r.total, r.netWpm, r.accuracy);
+    if(r.weakestKeys && r.weakestKeys.length > 0) {
+      const topWeak = r.weakestKeys.slice(0, 3).map(k => k.letter);
+      NotificationService.notifyWeakKeys(topWeak);
+    }
+  }
   showScreen('screen-results');
 }
 
@@ -6973,6 +7118,60 @@ initAppUsageTracker();
 loadRecentResults();
 loadProfile();
 updateHeroTrackLabel();
+if(window.NotificationService) {
+  NotificationService.init();
+}
+
+/* =====================================================================
+   NOTIFICATION PREFERENCES UI SYNC
+===================================================================== */
+function saveNotificationPreferencesFromUI() {
+  const enabled = $('chkDailyReminder') ? $('chkDailyReminder').checked : true;
+  const time = $('selReminderTime') ? $('selReminderTime').value : '09:00';
+  const examAlerts = $('chkExamAlerts') ? $('chkExamAlerts').checked : true;
+  const weakAlerts = $('chkWeakKeyAlerts') ? $('chkWeakKeyAlerts').checked : true;
+  
+  const wrap = $('wrapReminderTime');
+  if(wrap) wrap.style.display = enabled ? 'block' : 'none';
+  const badge = $('lblNotifStatusBadge');
+  if(badge) {
+    badge.textContent = enabled ? 'Active' : 'Disabled';
+    badge.style.background = enabled ? 'var(--emerald-light)' : 'var(--coral-light)';
+    badge.style.color = enabled ? 'var(--emerald)' : 'var(--coral)';
+  }
+  
+  if(window.NotificationService) {
+    NotificationService.updatePreferences({
+      enabled: enabled,
+      reminderTime: time,
+      examAlerts: examAlerts,
+      resultAlerts: examAlerts,
+      weakKeyAlerts: weakAlerts
+    });
+  }
+}
+window.saveNotificationPreferencesFromUI = saveNotificationPreferencesFromUI;
+
+function loadNotificationPreferencesToUI() {
+  if(!window.NotificationService) return;
+  const s = NotificationService.settings;
+  if($('chkDailyReminder')) $('chkDailyReminder').checked = s.enabled !== false;
+  if($('selReminderTime') && s.reminderTime) $('selReminderTime').value = s.reminderTime;
+  if($('chkExamAlerts')) $('chkExamAlerts').checked = s.examAlerts !== false;
+  if($('chkWeakKeyAlerts')) $('chkWeakKeyAlerts').checked = s.weakKeyAlerts !== false;
+  
+  const wrap = $('wrapReminderTime');
+  if(wrap) wrap.style.display = (s.enabled !== false) ? 'block' : 'none';
+  const badge = $('lblNotifStatusBadge');
+  if(badge) {
+    const en = (s.enabled !== false);
+    badge.textContent = en ? 'Active' : 'Disabled';
+    badge.style.background = en ? 'var(--emerald-light)' : 'var(--coral-light)';
+    badge.style.color = en ? 'var(--emerald)' : 'var(--coral)';
+  }
+}
+window.loadNotificationPreferencesToUI = loadNotificationPreferencesToUI;
+
 if($('btnHomeStartTest')){
   $('btnHomeStartTest').addEventListener('click', () => {
     readConfig();
@@ -6982,6 +7181,13 @@ if($('btnHomeStartTest')){
 
 function registerBackButton() {
   const handleBack = () => {
+    // 0. Close notification center if open
+    const notifModal = document.getElementById('notifCenterModal');
+    if (notifModal && notifModal.style.display !== 'none' && notifModal.style.display !== '') {
+      if(window.NotificationService) NotificationService.closeCenter();
+      else notifModal.style.display = 'none';
+      return;
+    }
     // 1. Close weak key bottom sheet if open
     const weakOverlay = document.getElementById('weakKeySheetOverlay');
     if (weakOverlay && weakOverlay.style.display !== 'none') {
@@ -7069,6 +7275,8 @@ if (window.Capacitor) {
   </div>
 </div>
 
+  <!-- NOTIFICATION SERVICE SCRIPT -->
+  <script src="js/notification_service.js"></script>
   <!-- GAMES MODULE ENGINE SCRIPT -->
   <script src="js/games_engine.js"></script>
 </body>
