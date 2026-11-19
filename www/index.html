@@ -1806,6 +1806,62 @@ body:has(#screen-test.active) .bottom-nav-bar {
   display: inline-block;
 }
 
+/* OTG Physical Keyboard Status Badges */
+.otg-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.otg-badge.otg-connected {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #059669 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+.otg-badge.otg-disconnected {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #dc2626 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  animation: pulse-otg-badge 1.5s infinite;
+}
+.otg-badge.otg-fallback {
+  background: var(--subtle-bg, #f1f5f9) !important;
+  color: var(--muted, #64748b) !important;
+  border: 1px solid var(--card-border, #cbd5e1) !important;
+}
+@keyframes pulse-otg-badge {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Header OTG Tool Button & Indicator Dot */
+.otg-tool-btn {
+  position: relative !important;
+}
+.otg-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid var(--card-bg, #fff);
+}
+.otg-dot.connected {
+  background-color: #10b981;
+}
+.otg-dot.disconnected {
+  background-color: #94a3b8;
+}
+
 /* Passage card */
 .passcard {
   background: var(--card-bg);
@@ -2180,6 +2236,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
       </div>
       
       <div class="header-tools">
+        <button class="tool-btn otg-tool-btn" id="btnOTGStatus" onclick="OTGKeyboardService.showInfoModal()" title="OTG Physical Keyboard Status">⌨️<span class="otg-dot disconnected" id="hdrOTGDot"></span></button>
         <div class="streak-chip" title="Daily Practice Streak">
           <span class="streak-flame">🔥</span>
           <span id="hdrStreakVal">0</span>d
@@ -2902,6 +2959,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
       <div class="cockpit-left-group">
         <button class="test-back-btn" onclick="confirmQuit()">‹ Exit</button>
         <span id="kbBadge"></span>
+        <span id="otgCockpitBadge" class="otg-badge otg-fallback" onclick="OTGKeyboardService.showInfoModal()" title="OTG Physical Keyboard Status" style="cursor:pointer;">⌨️ Virtual/Touch</span>
         <div class="live-cockpit-stats">
           <span class="live-stat-pill"><span class="pill-label">Chars: </span><b id="liveChars">0</b></span>
           <span class="live-stat-pill">⌫ <b id="liveBack">0</b></span>
@@ -3150,7 +3208,10 @@ body:has(#screen-test.active) .bottom-nav-bar {
       <div class="inputcard practice-panel-right" style="margin:0;display:flex;flex-direction:column;">
         <div class="panelhead" style="display:flex;justify-content:space-between;align-items:center;padding:7px 12px 6px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);background:var(--card-bg);border-bottom:1px solid var(--card-border);position:sticky;top:0;z-index:5;flex-shrink:0;">
           <span>Your Typing</span>
-          <span style="font-size:10px;font-weight:600;color:var(--primary);">Active Input</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span id="otgDrillBadge" class="otg-badge otg-fallback" onclick="OTGKeyboardService.showInfoModal()" title="OTG Status" style="cursor:pointer;">⌨️ Touch</span>
+            <span style="font-size:10px;font-weight:600;color:var(--primary);">Active Input</span>
+          </div>
         </div>
         <textarea id="practiceInput" placeholder="Type the exercise..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%;flex:1 1 auto;min-height:120px;border:none;background:transparent;outline:none;font-family:var(--font-mono);font-size:20px;line-height:1.8;resize:none;padding:10px 12px;color:var(--ink);box-sizing:border-box;"></textarea>
       </div>
@@ -4307,7 +4368,11 @@ function startTest(m){
   // visibility/layout race without touching typing/timer/cursor logic.
   requestAnimationFrame(()=>{ requestAnimationFrame(resetPassageScroll); });
   setTimeout(resetPassageScroll, 250);
-  setTimeout(()=>{ $('typingArea').focus(); resetPassageScroll(); }, 80);
+  setTimeout(()=>{
+    $('typingArea').focus();
+    resetPassageScroll();
+    if(window.OTGKeyboardService) OTGKeyboardService.focusTypingArea();
+  }, 80);
 }
 
 function confirmQuit(){
@@ -7121,6 +7186,9 @@ updateHeroTrackLabel();
 if(window.NotificationService) {
   NotificationService.init();
 }
+if(window.OTGKeyboardService) {
+  OTGKeyboardService.init();
+}
 
 /* =====================================================================
    NOTIFICATION PREFERENCES UI SYNC
@@ -7151,6 +7219,11 @@ function saveNotificationPreferencesFromUI() {
   }
 }
 window.saveNotificationPreferencesFromUI = saveNotificationPreferencesFromUI;
+window.tamilCharKey = tamilCharKey;
+window.tamilBackspace = tamilBackspace;
+window.insertPlain = insertPlain;
+window.countStrokes = countStrokes;
+window.LEVEL_STROKES = LEVEL_STROKES;
 
 function loadNotificationPreferencesToUI() {
   if(!window.NotificationService) return;
@@ -7275,6 +7348,8 @@ if (window.Capacitor) {
   </div>
 </div>
 
+  <!-- OTG PHYSICAL KEYBOARD ENGINE SCRIPT -->
+  <script src="js/otg_keyboard_service.js"></script>
   <!-- NOTIFICATION SERVICE SCRIPT -->
   <script src="js/notification_service.js"></script>
   <!-- GAMES MODULE ENGINE SCRIPT -->
