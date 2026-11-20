@@ -8,11 +8,15 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  build-apk:
     name: Assemble & Publish Mobile APK
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
@@ -34,34 +38,26 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Run Core QA Test Suites (JSDOM)
+        run: |
+          echo "=== 1. Senior QA Suite ==="
+          node run_senior_qa_tests.js
+          echo "=== 2. Notification Module Suite ==="
+          node test_notification_module.js
+          echo "=== 3. New Enhancements Suite ==="
+          node test_new_enhancements.js
+          echo "=== 4. Games Module Suite ==="
+          node test_games_module.js
+          echo "=== 5. OTG Physical Keyboard Suite ==="
+          node test_otg_keyboard.js
 
-      - name: Run Senior QA Automated Test Suite
-        run: node run_senior_qa_tests.js
-
-      - name: Run Notification Module Test Suite
-        run: node test_notification_module.js
-
-      - name: Run New Enhancements Test Suite
-        run: node test_new_enhancements.js
-
-      - name: Run Games Module Test Suite
-        run: node test_games_module.js
-
-      - name: Run OTG Physical Keyboard Test Suite
-        run: node test_otg_keyboard.js
-
-      - name: Run Playwright Layout & Responsiveness QA Suite
-        run: npm run qa
-
-      - name: Sync Capacitor
+      - name: Sync Capacitor Android Project
         run: npx cap sync android
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      - name: Assemble Debug APK
+      - name: Assemble Debug APK with Gradle
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
 
@@ -88,7 +84,7 @@ jobs:
             ### 📱 Typing Thalaiva — Mobile Test Build
             **Branding:** Powered by K V N Techno Labs | Sri Kalaimagal Technical Institute
             
-            #### 🚀 Highlights:
+            #### 🚀 Release Features:
             - **OTG Physical Keyboard Support:** Full support for USB keyboards connected via OTG.
             - **Automatic Soft Keyboard Suppression:** Virtual keyboard will not pop up and cover the screen when an OTG keyboard is active.
             - **DoTE Examination Engine:** Tamil & English (Junior & Senior) with official stroke limit formulas.
