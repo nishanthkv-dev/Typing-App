@@ -269,6 +269,12 @@ async function runOTGKeyboardTestSuite() {
   console.log('\n======================================================================');
   console.log(`   OTG KEYBOARD ACCEPTANCE RESULTS: ${passedTests}/${totalTests} PASSED (100%)`);
   console.log('======================================================================\n');
+
+  if (passedTests === totalTests) {
+    process.exit(0);
+  } else {
+    process.exit(1);
+  }
 }
 
 runOTGKeyboardTestSuite().catch(err => {
