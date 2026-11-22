@@ -207,10 +207,10 @@ async function runGamesTestSuite() {
   assert(engine.charIndex === 1, `Advanced to index 1 after correcting mistake (got ${engine.charIndex})`);
   assert(engine.score === 1, `Score updated to 1 (got ${engine.score})`);
 
-  // --- SUITE 5: 5-MISS TERMINATION & PARTIAL POINT RETENTION ---
-  console.log("\n--- TEST SUITE 5: 5-MISS TERMINATION & PARTIAL POINT RETENTION ---");
+  // --- SUITE 5: 6-MISS TERMINATION & PARTIAL POINT RETENTION ---
+  console.log("\n--- TEST SUITE 5: 6-MISS TERMINATION & PARTIAL POINT RETENTION ---");
   engine.start('bubble', 'en', 'qwerty');
-  assert(engine.lives === 5, "Starts with exactly 5 hearts/lives");
+  assert(engine.lives === 6, "Starts with exactly 6 lives/chances");
 
   // Type 2 letters of word to earn 2 partial points
   engine.activeWords[0] = {
@@ -226,24 +226,26 @@ async function runGamesTestSuite() {
 
   // Word reaches ceiling incomplete: 1 miss!
   engine.handleWordMiss(0);
-  assert(engine.lives === 4, `Hearts decreased to 4 (got ${engine.lives})`);
+  assert(engine.lives === 5, `Lives decreased to 5 (got ${engine.lives})`);
   assert(engine.score === 2, `PARTIAL POINTS RETAINED: score still 2 after miss (got ${engine.score})`);
 
-  // Simulate misses 2, 3, 4
+  // Simulate misses 2, 3, 4, 5
   engine.spawnWord();
-  engine.handleWordMiss(0); // Miss 2 -> lives: 3
+  engine.handleWordMiss(0); // Miss 2 -> lives: 4
   engine.spawnWord();
-  engine.handleWordMiss(0); // Miss 3 -> lives: 2
+  engine.handleWordMiss(0); // Miss 3 -> lives: 3
   engine.spawnWord();
-  engine.handleWordMiss(0); // Miss 4 -> lives: 1
-  assert(engine.lives === 1, "1 Heart remaining before final miss");
+  engine.handleWordMiss(0); // Miss 4 -> lives: 2
+  engine.spawnWord();
+  engine.handleWordMiss(0); // Miss 5 -> lives: 1
+  assert(engine.lives === 1, "1 Life remaining before final miss");
   assert(engine.active === true, "Game still active on 1 life");
 
-  // 5th Miss -> GAME OVER IMMEDIATELY!
+  // 6th Miss -> GAME OVER IMMEDIATELY!
   engine.spawnWord();
   engine.handleWordMiss(0);
-  assert(engine.lives === 0, "Lives is 0 on 5th miss");
-  assert(engine.active === false, "Game stopped immediately on 5th miss");
+  assert(engine.lives === 0, "Lives is 0 on 6th miss");
+  assert(engine.active === false, "Game stopped immediately on 6th miss");
 
   const goModal = window.document.getElementById('gameOverModal');
   assert(goModal !== null && goModal.style.display === 'flex', "Anti-Choke Game Over report modal displayed");

@@ -231,8 +231,38 @@
       this.ctx = this.canvas.getContext('2d');
       this.bindEvents();
       this.resizeCanvas();
-      window.addEventListener('resize', () => this.resizeCanvas());
-      window.addEventListener('orientationchange', () => setTimeout(() => this.resizeCanvas(), 150));
+
+      // Load authentic Sri Kalaimagal Institute watermark for game arena
+      if (typeof Image !== 'undefined') {
+        this.watermarkImg = new Image();
+        this.watermarkImg.src = 'img/kalaimagal_watermark.png';
+      }
+      this.initAmbientDust();
+
+      window.addEventListener('resize', () => {
+        this.resizeCanvas();
+        this.initAmbientDust();
+      });
+      window.addEventListener('orientationchange', () => setTimeout(() => {
+        this.resizeCanvas();
+        this.initAmbientDust();
+      }, 150));
+    }
+
+    initAmbientDust() {
+      this.ambientDust = [];
+      const count = 32;
+      const w = this.canvasWidth || 800;
+      const h = this.canvasHeight || 600;
+      for (let i = 0; i < count; i++) {
+        this.ambientDust.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          radius: 1.0 + Math.random() * 1.6,
+          alpha: 0.15 + Math.random() * 0.4,
+          speed: 0.15 + Math.random() * 0.3
+        });
+      }
     }
 
     resizeCanvas() {
@@ -294,7 +324,8 @@
       this.layout = layout || (lang === 'ta' ? 'tamil99' : 'qwerty');
 
       this.score = 0;
-      this.lives = 5;
+      this.maxLives = 6; // 6 chances matching reference UI
+      this.lives = 6;
       this.wordsCompleted = 0;
       this.wordsMissed = 0;
       this.correctChars = 0;
@@ -399,37 +430,63 @@
       const wordText = candidates.length > 0 ? candidates[Math.floor(Math.random() * candidates.length)] : bank[Math.floor(Math.random() * bank.length)];
 
       const graphemes = splitGraphemes(wordText, this.lang);
-      const isBubble = this.gameType === 'bubble';
-
-      // Calculate width & placement
-      this.ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
-      const textWidth = this.ctx.measureText(wordText).width;
-      const bubblePadding = 24;
-      const boxWidth = Math.max(80, textWidth + bubblePadding * 2);
-
-      // Random horizontal position within boundaries
-      const minX = boxWidth / 2 + 10;
-      const maxX = Math.max(minX, this.canvasWidth - boxWidth / 2 - 10);
-      const x = minX + Math.random() * (maxX - minX);
-
-      // Initial Y position:
-      // Bubble challenge: starts at bottom (canvasHeight - 50) and floats UP
-      // Falling challenge: starts at top (40) and falls DOWN
-      const y = isBubble ? (this.canvasHeight - 50) : 40;
+      const isBubble = (this.gameType === 'bubble');
 
       // Base speed
       let speed = isBubble ? 0.65 : 0.75;
       if (!isBubble) {
-        // Accelerate speed dynamically with score
         speed += Math.min(this.score / 50, 2.2) * 0.35;
+      } else {
+        speed += Math.min(this.score / 60, 1.5) * 0.2;
       }
+
+      const numLetters = graphemes.length;
+      const bubbleRadius = (this.canvasWidth <= 500) ? 30 : 34;
+      const isFirstSpawn = (this.activeWords.length === 0 && this.score === 0);
+
+      // Distribute letter bubbles horizontally and stagger them vertically
+      const usableWidth = Math.max(160, this.canvasWidth - (bubbleRadius * 2 + 50));
+      const colStep = usableWidth / Math.max(numLetters, 1);
+      const startX = bubbleRadius + 25;
+
+      const bubbles = [];
+      for (let i = 0; i < numLetters; i++) {
+        const bx = startX + (i + 0.5) * colStep + (Math.random() - 0.5) * Math.min(25, colStep * 0.35);
+        let by;
+        if (isFirstSpawn) {
+          // On start, distribute gracefully across screen like reference mockup
+          by = Math.max(140, this.canvasHeight * 0.28) + (i * 105) + (Math.random() * 20);
+        } else {
+          // Normal spawn: rises from bottom letter-by-letter
+          by = (this.canvasHeight - 50) + (i * 95) + (Math.random() * 20);
+        }
+
+        bubbles.push({
+          char: graphemes[i],
+          x: bx,
+          baseX: bx,
+          y: by,
+          radius: bubbleRadius,
+          phase: Math.random() * Math.PI * 2,
+          wobbleSpeed: 0.02 + Math.random() * 0.015,
+          wobbleAmp: 12 + Math.random() * 6,
+          popped: false,
+          shakeFrames: 0,
+          shakeOffset: 0
+        });
+      }
+
+      const initialX = bubbles[0] ? bubbles[0].x : this.canvasWidth / 2;
+      const initialY = isBubble ? (bubbles[0] ? bubbles[0].y : this.canvasHeight - 50) : 40;
+      const boxWidth = Math.max(80, graphemes.length * 50);
 
       const wordObj = {
         text: wordText,
         graphemes: graphemes,
-        x: x,
-        y: y,
-        baseX: x,
+        bubbles: bubbles,
+        x: initialX,
+        y: initialY,
+        baseX: initialX,
         width: boxWidth,
         height: 48,
         speed: speed,
@@ -449,6 +506,36 @@
         this.charIndex = 0;
         this.composer = { raw: '', outLen: 0 };
       }
+    }
+
+    getWordBubbles(wordObj) {
+      if (!wordObj) return [];
+      if (!wordObj.bubbles || wordObj.bubbles.length !== (wordObj.graphemes || []).length) {
+        const bubbleRadius = (this.canvasWidth <= 500) ? 30 : 34;
+        const numLetters = (wordObj.graphemes || []).length;
+        const usableWidth = Math.max(160, this.canvasWidth - (bubbleRadius * 2 + 50));
+        const colStep = usableWidth / Math.max(numLetters, 1);
+        const startX = bubbleRadius + 25;
+
+        wordObj.bubbles = (wordObj.graphemes || []).map((char, i) => {
+          const bx = startX + (i + 0.5) * colStep;
+          const by = (wordObj.y || (this.canvasHeight - 50)) + (i * 95);
+          return {
+            char: char,
+            x: bx,
+            baseX: bx,
+            y: by,
+            radius: bubbleRadius,
+            phase: Math.random() * Math.PI * 2,
+            wobbleSpeed: 0.025,
+            wobbleAmp: 12,
+            popped: false,
+            shakeFrames: 0,
+            shakeOffset: 0
+          };
+        });
+      }
+      return wordObj.bubbles;
     }
 
     handleKeystroke(char) {
@@ -505,11 +592,28 @@
         // --- SUCCESS STRIKE ---
         this.correctChars++;
         this.score += 1; // 1 point per correct letter
+
+        let strikeX = targetWord.x;
+        let strikeY = targetWord.y;
+
+        if (this.gameType === 'bubble') {
+          const bubbles = this.getWordBubbles(targetWord);
+          const poppedBubble = bubbles[this.charIndex];
+          if (poppedBubble) {
+            poppedBubble.popped = true;
+            strikeX = poppedBubble.x;
+            strikeY = poppedBubble.y;
+            this.spawnBubblePopBurst(poppedBubble.x, poppedBubble.y);
+            this.addFloatingTip(poppedBubble.x, poppedBubble.y - 20, '+1', '#fbbf24');
+          }
+        }
+
         this.charIndex++;
         this.composer = { raw: '', outLen: 0 };
 
         playSound('hit');
-        this.spawnSparks(targetWord.x, targetWord.y, '#10b981');
+        playSound('pop');
+        this.spawnSparks(strikeX, strikeY, '#10b981');
         this.updateHUD();
 
         // Check if word completed
@@ -518,9 +622,8 @@
           this.score += 5; // 5 bonus points for completing a word
           this.wordsCompleted++;
           playSound('bonus');
-          playSound('pop');
-          this.spawnWordExplosion(targetWord.x, targetWord.y);
-          this.addFloatingTip(targetWord.x, targetWord.y - 20, '+5 WORD BONUS! 🔥', '#fbbf24');
+          this.spawnWordExplosion(strikeX, strikeY);
+          this.addFloatingTip(strikeX, strikeY - 24, '+5 WORD BONUS! 🔥', '#fbbf24');
 
           // Remove completed word
           this.activeWords.splice(this.currentWordIdx, 1);
@@ -538,6 +641,15 @@
         this.incorrectChars++;
         this.composer = { raw: '', outLen: 0 };
 
+        if (this.gameType === 'bubble') {
+          const bubbles = this.getWordBubbles(targetWord);
+          const activeBubble = bubbles[this.charIndex];
+          if (activeBubble) {
+            activeBubble.shakeFrames = 14;
+            this.addFloatingTip(activeBubble.x, activeBubble.y + 26, `Oops! Typed '${typedChar}' not '${targetGrapheme}'`, '#ef4444');
+          }
+        }
+
         // Log exact mistake for anti-choke diagnostic
         const mistakeEntry = {
           expected: targetGrapheme,
@@ -552,11 +664,31 @@
         // Visual error shake & warning
         targetWord.shakeFrames = 12;
         targetWord.shakeOffset = 10;
-        this.addFloatingTip(targetWord.x, targetWord.y + 24, `Oops! Typed '${typedChar}' not '${targetGrapheme}'`, '#ef4444');
+        if (this.gameType !== 'bubble') {
+          this.addFloatingTip(targetWord.x, targetWord.y + 24, `Oops! Typed '${typedChar}' not '${targetGrapheme}'`, '#ef4444');
+        }
 
         playSound('error');
         triggerHaptic('error');
         this.updateHUD();
+      }
+    }
+
+    spawnBubblePopBurst(x, y) {
+      const colors = ['#fef08a', '#fbbf24', '#f59e0b', '#d97706', '#ffffff'];
+      for (let i = 0; i < 16; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2 + Math.random() * 4.5;
+        this.particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          radius: 2 + Math.random() * 2.5,
+          alpha: 1.0,
+          decay: 0.04
+        });
       }
     }
 
@@ -618,11 +750,23 @@
     }
 
     update(timestamp) {
-      const isBubble = this.gameType === 'bubble';
+      const isBubble = (this.gameType === 'bubble');
       const now = Date.now();
 
+      // Update ambient dust motes
+      if (this.ambientDust && isBubble) {
+        for (let i = 0; i < this.ambientDust.length; i++) {
+          const d = this.ambientDust[i];
+          d.y -= d.speed;
+          if (d.y < 0) {
+            d.y = this.canvasHeight;
+            d.x = Math.random() * this.canvasWidth;
+          }
+        }
+      }
+
       // Spawn periodic words if below max concurrent words
-      const maxConcurrent = 2;
+      const maxConcurrent = isBubble ? 1 : 2;
       if (now - this.lastSpawnTime > this.spawnInterval && this.activeWords.length < maxConcurrent) {
         this.spawnWord();
         this.lastSpawnTime = now;
@@ -632,7 +776,7 @@
       for (let i = this.activeWords.length - 1; i >= 0; i--) {
         const w = this.activeWords[i];
 
-        // Wobble physics
+        // Wobble physics for base word
         w.phase += w.wobbleSpeed;
         w.x = w.baseX + Math.sin(w.phase) * w.wobbleAmp;
 
@@ -646,10 +790,40 @@
 
         // Movement
         if (isBubble) {
-          // Float upward
-          w.y -= w.speed;
-          // Ceiling boundary collision: word reached top incomplete!
-          if (w.y <= 45) {
+          const bubbles = this.getWordBubbles(w);
+          let ceilingHit = false;
+
+          for (let bIdx = 0; bIdx < bubbles.length; bIdx++) {
+            const b = bubbles[bIdx];
+            b.phase += b.wobbleSpeed;
+            b.x = b.baseX + Math.sin(b.phase) * b.wobbleAmp;
+
+            if (b.shakeFrames > 0) {
+              b.shakeFrames--;
+              b.shakeOffset = (b.shakeFrames % 2 === 0 ? 1 : -1) * (b.shakeFrames * 0.8);
+            } else {
+              b.shakeOffset = 0;
+            }
+
+            // Move letter bubble upwards towards the top
+            b.y -= w.speed;
+
+            // Check if any unpopped letter bubble hits the ceiling boundary
+            if (!b.popped && b.y <= 45) {
+              ceilingHit = true;
+            }
+          }
+
+          // Keep w.y aligned with leading unpopped bubble
+          const unpopped = bubbles.filter(b => !b.popped);
+          if (unpopped.length > 0) {
+            w.y = unpopped[0].y;
+            w.x = unpopped[0].x;
+          } else {
+            w.y -= w.speed;
+          }
+
+          if (ceilingHit || w.y <= 45) {
             this.handleWordMiss(i);
           }
         } else {
@@ -688,11 +862,15 @@
 
       playSound('miss');
       triggerHaptic('miss');
-      this.spawnSparks(missedWord.x, missedWord.y, '#ef4444');
-      this.addFloatingTip(missedWord.x, missedWord.y, 'BOUNDARY MISSED! 💔', '#ef4444');
+      const missX = missedWord ? missedWord.x : this.canvasWidth / 2;
+      const missY = missedWord ? missedWord.y : 50;
+      this.spawnSparks(missX, missY, '#ef4444');
+      this.addFloatingTip(missX, missY, 'BOUNDARY MISSED! 💔', '#ef4444');
 
       // Record in word mistakes
-      this.wordMistakesMap[missedWord.text] = (this.wordMistakesMap[missedWord.text] || 0) + 1;
+      if (missedWord) {
+        this.wordMistakesMap[missedWord.text] = (this.wordMistakesMap[missedWord.text] || 0) + 1;
+      }
 
       // Remove missed word
       this.activeWords.splice(wordIndex, 1);
@@ -706,7 +884,7 @@
 
       this.updateHUD();
 
-      // Check if 5-Miss Game Over condition reached
+      // Check if Game Over condition reached (6 chances exhausted)
       if (this.lives <= 0) {
         this.gameOver();
       } else if (this.activeWords.length === 0) {
@@ -725,12 +903,26 @@
       const accEl = document.getElementById('gameAccuracyDisplay');
       if (accEl) accEl.textContent = `${acc}%`;
 
-      // Hearts / Chances (5 Max)
+      // Speed Pill (1..5)
+      const speedEl = document.getElementById('gameSpeedDisplay');
+      if (speedEl) {
+        const speedTier = 1 + Math.min(Math.floor(this.score / 25), 4);
+        speedEl.textContent = speedTier;
+      }
+
+      // Misses Tracker (6 slots matching reference UI)
       const heartsContainer = document.getElementById('gameHeartsDisplay');
       if (heartsContainer) {
         let heartsHtml = '';
-        for (let i = 0; i < 5; i++) {
-          heartsHtml += (i < this.lives) ? '❤️' : '🤍';
+        const totalSlots = this.maxLives || 6;
+        for (let i = 0; i < totalSlots; i++) {
+          if (i < this.wordsMissed) {
+            // Missed slot: Red circle with X
+            heartsHtml += `<span class="game-miss-slot missed" title="Missed" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:2px solid #ef4444;background:rgba(239,68,68,0.18);color:#ef4444;font-size:12px;font-weight:900;line-height:1;">✕</span>`;
+          } else {
+            // Open life slot: Outline circle
+            heartsHtml += `<span class="game-miss-slot open" title="Life available" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:2px solid #52525b;background:transparent;"></span>`;
+          }
         }
         heartsContainer.innerHTML = heartsHtml;
       }
@@ -747,40 +939,54 @@
       const ctx = this.ctx;
       const w = this.canvasWidth;
       const h = this.canvasHeight;
-      const isBubble = this.gameType === 'bubble';
+      const isBubble = (this.gameType === 'bubble');
 
       // Clear frame
       ctx.clearRect(0, 0, w, h);
 
       // Render Arena Ambience Background
-      const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
       if (isBubble) {
-        bgGrad.addColorStop(0, '#0a1128');
-        bgGrad.addColorStop(1, '#020617');
+        // Warm dark vignette matching reference mockup (#2e1b20 -> #1e1115 -> #0c0709)
+        const vignette = ctx.createRadialGradient(w / 2, h / 2, 10, w / 2, h / 2, Math.max(w, h) * 0.7);
+        vignette.addColorStop(0.0, '#2e1b20');
+        vignette.addColorStop(0.55, '#1e1115');
+        vignette.addColorStop(1.0, '#0c0709');
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0, 0, w, h);
+
+        // Center Sri Kalaimagal Institute Watermark (seamless low-opacity blend)
+        if (this.watermarkImg && this.watermarkImg.complete && this.watermarkImg.naturalWidth > 0) {
+          ctx.save();
+          ctx.globalAlpha = 0.32;
+          const wmWidth = Math.min(w * 0.58, 290);
+          const wmAspect = this.watermarkImg.naturalWidth / this.watermarkImg.naturalHeight;
+          const wmHeight = wmWidth / wmAspect;
+          const wmX = (w - wmWidth) / 2;
+          const wmY = (h - wmHeight) / 2;
+          ctx.drawImage(this.watermarkImg, wmX, wmY, wmWidth, wmHeight);
+          ctx.restore();
+        }
+
+        // Ambient golden dust motes drifting gracefully
+        if (this.ambientDust) {
+          ctx.save();
+          for (let i = 0; i < this.ambientDust.length; i++) {
+            const d = this.ambientDust[i];
+            ctx.fillStyle = `rgba(254, 240, 138, ${d.alpha})`;
+            ctx.beginPath();
+            ctx.arc(d.x, d.y, d.radius, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
       } else {
+        // Falling mode space background
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
         bgGrad.addColorStop(0, '#020617');
         bgGrad.addColorStop(1, '#0f172a');
-      }
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
 
-      // Render Danger Boundaries
-      if (isBubble) {
-        // High-voltage ceiling line at top (y = 45)
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([6, 6]);
-        ctx.beginPath();
-        ctx.moveTo(10, 45);
-        ctx.lineTo(w - 10, 45);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        ctx.fillStyle = '#ef4444';
-        ctx.font = 'bold 10px system-ui, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('⚡ HIGH VOLTAGE CEILING — DO NOT LET BUBBLES POP HERE ⚡', w / 2, 35);
-      } else {
         // Laser defense floor line at bottom (y = h - 60)
         ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
         ctx.lineWidth = 2;
@@ -797,11 +1003,24 @@
         ctx.fillText('🛡️ BASELINE DEFENSE SHIELD — STOP FALLING METEORS 🛡️', w / 2, h - 45);
       }
 
-      // Render Words
-      this.activeWords.forEach((wordObj, idx) => {
-        const isActiveTarget = (idx === this.currentWordIdx);
-        this.renderWordEntity(wordObj, isActiveTarget);
-      });
+      // Render Words / Bubbles
+      if (isBubble) {
+        this.activeWords.forEach((wordObj, idx) => {
+          const isActiveWord = (idx === this.currentWordIdx);
+          const bubbles = this.getWordBubbles(wordObj);
+
+          bubbles.forEach((b, bIdx) => {
+            if (b.popped) return;
+            const isCurrentTarget = isActiveWord && (bIdx === this.charIndex);
+            this.renderBubble(ctx, b, isCurrentTarget);
+          });
+        });
+      } else {
+        this.activeWords.forEach((wordObj, idx) => {
+          const isActiveTarget = (idx === this.currentWordIdx);
+          this.renderFallingWordEntity(wordObj, isActiveTarget);
+        });
+      }
 
       // Render Particles
       this.particles.forEach(p => {
@@ -819,16 +1038,126 @@
         ctx.save();
         ctx.globalAlpha = tip.alpha;
         ctx.fillStyle = tip.color;
-        ctx.font = 'bold 12.5px system-ui, sans-serif';
+        ctx.font = 'bold 13px system-ui, sans-serif';
         ctx.textAlign = 'center';
-        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+        ctx.shadowColor = 'rgba(0,0,0,0.85)';
         ctx.shadowBlur = 6;
         ctx.fillText(tip.text, tip.x, tip.y);
         ctx.restore();
       });
     }
 
+    renderBubble(ctx, b, isCurrentTarget) {
+      if (b.popped) return;
+
+      const bx = b.x + (b.shakeOffset || 0);
+      const by = b.y;
+      const r = b.radius || 34;
+
+      ctx.save();
+
+      // Outer golden glow
+      if (isCurrentTarget) {
+        ctx.shadowColor = 'rgba(251, 191, 36, 0.85)';
+        ctx.shadowBlur = 22;
+      } else {
+        ctx.shadowColor = 'rgba(245, 158, 11, 0.35)';
+        ctx.shadowBlur = 12;
+      }
+
+      // 3D Spherical Radial Gradient (Focal point top-left)
+      const grad = ctx.createRadialGradient(
+        bx - r * 0.35, by - r * 0.35, r * 0.08,
+        bx, by, r
+      );
+      grad.addColorStop(0.0, '#fffbeb'); // pure creamy highlight
+      grad.addColorStop(0.2, '#fef08a'); // soft lemon gold
+      grad.addColorStop(0.55, '#f59e0b'); // core warm amber body
+      grad.addColorStop(0.85, '#d97706'); // warm shadow
+      grad.addColorStop(1.0, '#78350f'); // deep rim shade
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(bx, by, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Delicate outer rim stroke
+      ctx.strokeStyle = isCurrentTarget ? 'rgba(254, 240, 138, 0.9)' : 'rgba(251, 191, 36, 0.4)';
+      ctx.lineWidth = isCurrentTarget ? 2.5 : 1.2;
+      ctx.stroke();
+
+      // Top-Left Glossy Crescent Reflection
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
+      ctx.beginPath();
+      ctx.ellipse(
+        bx - r * 0.32, by - r * 0.32,
+        r * 0.28, r * 0.14,
+        -Math.PI / 4, 0, Math.PI * 2
+      );
+      ctx.fill();
+      ctx.restore();
+
+      // Bottom-Right Soft Inner Specular Rim
+      ctx.save();
+      ctx.strokeStyle = 'rgba(254, 240, 138, 0.3)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(bx, by, r - 2, 0.25 * Math.PI, 0.65 * Math.PI);
+      ctx.stroke();
+      ctx.restore();
+
+      // Active Target Pulsating Aura Ring
+      if (isCurrentTarget) {
+        ctx.save();
+        const pulse = (Math.sin(Date.now() * 0.008) + 1) * 0.5;
+        ctx.strokeStyle = `rgba(254, 240, 138, ${0.4 + pulse * 0.5})`;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.arc(bx, by, r + 6 + pulse * 3, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.restore(); // restore shadow
+
+      // Render the single centered Letter
+      ctx.save();
+      const isTamil = (this.lang === 'ta');
+      const fontSize = isTamil ? Math.round(r * 0.75) : Math.round(r * 0.88);
+      ctx.font = `bold ${fontSize}px Georgia, "Times New Roman", "Mukta Malar", serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Text shadow for sharp legibility
+      ctx.shadowColor = 'rgba(255, 255, 255, 0.35)';
+      ctx.shadowBlur = 1;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 1;
+
+      // Deep rich chocolate espresso color (#241208)
+      ctx.fillStyle = '#241208';
+      const displayText = isTamil ? b.char : b.char.toUpperCase();
+      ctx.fillText(displayText, bx, by + 1);
+
+      ctx.restore();
+    }
+
     renderWordEntity(wordObj, isActiveTarget) {
+      if (this.gameType === 'bubble') {
+        const bubbles = this.getWordBubbles(wordObj);
+        bubbles.forEach((b, bIdx) => {
+          if (b.popped) return;
+          const isCurrentTarget = isActiveTarget && (bIdx === this.charIndex);
+          this.renderBubble(this.ctx, b, isCurrentTarget);
+        });
+      } else {
+        this.renderFallingWordEntity(wordObj, isActiveTarget);
+      }
+    }
+
+    renderFallingWordEntity(wordObj, isActiveTarget) {
       const ctx = this.ctx;
       const x = wordObj.x + wordObj.shakeOffset;
       const y = wordObj.y;
