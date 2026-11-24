@@ -65,20 +65,23 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      - name: Assemble Debug APK with Gradle
+      - name: Assemble Debug APK & App Bundle with Gradle
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug bundleDebug --no-daemon
 
-      - name: Prepare Named Mobile APK
+      - name: Prepare Named Mobile APK & AAB
         run: |
           cp android/app/build/outputs/apk/debug/app-debug.apk TypingThalaiva-OTG-Mobile.apk
-          ls -lh TypingThalaiva-OTG-Mobile.apk
+          cp android/app/build/outputs/bundle/debug/app-debug.aab TypingThalaiva-Mobile.aab
+          ls -lh TypingThalaiva-OTG-Mobile.apk TypingThalaiva-Mobile.aab
 
-      - name: Upload APK as Workflow Artifact
+      - name: Upload APK & AAB as Workflow Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: TypingThalaiva-OTG-Mobile-APK
-          path: TypingThalaiva-OTG-Mobile.apk
+          name: TypingThalaiva-Mobile-Builds
+          path: |
+            TypingThalaiva-OTG-Mobile.apk
+            TypingThalaiva-Mobile.aab
           if-no-files-found: error
           retention-days: 14
 
@@ -89,20 +92,24 @@ jobs:
           tag_name: mobile-latest
           name: "Typing Thalaiva — OTG Mobile Release (Latest)"
           body: |
-            ### 📱 Typing Thalaiva — Mobile Test Build
+            ### 📱 Typing Thalaiva — Mobile Test Build & Play Store Bundle
             **Branding:** Powered by K V N Techno Labs | Sri Kalaimagal Technical Institute
             
             #### 🚀 Release Features:
-            - **OTG Physical Keyboard Support:** Full support for USB keyboards connected via OTG.
-            - **Automatic Soft Keyboard Suppression:** Virtual keyboard will not pop up and cover the screen when an OTG keyboard is active.
-            - **DoTE Examination Engine:** Tamil & English (Junior & Senior) with official stroke limit formulas.
-            - **Arcade Games & Anti-Choke Mode:** Bubble Words & Falling Words with Tamil99 & Typewriter support.
-            - **Local Notification Alerts:** Daily practice reminders and milestone alerts.
+            - **DoTE Examination Engine:** Specially designed for DoTE Typewriting Examination preparation (Tamil & English Junior/Senior).
+            - **Google Sign-In & Secure Entitlements:** Free Forever guest access for 2 passages per language, with Google Auth only required for course upgrades.
+            - **Single-Device Protection:** Immediate automatic revocation on concurrent device logins.
+            - **OTG Physical Keyboard Support:** Full support for USB keyboards connected via OTG with automatic soft keyboard suppression.
+            - **Arcade Games & Anti-Choke Mode:** Bubble Words & Falling Words with progressive speed and Tamil99/Typewriter support.
+            - **Play Store Compliance:** Built-in Privacy Policy modal and user account/data deletion.
             
             #### 📥 Direct Installation:
             Download **`TypingThalaiva-OTG-Mobile.apk`** below directly onto your Android smartphone and tap to install.
+            For Play Console testing, **`TypingThalaiva-Mobile.aab`** is also generated.
           draft: false
           prerelease: false
-          files: TypingThalaiva-OTG-Mobile.apk
+          files: |
+            TypingThalaiva-OTG-Mobile.apk
+            TypingThalaiva-Mobile.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

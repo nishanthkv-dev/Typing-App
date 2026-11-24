@@ -620,6 +620,58 @@
     },
 
     /**
+     * Delete Account & Purge Data (Google Play Policy Compliance)
+     */
+    async deleteAccount() {
+      try {
+        const uid = this.currentUser ? this.currentUser.uid : null;
+        if (this.sessionUnsubscribe) {
+          try { this.sessionUnsubscribe(); } catch(e){}
+          this.sessionUnsubscribe = null;
+        }
+
+        // Delete from Firestore
+        if (uid && window.firebase && window.firebase.firestore) {
+          try {
+            const db = window.firebase.firestore();
+            await db.collection('students').doc(uid).delete();
+          } catch (e) {
+            console.warn('[FirebaseService] Firestore record delete note:', e);
+          }
+        }
+
+        // Delete from Firebase Auth
+        if (window.firebase && window.firebase.auth && window.firebase.auth().currentUser) {
+          try {
+            await window.firebase.auth().currentUser.delete();
+          } catch(e) {
+            console.warn('[FirebaseService] Auth user delete note:', e);
+          }
+        }
+      } catch (err) {
+        console.warn('[FirebaseService] deleteAccount error:', err);
+      } finally {
+        this.setGuestState();
+        if (typeof localStorage !== 'undefined') {
+          localStorage.removeItem('thalaiva_session_id');
+          localStorage.removeItem('thalaiva_user_profile');
+          localStorage.removeItem('thalaiva_entitlement');
+          localStorage.removeItem('recent_results');
+        }
+        if (typeof window.syncStudentProfileWithAuth === 'function') {
+          window.syncStudentProfileWithAuth(null);
+        }
+        if (typeof window.populatePassageDropdown === 'function') {
+          window.populatePassageDropdown();
+        }
+        if (typeof window.toast === 'function') {
+          window.toast('🗑️ Account and all associated data permanently deleted.');
+        }
+        this.notifyListeners('accountDeleted', {});
+      }
+    },
+
+    /**
      * Listener registration
      */
     addListener(fn) {

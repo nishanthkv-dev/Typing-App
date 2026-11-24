@@ -166,7 +166,7 @@ async function runTestSuite() {
   assert(doteEmblemImg !== null, "Official DoTE emblem image element (img/dote_emblem.png) rendered");
 
   const brandText = window.document.body.textContent;
-  const officialStatement = "Specially designed for DOT Typewriting Examination preparation — practice smarter";
+  const officialStatement = "Specially designed for DoTE Typewriting Examination preparation — practice smarter";
   assert(brandText.includes(officialStatement), "Official DoTE preparation purpose statement embedded");
 
   // --- SUITE 5: INTERACTIVE KEYBOARD KEY MAP MODAL ---

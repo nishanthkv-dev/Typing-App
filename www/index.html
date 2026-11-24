@@ -2893,7 +2893,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
             <span>🏛️</span> Tamil Nadu Technical Examinations (DoTE)
           </div>
           <div style="font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.45;margin-top:3px;">
-            Specially designed for DOT Typewriting Examination preparation — practice smarter, improve your speed and accuracy, score higher marks, and achieve better grades.
+            Specially designed for DoTE Typewriting Examination preparation — practice smarter, improve your speed and accuracy, score higher marks, and achieve better grades.
           </div>
         </div>
       </div>
@@ -3216,7 +3216,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
         <div style="min-width:0;">
           <div style="font-size:11px;font-weight:800;color:#d97706;text-transform:uppercase;letter-spacing:0.8px;">DoTE Technical Examination Drills</div>
           <div style="font-size:12px;font-weight:600;color:var(--ink);line-height:1.4;margin-top:2px;">
-            Specially designed for DOT Typewriting Examination preparation — practice smarter, improve your speed and accuracy, score higher marks, and achieve better grades.
+            Specially designed for DoTE Typewriting Examination preparation — practice smarter, improve your speed and accuracy, score higher marks, and achieve better grades.
           </div>
         </div>
       </div>
@@ -3619,7 +3619,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
         </div>
         <div class="form-field">
           <div class="form-label">Exam Registration Number:</div>
-          <input type="text" id="profAddress" class="custom-select-wrap select" style="width:100%;border:1.5px solid var(--card-border);border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;outline:none;" placeholder="e.g. 2026-DOT-4920" maxlength="120">
+          <input type="text" id="profAddress" class="custom-select-wrap select" style="width:100%;border:1.5px solid var(--card-border);border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;outline:none;" placeholder="e.g. 2026-DoTE-4920" maxlength="120">
         </div>
         <div class="form-field">
           <div class="form-label">Contact Mobile:</div>
@@ -3882,7 +3882,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
     <div class="dote-prep-pill" style="display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(245,158,11,0.09));border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:8px 12px;margin-bottom:12px;">
       <img src="img/dote_emblem.png" alt="DoTE" style="width:28px;height:28px;object-fit:contain;flex-shrink:0;">
       <div style="font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.35;">
-        Specially designed for DOT Typewriting Examination preparation — practice smarter &amp; score higher grades!
+        Specially designed for DoTE Typewriting Examination preparation — practice smarter &amp; score higher grades!
       </div>
     </div>
 
@@ -4660,6 +4660,48 @@ body:has(#screen-test.active) .bottom-nav-bar {
     <div style="display:flex;flex-direction:column;gap:10px;">
       <button class="solidbtn" style="padding:12px;font-size:13.5px;font-weight:800;border-radius:12px;" onclick="closeDeviceRevokedAndSignIn()">🔑 Sign In on This Device</button>
       <button class="ghostbtn" style="padding:10px;font-size:12.5px;font-weight:700;border-radius:10px;" onclick="closeDeviceRevokedAndContinueGuest()">Continue as Free Guest</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRIVACY POLICY & DATA SAFETY MODAL -->
+<div class="modalbg" id="modalPrivacyPolicy" style="display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);z-index:10006;overflow-y:auto;padding:16px;">
+  <div class="modalcard" style="max-width:520px;width:100%;border-radius:20px;padding:22px;background:var(--card-bg);border:1.5px solid var(--card-border);max-height:85vh;display:flex;flex-direction:column;box-shadow:0 25px 60px rgba(0,0,0,0.4);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--card-border);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:24px;">🔒</span>
+        <div>
+          <h3 style="margin:0;font-size:16px;font-weight:800;color:var(--ink);">Privacy Policy &amp; Data Safety</h3>
+          <div style="font-size:11px;color:var(--muted);">Typing Thalaiva • Powered by K V N Techno Labs</div>
+        </div>
+      </div>
+      <button class="ghostbtn" style="padding:4px 10px;font-size:12px;" onclick="closePrivacyPolicyModal()">✕</button>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;font-size:12.5px;color:var(--ink-soft);line-height:1.6;padding-right:4px;">
+      <p style="margin-top:0;"><b>Last Updated:</b> November 2026</p>
+      
+      <h4 style="font-size:13.5px;color:var(--ink);margin:12px 0 4px;">1. Free Access &amp; Guest Privacy</h4>
+      <p>Typing Thalaiva allows students to practice model passages in <b>Guest Mode without registering or logging in</b>. In guest mode, no personal identifying information (PII) is collected or transmitted to external servers.</p>
+
+      <h4 style="font-size:13.5px;color:var(--ink);margin:12px 0 4px;">2. Account Creation &amp; Google Sign-In</h4>
+      <p>When a student upgrades or purchases a course package, we use Google Sign-In via Firebase Authentication to create a student profile. We receive basic profile information (Google Display Name, Email address, and UID) solely to link and restore course entitlements.</p>
+
+      <h4 style="font-size:13.5px;color:var(--ink);margin:12px 0 4px;">3. Single-Device Security Policy</h4>
+      <p>To prevent unauthorized credential sharing and protect copyrighted institute examination materials, each student account is restricted to <b>one active device</b>. When you log in on a new device, previous sessions are automatically invalidated on our server.</p>
+
+      <h4 style="font-size:13.5px;color:var(--ink);margin:12px 0 4px;">4. In-App Purchases &amp; Billing</h4>
+      <p>Digital course upgrades are processed in compliance with Google Play Billing policies. We do not store or collect financial payment card numbers or banking passwords.</p>
+
+      <h4 style="font-size:13.5px;color:var(--ink);margin:12px 0 4px;">5. Account Deletion &amp; Data Retention</h4>
+      <p>In compliance with Google Play Store User Data policies, students can permanently delete their account and purge all cloud records at any time directly inside the app via <b>Profile → Delete Account &amp; Purge Data</b>.</p>
+
+      <h4 style="font-size:13.5px;color:var(--ink);margin:12px 0 4px;">6. Contact Us</h4>
+      <p>For inquiries regarding privacy, DoTE syllabus, or data safety, contact: <b>privacy@srikalaimagal.in</b> / <b>kvntechnolabs@gmail.com</b>.</p>
+    </div>
+
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--card-border);display:flex;justify-content:flex-end;">
+      <button class="solidbtn" style="padding:8px 20px;font-size:13px;" onclick="closePrivacyPolicyModal()">Understood</button>
     </div>
   </div>
 </div>
@@ -8738,11 +8780,24 @@ function renderUpgradeAuthSection() {
   const user = window.FirebaseService ? window.FirebaseService.currentUser : null;
   const selectedPkg = document.querySelector('input[name="pkgOption"]:checked')?.value || 'combo_speed';
 
+  let pkgTitle = 'Combo Speed Pass (Tamil + English)';
+  let pkgPrice = '₹299';
+  if (selectedPkg === 'tamil_speed') {
+    pkgTitle = 'Tamil Speed Pass (50 Model Papers)';
+    pkgPrice = '₹199';
+  } else if (selectedPkg === 'english_speed') {
+    pkgTitle = 'English Speed Pass (50 Model Papers)';
+    pkgPrice = '₹199';
+  }
+
   let html = '';
   if (isGuest || !user) {
     html = `
       <div style="background:var(--bg-main);border:1px solid var(--card-border);border-radius:14px;padding:14px;text-align:center;">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">Sign in with Google to link your purchase and unlock instantly:</div>
+        <div style="font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:8px;">
+          Selected: <b style="color:var(--primary);">${pkgTitle}</b> • <b style="color:var(--ink);">${pkgPrice}</b><br>
+          <span style="font-size:11.5px;font-weight:500;">Sign in with Google to associate your purchase with your student account:</span>
+        </div>
         <button type="button" class="solidbtn" style="width:100%;padding:12px 16px;font-size:14px;font-weight:800;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:10px;background:#ffffff;color:#1e293b;border:1.5px solid #cbd5e1;box-shadow:0 3px 10px rgba(0,0,0,0.08);" onclick="handleGoogleSignInForUpgrade()">
           <svg width="20" height="20" viewBox="0 0 48 48">
             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -8765,10 +8820,19 @@ function renderUpgradeAuthSection() {
             <div style="font-size:13px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${user.name || 'Verified Student'}</div>
             <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${user.email || 'Google Account'}</div>
           </div>
-          <span style="font-size:9.5px;font-weight:800;background:rgba(16,185,129,0.15);color:#10b981;padding:3px 8px;border-radius:9999px;">SIGNED IN</span>
+          <span style="font-size:9.5px;font-weight:800;background:rgba(16,185,129,0.15);color:#10b981;padding:3px 8px;border-radius:9999px;">AUTHENTICATED</span>
         </div>
-        <button type="button" class="solidbtn" style="width:100%;padding:12px 16px;font-size:14px;font-weight:800;border-radius:12px;background:linear-gradient(135deg,var(--primary),#4f46e5);" onclick="handlePurchaseActivation('${selectedPkg}')">
-          🚀 Unlock Full Course Now
+
+        <div style="background:var(--card-bg);border:1px dashed var(--card-border);border-radius:10px;padding:10px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <span style="font-size:12px;font-weight:700;color:var(--ink);">${pkgTitle}</span>
+            <span style="font-size:14px;font-weight:900;color:var(--primary);">${pkgPrice}</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);">Billing Mode: Google Play In-App Billing (Testing Sandbox)</div>
+        </div>
+
+        <button type="button" class="solidbtn" style="width:100%;padding:12px 16px;font-size:14px;font-weight:800;border-radius:12px;background:linear-gradient(135deg,var(--primary),#4f46e5);display:flex;align-items:center;justify-content:center;gap:8px;" onclick="handlePurchaseActivation('${selectedPkg}')">
+          <span>💳</span> Complete Payment (${pkgPrice}) &amp; Unlock
         </button>
       </div>
     `;
@@ -8909,9 +8973,14 @@ function renderAccountAccessCard() {
           <span>Want 100+ Model Exam Papers? Unlock for less than a biryani!</span>
         </div>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
         <button type="button" class="solidbtn" style="flex:1;min-width:200px;padding:11px 14px;font-size:13px;font-weight:800;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);" onclick="openBiryaniUpgradeModal()">
           <span>🍗</span> Unlock Full Access (₹299)
+        </button>
+      </div>
+      <div style="display:flex;justify-content:center;margin-top:10px;padding-top:10px;border-top:1px dashed var(--card-border);">
+        <button type="button" class="ghostbtn" style="padding:6px 12px;font-size:11.5px;border-radius:8px;" onclick="openPrivacyPolicyModal()">
+          🔒 Privacy Policy &amp; Data Safety
         </button>
       </div>
     `;
@@ -8944,7 +9013,7 @@ function renderAccountAccessCard() {
         </div>
       </div>
 
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
         ${!isPremium ? `
           <button type="button" class="solidbtn" style="flex:1;min-width:180px;padding:10px 14px;font-size:12.5px;font-weight:800;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#ef4444);" onclick="openBiryaniUpgradeModal()">
             🍗 Upgrade Course (₹299)
@@ -8954,9 +9023,36 @@ function renderAccountAccessCard() {
           🚪 Sign Out
         </button>
       </div>
+
+      <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px dashed var(--card-border);">
+        <button type="button" class="ghostbtn" style="padding:6px 10px;font-size:11.5px;border-radius:8px;" onclick="openPrivacyPolicyModal()">
+          🔒 Privacy Policy &amp; Data Safety
+        </button>
+        <button type="button" class="ghostbtn" style="padding:6px 10px;font-size:11.5px;border-radius:8px;color:#ef4444;border-color:rgba(239,68,68,0.3);" onclick="handleDeleteAccountConfirmation()">
+          🗑️ Delete Account
+        </button>
+      </div>
     `;
   }
   container.innerHTML = html;
+}
+
+function openPrivacyPolicyModal() {
+  const m = document.getElementById('modalPrivacyPolicy');
+  if (m) m.style.display = 'flex';
+}
+
+function closePrivacyPolicyModal() {
+  const m = document.getElementById('modalPrivacyPolicy');
+  if (m) m.style.display = 'none';
+}
+
+async function handleDeleteAccountConfirmation() {
+  if (confirm('⚠️ Permanently delete your student account and all cloud records?\n\nThis action cannot be undone. In compliance with Google Play Store User Data policy, your profile and associated session credentials will be permanently erased.')) {
+    if (window.FirebaseService) {
+      await window.FirebaseService.deleteAccount();
+    }
+  }
 }
 
 window.openBiryaniUpgradeModal = openBiryaniUpgradeModal;
@@ -8968,6 +9064,9 @@ window.closeDeviceRevokedAndSignIn = closeDeviceRevokedAndSignIn;
 window.closeDeviceRevokedAndContinueGuest = closeDeviceRevokedAndContinueGuest;
 window.syncStudentProfileWithAuth = syncStudentProfileWithAuth;
 window.renderAccountAccessCard = renderAccountAccessCard;
+window.openPrivacyPolicyModal = openPrivacyPolicyModal;
+window.closePrivacyPolicyModal = closePrivacyPolicyModal;
+window.handleDeleteAccountConfirmation = handleDeleteAccountConfirmation;
 
 </script>
 
