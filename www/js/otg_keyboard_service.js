@@ -186,6 +186,13 @@
         drillBadge.title = 'Touch input mode';
       }
     }
+
+    if (typeof updateConnectScreenStatus === 'function') {
+      updateConnectScreenStatus();
+    }
+    if (typeof updateTesterScreenStatus === 'function') {
+      updateTesterScreenStatus();
+    }
   }
 
   function notifyListeners(payload) {
@@ -306,6 +313,162 @@
 
     // Initial UI render
     updateUI();
+
+    // Tester key listeners
+    window.addEventListener('keydown', function(e) {
+      var testerScreen = document.getElementById('screen-keyboard-test');
+      if (testerScreen && testerScreen.classList.contains('active')) {
+        handleTesterKeyEvent(e, 'down');
+      }
+    }, true);
+
+    window.addEventListener('keyup', function(e) {
+      var testerScreen = document.getElementById('screen-keyboard-test');
+      if (testerScreen && testerScreen.classList.contains('active')) {
+        handleTesterKeyEvent(e, 'up');
+      }
+    }, true);
+  }
+
+  var testerState = {
+    keysPressed: 0,
+    lastKey: '—'
+  };
+
+  var currentConnectTab = 'wired';
+
+  function setConnectTab(tab) {
+    currentConnectTab = tab;
+    var btnWired = document.getElementById('btnConnTabWired');
+    var btnWireless = document.getElementById('btnConnTabWireless');
+    var stepsWired = document.getElementById('connStepsWired');
+    var stepsWireless = document.getElementById('connStepsWireless');
+
+    if (btnWired) btnWired.classList.toggle('active', tab === 'wired');
+    if (btnWireless) btnWireless.classList.toggle('active', tab === 'wireless');
+    if (stepsWired) stepsWired.style.display = (tab === 'wired') ? 'block' : 'none';
+    if (stepsWireless) stepsWireless.style.display = (tab === 'wireless') ? 'block' : 'none';
+  }
+
+  function openConnectScreen() {
+    if (typeof window.showScreen === 'function') {
+      window.showScreen('screen-connect-keyboard');
+    }
+    updateConnectScreenStatus();
+    setConnectTab(currentConnectTab);
+  }
+
+  function openTesterScreen() {
+    if (typeof window.showScreen === 'function') {
+      window.showScreen('screen-keyboard-test');
+    }
+    updateTesterScreenStatus();
+  }
+
+  function updateConnectScreenStatus() {
+    var badge = document.getElementById('connectKbLiveBadge');
+    if (badge) {
+      if (state.connected) {
+        badge.className = 'kb-live-status-pill connected';
+        badge.innerHTML = '🟢 Physical Keyboard Active: <b>' + (state.deviceName || 'USB/Bluetooth Keyboard') + '</b>';
+      } else {
+        badge.className = 'kb-live-status-pill disconnected';
+        badge.innerHTML = '⚪ No external keyboard detected yet (Plug in OTG or pair Bluetooth)';
+      }
+    }
+  }
+
+  function updateTesterScreenStatus() {
+    var card = document.getElementById('testerDetectionCard');
+    if (card) {
+      if (state.connected) {
+        card.className = 'kb-test-status-box connected';
+        card.innerHTML = 
+          '<div style="display:flex;align-items:center;gap:10px;">' +
+            '<span style="font-size:22px;color:#10b981;">✔</span>' +
+            '<div>' +
+              '<div style="font-weight:800;font-size:14px;color:var(--ink);">External keyboard connected</div>' +
+              '<div style="font-size:12px;color:var(--muted);">' + (state.deviceName || 'USB Hardware Keyboard') + ' active &amp; ready</div>' +
+            '</div>' +
+          '</div>';
+      } else {
+        card.className = 'kb-test-status-box disconnected';
+        card.innerHTML = 
+          '<div style="display:flex;align-items:flex-start;gap:10px;">' +
+            '<span style="font-size:20px;color:var(--primary);margin-top:2px;">ℹ</span>' +
+            '<div>' +
+              '<div style="font-weight:800;font-size:14px;color:var(--ink);">No external keyboard detected</div>' +
+              '<div style="font-size:12px;color:var(--muted);line-height:1.4;">Connect a Bluetooth or USB-OTG keyboard from Android Settings, then come back here.</div>' +
+            '</div>' +
+          '</div>';
+      }
+    }
+  }
+
+  function handleTesterKeyEvent(e, action) {
+    if (!e) return;
+
+    var code = e.code || '';
+    var key = e.key || '';
+
+    // Mark as connected if hardware key is received
+    if (!state.connected && code && code !== 'Unidentified') {
+      updateConnectionState(true, 'Hardware Keyboard');
+      updateTesterScreenStatus();
+      updateConnectScreenStatus();
+    }
+
+    // Key lookup in tester DOM
+    var selector = '';
+    if (code) {
+      selector = '[data-key="' + code + '"]';
+    }
+    var keyEl = selector ? document.querySelector(selector) : null;
+    if (!keyEl && key && key.length === 1) {
+      keyEl = document.querySelector('[data-char="' + key.toUpperCase() + '"]');
+    }
+
+    if (action === 'down') {
+      testerState.keysPressed++;
+      var formattedKey = key;
+      if (code && code !== key) {
+        formattedKey = (key.length === 1 ? key.toUpperCase() : key) + ' (' + code + ')';
+      }
+      testerState.lastKey = formattedKey;
+
+      var countEl = document.getElementById('kbTestPressCount');
+      var lastEl = document.getElementById('kbTestLastKey');
+      if (countEl) countEl.textContent = testerState.keysPressed;
+      if (lastEl) lastEl.textContent = testerState.lastKey;
+
+      if (keyEl) {
+        keyEl.classList.add('key-pressed');
+      }
+
+      // Play audio mechanical feedback
+      if (typeof window !== 'undefined' && typeof window.AudioEngine !== 'undefined' && typeof window.AudioEngine.play === 'function') {
+        try {
+          window.AudioEngine.play('click');
+        } catch(err) {}
+      }
+    } else if (action === 'up') {
+      if (keyEl) {
+        keyEl.classList.remove('key-pressed');
+      }
+    }
+  }
+
+  function resetTester() {
+    testerState.keysPressed = 0;
+    testerState.lastKey = '—';
+    var countEl = document.getElementById('kbTestPressCount');
+    var lastEl = document.getElementById('kbTestLastKey');
+    if (countEl) countEl.textContent = '0';
+    if (lastEl) lastEl.textContent = '—';
+
+    document.querySelectorAll('.vkey.key-pressed').forEach(function(el) {
+      el.classList.remove('key-pressed');
+    });
   }
 
   return {
@@ -321,6 +484,13 @@
     showInfoModal: showInfoModal,
     hideInfoModal: hideInfoModal,
     testFocus: testFocus,
+    openConnectScreen: openConnectScreen,
+    openTesterScreen: openTesterScreen,
+    setConnectTab: setConnectTab,
+    resetTester: resetTester,
+    updateConnectScreenStatus: updateConnectScreenStatus,
+    updateTesterScreenStatus: updateTesterScreenStatus,
+    handleTesterKeyEvent: handleTesterKeyEvent,
     subscribe: function (fn) {
       listeners.push(fn);
       return function () {

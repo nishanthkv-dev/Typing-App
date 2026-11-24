@@ -2541,6 +2541,296 @@ body:has(#screen-test.active) .bottom-nav-bar {
 .rr-row:last-child { border-bottom: none; }
 .rr-row b { color: var(--primary); }
 
+/* =====================================================================
+   CONNECT A KEYBOARD & TESTER SCREENS
+===================================================================== */
+#screen-connect-keyboard,
+#screen-keyboard-test,
+#screen-gov-jobs {
+  padding-bottom: 40px;
+}
+.connect-kb-icon-wrap {
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px auto 14px;
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.35);
+  color: #ffffff;
+}
+.connect-kb-icon-wrap svg {
+  width: 42px;
+  height: 42px;
+  fill: #ffffff;
+}
+.kb-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.kb-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #4f46e5;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(79, 70, 229, 0.3);
+}
+.kb-step-text {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  font-weight: 500;
+}
+.kb-live-status-pill {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  margin: 18px 0;
+  transition: all .2s ease;
+}
+.kb-live-status-pill.connected {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid #10b981;
+  color: #065f46;
+}
+[data-theme="dark"] .kb-live-status-pill.connected,
+[data-theme="golden"] .kb-live-status-pill.connected {
+  color: #34d399;
+}
+.kb-live-status-pill.disconnected {
+  background: var(--subtle-bg, #f8fafc);
+  border: 1px solid var(--card-border);
+  color: var(--muted);
+}
+.btn-kb-test-primary {
+  display: block;
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn-kb-test-primary:active {
+  transform: scale(0.98);
+}
+
+/* External Keyboard Tester Visual Layout */
+.kb-test-status-box {
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  border: 1.5px solid var(--card-border);
+  background: var(--card-bg);
+}
+.kb-test-status-box.connected {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+}
+.kb-test-status-box.disconnected {
+  border-color: rgba(99, 102, 241, 0.3);
+  background: var(--subtle-bg, #f8fafc);
+}
+.virtual-kb-container {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 18px 0 24px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.virtual-kb-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.vkey {
+  flex: 1 1 0;
+  max-width: 44px;
+  height: 48px;
+  border-radius: 8px;
+  background: var(--card-bg, #ffffff);
+  border: 1.5px solid var(--card-border, #cbd5e1);
+  color: var(--ink, #1e293b);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  transition: all .1s ease;
+  position: relative;
+}
+.vkey-space {
+  max-width: 220px;
+  flex: 5 1 0;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.vkey.key-pressed {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+  color: #ffffff !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.8) !important;
+  transform: translateY(2px) scale(0.96) !important;
+}
+.vkey-sub {
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 1px;
+  font-weight: 600;
+}
+.vkey.key-pressed .vkey-sub {
+  color: rgba(255, 255, 255, 0.85);
+}
+.kb-tester-counters-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  text-align: center;
+}
+.kb-counter-block .val {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.kb-counter-block .lbl {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* =====================================================================
+   ON-SCREEN LETTER OVERLAY TYPING MODE
+===================================================================== */
+#screen-test.mode-overlay .testpanels {
+  display: block !important;
+  position: relative !important;
+  flex: 1 1 auto !important;
+  height: calc(100vh - 180px) !important;
+  min-height: 320px !important;
+}
+#screen-test.mode-overlay .passcard {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  border: 2px solid var(--primary);
+  border-radius: 16px;
+  background: var(--card-bg);
+  padding: 18px 22px !important;
+  overflow-y: auto !important;
+  cursor: text;
+  box-shadow: var(--card-shadow);
+}
+#screen-test.mode-overlay #passDisplay {
+  font-family: var(--font-mono, monospace);
+  font-size: calc(var(--typesize, 18px) * 1.18);
+  line-height: 2.1;
+  letter-spacing: 0.05em;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+#screen-test.mode-overlay .typewrap {
+  position: absolute !important;
+  top: 0; left: 0; right: 0; bottom: 0;
+  opacity: 0.005 !important;
+  z-index: 20 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: auto !important;
+}
+#screen-test.mode-overlay #typingArea {
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0.005 !important;
+  cursor: text !important;
+  caret-color: transparent !important;
+  resize: none !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Overlay Character Classes */
+.overlay-char {
+  display: inline;
+  padding: 1px 1px;
+  border-radius: 3px;
+  transition: background-color .08s ease, color .08s ease;
+}
+.overlay-char.char-ok,
+.pc-ok {
+  color: #10b981 !important;
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  font-weight: 700;
+  border-radius: 2px;
+}
+[data-theme="dark"] .overlay-char.char-ok,
+[data-theme="golden"] .overlay-char.char-ok,
+[data-theme="dark"] .pc-ok,
+[data-theme="golden"] .pc-ok {
+  color: #34d399 !important;
+  background-color: rgba(52, 211, 153, 0.22) !important;
+}
+.overlay-char.char-bad,
+.pc-bad {
+  color: #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.25) !important;
+  text-decoration: underline;
+  text-decoration-color: #ef4444;
+  font-weight: 700;
+  border-radius: 2px;
+}
+.overlay-char.char-cur,
+.pc-cur {
+  position: relative;
+  background-color: rgba(59, 130, 246, 0.25) !important;
+  border-left: 2.5px solid var(--primary, #2563eb) !important;
+  font-weight: 800;
+  border-radius: 2px;
+  animation: overlayCaretPulse 1s infinite alternate;
+}
+@keyframes overlayCaretPulse {
+  0% { border-left-color: var(--primary, #2563eb); }
+  100% { border-left-color: transparent; }
+}
+.overlay-char.char-pending {
+  color: var(--ink);
+  opacity: 0.72;
+}
+.overlay-char.char-extra {
+  color: #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.3) !important;
+  text-decoration: line-through;
+}
+
 </style>
 </head>
 <body>
@@ -2567,7 +2857,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
       </div>
       
       <div class="header-tools">
-        <button class="tool-btn otg-tool-btn" id="btnOTGStatus" onclick="OTGKeyboardService.showInfoModal()" title="OTG Physical Keyboard Status">⌨️<span class="otg-dot disconnected" id="hdrOTGDot"></span></button>
+        <button class="tool-btn otg-tool-btn" id="btnOTGStatus" onclick="OTGKeyboardService.openConnectScreen()" title="Connect Physical Keyboard (Wired & Bluetooth)">⌨️<span class="otg-dot disconnected" id="hdrOTGDot"></span></button>
         <div class="streak-chip" title="Daily Practice Streak">
           <span class="streak-flame">🔥</span>
           <span id="hdrStreakVal">0</span>d
@@ -2903,6 +3193,15 @@ body:has(#screen-test.active) .bottom-nav-bar {
           </div>
           <div class="mode-launch-arrow">▶</div>
         </div>
+
+        <div class="launch-mode-card" onclick="startTest('overlay')">
+          <div class="mode-icon-circle">✍️</div>
+          <div class="mode-details">
+            <h4>Letter Overlay (Type on Screen)</h4>
+            <p>Type directly over the practice letters on screen. Dynamic letter-by-letter live highlights with real-time caret.</p>
+          </div>
+          <div class="mode-launch-arrow">▶</div>
+        </div>
       </div>
 
       <div style="height:36px;width:100%;"></div>
@@ -3094,6 +3393,13 @@ body:has(#screen-test.active) .bottom-nav-bar {
           <div class="tile-title">Marking Rules</div>
           <div class="tile-desc">Official government technical exam evaluation formulas &amp; limits.</div>
         </div>
+
+        <div class="academy-tile" style="border-left: 4px solid #3b82f6; cursor: pointer;" onclick="GovJobsUI.openScreenGovJobs()">
+          <div class="tile-badge" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">Central &amp; TN State</div>
+          <div class="tile-icon">🏛️</div>
+          <div class="tile-title">Government Jobs &amp; Exams</div>
+          <div class="tile-desc">Explore TNPSC, High Court, SSC, Railways &amp; CAPF typist eligibility and qualifications.</div>
+        </div>
       </div>
 
       <footer class="app-footer powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></footer>
@@ -3151,6 +3457,28 @@ body:has(#screen-test.active) .bottom-nav-bar {
             </select>
           </div>
           <div class="form-hint">Official Tamil Nadu Technical Examinations timetable schedule.</div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <button type="button" class="solidbtn" style="width:100%;font-size:13px;padding:10px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="GovJobsUI.openScreenGovJobs()">
+            <span>🏛️</span> View Eligible Government Jobs &amp; Exams
+          </button>
+        </div>
+      </div>
+
+      <!-- PHYSICAL KEYBOARD & HARDWARE SETTINGS -->
+      <div class="glass-card">
+        <div class="card-header-bar">
+          <h2>⌨️ Hardware &amp; Physical Keyboard</h2>
+        </div>
+        <p style="font-size:12.5px;color:var(--muted);margin:0 0 12px 0;">Connect external USB-OTG or Bluetooth keyboards for realistic typewriter examination practice.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="button" class="solidbtn" style="flex:1;min-width:140px;font-size:12.5px;padding:10px 12px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="OTGKeyboardService.openConnectScreen()">
+            <span>🔌</span> Connect Keyboard
+          </button>
+          <button type="button" class="ghostbtn" style="flex:1;min-width:140px;font-size:12.5px;padding:10px 12px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="OTGKeyboardService.openTesterScreen()">
+            <span>🧪</span> Test My Keyboard
+          </button>
         </div>
       </div>
 
@@ -3762,6 +4090,239 @@ body:has(#screen-test.active) .bottom-nav-bar {
         <button id="btnGameNext" class="game-btn-next" onclick="GamesEngine.skipWord()">Next</button>
         <button id="btnGameCancel" class="game-btn-cancel" onclick="quitGame()">Cancel</button>
       </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       SCREEN: CONNECT A KEYBOARD (WIRED & BLUETOOTH)
+  =================================================================== -->
+  <section class="screen" id="screen-connect-keyboard">
+    <div class="test-cockpit-bar" style="margin-bottom:14px;">
+      <button class="test-back-btn" onclick="showScreen('screen-config')">‹</button>
+      <div style="font-weight:800;font-size:17px;color:var(--ink);flex:1;text-align:left;margin-left:4px;">Connect a Keyboard</div>
+    </div>
+
+    <div class="glass-card" style="padding:20px;border-radius:18px;">
+      <!-- Keyboard App Emblem Icon -->
+      <div class="connect-kb-icon-wrap">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/>
+        </svg>
+      </div>
+
+      <p style="text-align:center;font-size:13.5px;color:var(--ink);line-height:1.5;margin:0 0 16px;font-weight:500;">
+        Typing Speed Test fully supports physical keyboards — pick your connection type below.
+      </p>
+
+      <!-- Toggle Seg Control (Wireless vs Wired) -->
+      <div class="seg-control" style="margin-bottom:20px;">
+        <button class="seg-btn" id="btnConnTabWireless" type="button" onclick="OTGKeyboardService.setConnectTab('wireless')">
+          <span>ᛒ</span> Wireless (Bluetooth)
+        </button>
+        <button class="seg-btn active" id="btnConnTabWired" type="button" onclick="OTGKeyboardService.setConnectTab('wired')">
+          <span>∿</span> Wired (USB / OTG)
+        </button>
+      </div>
+
+      <!-- Wired Steps (1 to 5) -->
+      <div id="connStepsWired">
+        <div class="kb-step-item">
+          <div class="kb-step-num">1</div>
+          <div class="kb-step-text">Get a USB-OTG adapter that matches your phone's port (USB-C or Micro-USB).</div>
+        </div>
+        <div class="kb-step-item">
+          <div class="kb-step-num">2</div>
+          <div class="kb-step-text">Plug the adapter into your phone, then plug the keyboard into the adapter.</div>
+        </div>
+        <div class="kb-step-item">
+          <div class="kb-step-num">3</div>
+          <div class="kb-step-text">Android recognizes wired keyboards instantly — no pairing or app permissions needed.</div>
+        </div>
+        <div class="kb-step-item">
+          <div class="kb-step-num">4</div>
+          <div class="kb-step-text">Open Typing Speed Test — the keyboard is ready to use immediately.</div>
+        </div>
+        <div class="kb-step-item">
+          <div class="kb-step-num">5</div>
+          <div class="kb-step-text">Use Settings → Test My Keyboard to confirm every key registers correctly.</div>
+        </div>
+      </div>
+
+      <!-- Wireless Steps (1 to 5) -->
+      <div id="connStepsWireless" style="display:none;">
+        <div class="kb-step-item">
+          <div class="kb-step-num">1</div>
+          <div class="kb-step-text">Turn on Bluetooth on your device from Android Settings.</div>
+        </div>
+        <div class="kb-step-item">
+          <div class="kb-step-num">2</div>
+          <div class="kb-step-text">Put your Bluetooth keyboard into pairing mode (holding connect or Fn+Bluetooth).</div>
+        </div>
+        <div class="kb-step-item">
+          <div class="kb-step-num">3</div>
+          <div class="kb-step-text">Select your keyboard from available devices in Android Bluetooth settings to pair.</div>
+        </div>
+        <div class="kb-step-item">
+          <div class="kb-step-num">4</div>
+          <div class="kb-step-text">Once connected, return to Typing Thalaiva — the keyboard is active immediately.</div>
+        </div>
+        <div class="kb-step-item">
+          <div class="kb-step-num">5</div>
+          <div class="kb-step-text">Tap "Test My Keyboard" below to confirm keystrokes and typing response.</div>
+        </div>
+      </div>
+
+      <!-- Live Detection Badge -->
+      <div id="connectKbLiveBadge" class="kb-live-status-pill disconnected">
+        ⚪ No external keyboard detected yet (Plug in OTG or pair Bluetooth)
+      </div>
+
+      <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:18px;text-align:center;">
+        Tip: the app shows a live "Keyboard Connected" badge the moment it detects your hardware — no restart needed.
+      </div>
+
+      <!-- Primary Action Button: Test My Keyboard -->
+      <button type="button" class="btn-kb-test-primary" onclick="OTGKeyboardService.openTesterScreen()">
+        Test My Keyboard
+      </button>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       SCREEN: EXTERNAL KEYBOARD TEST
+  =================================================================== -->
+  <section class="screen" id="screen-keyboard-test">
+    <div class="test-cockpit-bar" style="margin-bottom:14px;">
+      <button class="test-back-btn" onclick="OTGKeyboardService.openConnectScreen()">‹</button>
+      <div style="font-weight:800;font-size:17px;color:var(--ink);flex:1;text-align:left;margin-left:4px;">External Keyboard Test</div>
+    </div>
+
+    <div class="glass-card" style="padding:18px;border-radius:18px;">
+      <!-- Live Status Alert Card -->
+      <div id="testerDetectionCard" class="kb-test-status-box disconnected">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span style="font-size:20px;color:var(--primary);margin-top:2px;">ℹ</span>
+          <div>
+            <div style="font-weight:800;font-size:14px;color:var(--ink);">No external keyboard detected</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.4;">Connect a Bluetooth or USB-OTG keyboard from Android Settings, then come back here.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <h4 style="margin:0 0 4px;font-size:15px;font-weight:800;color:var(--ink);">Press any key to test it</h4>
+        <div style="font-size:12px;color:var(--muted);line-height:1.45;">Works with your device's physical keyboard, whether Bluetooth, USB-OTG, or built-in.</div>
+      </div>
+
+      <!-- Interactive Virtual Keyboard Layout -->
+      <div class="virtual-kb-container" id="visualKbTesterLayout">
+        <!-- Row 1: Q W E R T Y U I O P -->
+        <div class="virtual-kb-row">
+          <div class="vkey" data-key="KeyQ" data-char="Q">Q<span class="vkey-sub">ஸ/ஙு</span></div>
+          <div class="vkey" data-key="KeyW" data-char="W">W<span class="vkey-sub">ஷ/ற</span></div>
+          <div class="vkey" data-key="KeyE" data-char="E">E<span class="vkey-sub">ஜ/ந</span></div>
+          <div class="vkey" data-key="KeyR" data-char="R">R<span class="vkey-sub">ஹ/ச</span></div>
+          <div class="vkey" data-key="KeyT" data-char="T">T<span class="vkey-sub">க்ஷ/வ</span></div>
+          <div class="vkey" data-key="KeyY" data-char="Y">Y<span class="vkey-sub">ஸ்ரீ/ல</span></div>
+          <div class="vkey" data-key="KeyU" data-char="U">U<span class="vkey-sub">ட/ர</span></div>
+          <div class="vkey" data-key="KeyI" data-char="I">I<span class="vkey-sub">ண/ை</span></div>
+          <div class="vkey" data-key="KeyO" data-char="O">O<span class="vkey-sub">த/டி</span></div>
+          <div class="vkey" data-key="KeyP" data-char="P">P<span class="vkey-sub">ந/ி</span></div>
+        </div>
+
+        <!-- Row 2: A S D F G H J K L -->
+        <div class="virtual-kb-row">
+          <div class="vkey" data-key="KeyA" data-char="A">A<span class="vkey-sub">அ/ய</span></div>
+          <div class="vkey" data-key="KeyS" data-char="S">S<span class="vkey-sub">இ/ள</span></div>
+          <div class="vkey" data-key="KeyD" data-char="D">D<span class="vkey-sub">உ/ன</span></div>
+          <div class="vkey" data-key="KeyF" data-char="F">F<span class="vkey-sub">்/க</span></div>
+          <div class="vkey" data-key="KeyG" data-char="G">G<span class="vkey-sub">எ/ப</span></div>
+          <div class="vkey" data-key="KeyH" data-char="H">H<span class="vkey-sub">க/ா</span></div>
+          <div class="vkey" data-key="KeyJ" data-char="J">J<span class="vkey-sub">ப/த</span></div>
+          <div class="vkey" data-key="KeyK" data-char="K">K<span class="vkey-sub">ம/ம</span></div>
+          <div class="vkey" data-key="KeyL" data-char="L">L<span class="vkey-sub">த/ட</span></div>
+        </div>
+
+        <!-- Row 3: Z X C V B N M -->
+        <div class="virtual-kb-row">
+          <div class="vkey" data-key="KeyZ" data-char="Z">Z<span class="vkey-sub">ஒ/ண</span></div>
+          <div class="vkey" data-key="KeyX" data-char="X">X<span class="vkey-sub">ஒள/ஒ</span></div>
+          <div class="vkey" data-key="KeyC" data-char="C">C<span class="vkey-sub">வ/உ</span></div>
+          <div class="vkey" data-key="KeyV" data-char="V">V<span class="vkey-sub">ள/எ</span></div>
+          <div class="vkey" data-key="KeyB" data-char="B">B<span class="vkey-sub">ங/இ</span></div>
+          <div class="vkey" data-key="KeyN" data-char="N">N<span class="vkey-sub">ல/ே</span></div>
+          <div class="vkey" data-key="KeyM" data-char="M">M<span class="vkey-sub">ர/அ</span></div>
+        </div>
+
+        <!-- Row 4: Spacebar -->
+        <div class="virtual-kb-row">
+          <div class="vkey vkey-space" data-key="Space" data-char=" ">SPACE</div>
+        </div>
+      </div>
+
+      <!-- Bottom Counters Row -->
+      <div class="kb-tester-counters-row">
+        <div class="kb-counter-block">
+          <div class="val" id="kbTestPressCount">0</div>
+          <div class="lbl">Keys pressed</div>
+        </div>
+        <div style="width:1px;height:40px;background:var(--card-border);"></div>
+        <div class="kb-counter-block">
+          <div class="val" id="kbTestLastKey" style="font-size:20px;min-height:35px;display:flex;align-items:center;justify-content:center;">—</div>
+          <div class="lbl">Last key</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button type="button" class="ghostbtn" style="flex:1;padding:10px;border-radius:10px;font-size:13px;" onclick="OTGKeyboardService.resetTester()">
+          🔄 Reset Test
+        </button>
+        <button type="button" class="solidbtn" style="flex:1;padding:10px;border-radius:10px;font-size:13px;" onclick="showScreen('screen-config')">
+          Done Testing
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       SCREEN: GOVERNMENT JOBS & EXAMINATIONS OPPORTUNITIES
+  =================================================================== -->
+  <section class="screen" id="screen-gov-jobs">
+    <div class="test-cockpit-bar" style="margin-bottom:14px;">
+      <button class="test-back-btn" onclick="showScreen('screen-config')">‹</button>
+      <div style="font-weight:800;font-size:16px;color:var(--ink);flex:1;text-align:left;margin-left:4px;">Government Jobs &amp; Exams</div>
+      <span class="card-badge" id="govJobsCountBadge" style="font-size:11px;font-weight:700;">13 Opportunities</span>
+    </div>
+
+    <!-- Official Disclaimer Banner -->
+    <div id="govDisclaimerBanner" style="background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(239,68,68,0.06));border:1.5px solid rgba(245,158,11,0.4);border-radius:14px;padding:12px 14px;margin-bottom:14px;"></div>
+
+    <!-- Category Seg Tabs -->
+    <div class="seg-control" style="margin-bottom:12px;">
+      <button class="seg-btn active" id="govTabAll" type="button" onclick="GovJobsUI.setCategory('all')">All Opportunities</button>
+      <button class="seg-btn" id="govTabTN" type="button" onclick="GovJobsUI.setCategory('tamilnadu')">🏛️ Tamil Nadu</button>
+      <button class="seg-btn" id="govTabCentral" type="button" onclick="GovJobsUI.setCategory('central')">🇮🇳 Central Govt</button>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div style="margin-bottom:12px;">
+      <input type="text" id="govSearchInput" placeholder="🔍 Search post, department, or qualification (e.g. TNPSC, SSC, 35 WPM, Higher)..." oninput="GovJobsUI.onSearchChange(this.value)" style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--card-border);background:var(--card-bg);color:var(--ink);font-size:13px;outline:none;box-sizing:border-box;" />
+      
+      <!-- Quick Filter Chips -->
+      <div style="display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px;white-space:nowrap;-webkit-overflow-scrolling:touch;">
+        <span class="modechip" onclick="GovJobsUI.setQuickFilter('all')" style="cursor:pointer;font-size:11px;">All</span>
+        <span class="modechip" onclick="GovJobsUI.setQuickFilter('group4')" style="cursor:pointer;font-size:11px;">TNPSC Group 4</span>
+        <span class="modechip" onclick="GovJobsUI.setQuickFilter('court')" style="cursor:pointer;font-size:11px;">High Court &amp; Courts</span>
+        <span class="modechip" onclick="GovJobsUI.setQuickFilter('chsl')" style="cursor:pointer;font-size:11px;">SSC CHSL / LDC</span>
+        <span class="modechip" onclick="GovJobsUI.setQuickFilter('steno')" style="cursor:pointer;font-size:11px;">Stenographer</span>
+        <span class="modechip" onclick="GovJobsUI.setQuickFilter('ntpc')" style="cursor:pointer;font-size:11px;">Railways NTPC</span>
+        <span class="modechip" onclick="GovJobsUI.setQuickFilter('paramilitary')" style="cursor:pointer;font-size:11px;">Defence &amp; Police</span>
+      </div>
+    </div>
+
+    <!-- Jobs List Container -->
+    <div id="govJobsContainer">
+      <div id="govJobsList"></div>
     </div>
   </section>
 
@@ -4522,7 +5083,8 @@ const MODE_LABEL = {
   line: 'Sprint Line',
   parallel: 'Dual Split (Auto-Scroll)',
   manual: 'Dual Split (Manual Scroll)',
-  page: 'Half & Half Page'
+  page: 'Half & Half Page',
+  overlay: 'Letter Overlay (Type on Screen)'
 };
 window.MODE_LABEL = MODE_LABEL;
 let mode = 'parallel';
@@ -5023,17 +5585,24 @@ function startTest(m){
   $('passCard').className = 'passcard mode-' + mode + (isSplit ? ' split mode-parallel' : '');
   $('typeWrap').className = 'typewrap mode-' + mode + (isSplit ? ' split mode-parallel' : '');
   $('testPanels').className = 'testpanels mode-' + mode + (isSplit ? ' split mode-parallel' : '');
-  $('screen-test').classList.remove('mode-line', 'mode-parallel', 'mode-manual', 'mode-page', 'split');
+  $('screen-test').classList.remove('mode-line', 'mode-parallel', 'mode-manual', 'mode-page', 'mode-overlay', 'split');
   $('screen-test').classList.add('mode-' + mode);
   if(isSplit) $('screen-test').classList.add('split');
   $('screen-test').classList.toggle('lm', mode==='line');
   $('modeTag').textContent = MODE_LABEL[mode] || (mode.charAt(0).toUpperCase()+mode.slice(1)+' mode');
   $('typeLabel').style.display = 'none';
-  $('passLabel').style.display = isSplit ? 'none' : 'flex';
+  $('passLabel').style.display = (isSplit || mode === 'overlay') ? 'none' : 'flex';
   const passTitle = getPassageTitle(CFG.lang, CFG.passageIdx);
   $('panelHeadTitle').textContent = passTitle;
   $('panelHeadSub').textContent = MODE_LABEL[mode] || mode;
   $('panelHeadStatus').textContent = 'Waiting for first keystroke…';
+
+  $('passCard').onclick = function() {
+    if (mode === 'overlay') {
+      const ta = $('typingArea');
+      if (ta) ta.focus();
+    }
+  };
 
   if (mode === 'manual') {
     $('passCard').style.touchAction = 'pan-y';
@@ -5096,7 +5665,70 @@ function confirmQuit(){
 function wrapPunct(tok){
   return tok.split(/([,.;:!?])/).map(p=>/^[,.;:!?]$/.test(p) ? `<span class="pn ${p==='.'?'dot':(p===','?'com':'oth')}">${p}</span>` : esc(p)).join('');
 }
+
+function renderOverlayPassage(typed){
+  const orig = passageText || '';
+  const t = typed || '';
+  
+  let origChars, typedChars;
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    try {
+      const seg = new Intl.Segmenter(CFG.lang === 'ta' ? 'ta' : 'en', { granularity: 'grapheme' });
+      origChars = Array.from(seg.segment(orig), s => s.segment);
+      typedChars = Array.from(seg.segment(t), s => s.segment);
+    } catch(e) {
+      origChars = Array.from(orig);
+      typedChars = Array.from(t);
+    }
+  } else {
+    origChars = Array.from(orig);
+    typedChars = Array.from(t);
+  }
+
+  let html = '';
+  const oLen = origChars.length;
+  const tLen = typedChars.length;
+
+  for (let i = 0; i < oLen; i++) {
+    const ch = origChars[i];
+    let display = (ch === ' ') ? ' ' : (ch === '\n' ? '<br>' : esc(ch));
+    let cls = 'overlay-char';
+
+    if (i < tLen) {
+      const isMatch = (typedChars[i] === ch);
+      cls += isMatch ? ' char-ok' : ' char-bad';
+    } else if (i === tLen) {
+      cls += ' char-cur';
+    } else {
+      cls += ' char-pending';
+    }
+
+    html += `<span class="${cls}">${display}</span>`;
+  }
+
+  if (tLen > oLen) {
+    for (let j = oLen; j < tLen; j++) {
+      html += `<span class="overlay-char char-extra">${esc(typedChars[j])}</span>`;
+    }
+  }
+
+  $('passDisplay').innerHTML = html;
+
+  // Auto-scroll to keep current character centered vertically
+  const curSpan = $('passDisplay').querySelector('.char-cur');
+  if (curSpan) {
+    const card = $('passCard');
+    const curTop = getElementOffsetInContainer(card, curSpan);
+    const target = Math.max(0, curTop - (card.clientHeight / 2));
+    card.scrollTop = target;
+  }
+}
+
 function renderPassage(typed){
+  if (mode === 'overlay') {
+    renderOverlayPassage(typed);
+    return;
+  }
   const origWords = passageText.split(/(\s+)/);
   let completed = [];
   {
@@ -8372,5 +9004,8 @@ window.renderAccountAccessCard = renderAccountAccessCard;
   <script src="js/keymap_reference.js"></script>
   <!-- PRACTICE DRILLS & CURRICULUM OVERHAUL SCRIPT -->
   <script src="js/practice_curriculum.js"></script>
+  <!-- GOVERNMENT EXAMINATIONS & CAREER OPPORTUNITIES SCRIPT -->
+  <script src="js/gov_jobs_data.js"></script>
+  <script src="js/gov_jobs_ui.js"></script>
 </body>
 </html>
