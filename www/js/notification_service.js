@@ -18,7 +18,10 @@ const NotificationService = {
   
   settings: {
     enabled: true,
-    reminderTime: '09:00', // 24-hr format HH:MM
+    reminderTime: '09:00', // 24-hr format HH:MM (legacy sync)
+    reminderMorning: '09:00',
+    reminderAfternoon: '14:00',
+    reminderEvening: '20:00',
     examAlerts: true,
     streakAlerts: true,
     resultAlerts: true,
@@ -280,30 +283,60 @@ const NotificationService = {
    */
   async scheduleDailyReminder() {
     if (!this.settings.enabled) return;
-    const parts = (this.settings.reminderTime || '09:00').split(':').map(Number);
-    const hour = parts[0] ?? 9;
-    const minute = parts[1] ?? 0;
+    const morningStr = this.settings.reminderMorning || this.settings.reminderTime || '09:00';
+    const afternoonStr = this.settings.reminderAfternoon || '14:00';
+    const eveningStr = this.settings.reminderEvening || '20:00';
+
+    const mParts = morningStr.split(':').map(Number);
+    const aParts = afternoonStr.split(':').map(Number);
+    const eParts = eveningStr.split(':').map(Number);
 
     if (this.isNative) {
       try {
         const { LocalNotifications } = window.Capacitor.Plugins;
-        // Cancel existing daily reminder with ID 1001
-        await LocalNotifications.cancel({ notifications: [{ id: 1001 }] });
+        // Cancel existing daily reminders with IDs 1001, 1002, 1003
+        await LocalNotifications.cancel({
+          notifications: [{ id: 1001 }, { id: 1002 }, { id: 1003 }]
+        });
 
         await LocalNotifications.schedule({
-          notifications: [{
-            id: 1001,
-            title: '⏰ Daily Touch Typing Practice!',
-            body: 'Keep your streak alive! Master your 45 WPM touch typing speed for DoTE exams.',
-            channelId: this.channelId,
-            schedule: {
-              on: { hour: hour, minute: minute },
-              repeats: true,
-              every: 'day'
+          notifications: [
+            {
+              id: 1001,
+              title: '☀️ காலை வணக்கம்! Morning Touch Typing',
+              body: 'Are you thinking about typing or something related to it? 😉 Start your day with a quick 5-min drill!',
+              channelId: this.channelId,
+              schedule: {
+                on: { hour: mParts[0] ?? 9, minute: mParts[1] ?? 0 },
+                repeats: true,
+                every: 'day'
+              }
+            },
+            {
+              id: 1002,
+              title: '⚡ பிற்பகல் வேகம்! Afternoon Speed Blast',
+              body: 'Keep your fingers nimble! தட்டச்சு செய்ய ரெடியா? 2-minute sprint test ready 🚀',
+              channelId: this.channelId,
+              schedule: {
+                on: { hour: aParts[0] ?? 14, minute: aParts[1] ?? 0 },
+                repeats: true,
+                every: 'day'
+              }
+            },
+            {
+              id: 1003,
+              title: '🌙 இரவு தேர்வு பயிற்சி! Evening Exam Revision',
+              body: 'Consistent daily practice creates Typing Thalaivas! Don\'t break your streak today! 🏆',
+              channelId: this.channelId,
+              schedule: {
+                on: { hour: eParts[0] ?? 20, minute: eParts[1] ?? 0 },
+                repeats: true,
+                every: 'day'
+              }
             }
-          }]
+          ]
         });
-        console.log(`[NotificationService] Daily reminder scheduled at ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
+        console.log(`[NotificationService] 3 Daily reminders scheduled at ${morningStr}, ${afternoonStr}, ${eveningStr}`);
       } catch (e) {
         console.warn('[NotificationService] Daily reminder scheduling error:', e);
       }
@@ -552,11 +585,17 @@ const NotificationService = {
   savePreferencesFromUI() {
     const chkDaily = document.getElementById('chkDailyReminder');
     const selTime = document.getElementById('selReminderTime');
+    const selMorning = document.getElementById('selReminderMorning');
+    const selAfternoon = document.getElementById('selReminderAfternoon');
+    const selEvening = document.getElementById('selReminderEvening');
     const chkExam = document.getElementById('chkExamAlerts');
     const chkWeak = document.getElementById('chkWeakKeyAlerts');
 
     const enabled = chkDaily ? chkDaily.checked : true;
-    const time = selTime ? selTime.value : '09:00';
+    const time = (selTime && selTime.value) ? selTime.value : (selMorning ? selMorning.value : '09:00');
+    const timeMorning = selMorning ? selMorning.value : time;
+    const timeAfternoon = selAfternoon ? selAfternoon.value : '14:00';
+    const timeEvening = selEvening ? selEvening.value : '20:00';
     const examAlerts = chkExam ? chkExam.checked : true;
     const weakAlerts = chkWeak ? chkWeak.checked : true;
 
@@ -572,6 +611,9 @@ const NotificationService = {
     this.updatePreferences({
       enabled: enabled,
       reminderTime: time,
+      reminderMorning: timeMorning,
+      reminderAfternoon: timeAfternoon,
+      reminderEvening: timeEvening,
       examAlerts: examAlerts,
       resultAlerts: examAlerts,
       weakKeyAlerts: weakAlerts
@@ -582,11 +624,17 @@ const NotificationService = {
     const s = this.settings;
     const chkDaily = document.getElementById('chkDailyReminder');
     const selTime = document.getElementById('selReminderTime');
+    const selMorning = document.getElementById('selReminderMorning');
+    const selAfternoon = document.getElementById('selReminderAfternoon');
+    const selEvening = document.getElementById('selReminderEvening');
     const chkExam = document.getElementById('chkExamAlerts');
     const chkWeak = document.getElementById('chkWeakKeyAlerts');
 
     if (chkDaily) chkDaily.checked = (s.enabled !== false);
     if (selTime && s.reminderTime) selTime.value = s.reminderTime;
+    if (selMorning && (s.reminderMorning || s.reminderTime)) selMorning.value = (s.reminderMorning || s.reminderTime);
+    if (selAfternoon && s.reminderAfternoon) selAfternoon.value = s.reminderAfternoon;
+    if (selEvening && s.reminderEvening) selEvening.value = s.reminderEvening;
     if (chkExam) chkExam.checked = (s.examAlerts !== false);
     if (chkWeak) chkWeak.checked = (s.weakKeyAlerts !== false);
 

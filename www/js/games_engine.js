@@ -55,7 +55,10 @@
   }
 
   // --- SOUND EFFECTS SYNTHESIS ---
+  let isGameSoundEnabled = true;
+
   function playSound(type) {
+    if (!isGameSoundEnabled) return;
     try {
       if (window.AudioEngine && typeof window.AudioEngine.play === 'function') {
         const ctx = window.AudioEngine.ctx || (window.AudioContext && new (window.AudioContext || window.webkitAudioContext)());
@@ -67,44 +70,53 @@
         osc.connect(gain);
         gain.connect(ctx.destination);
 
-        if (type === 'hit') {
-          // Pleasant high-pitch blip
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(580, t);
-          osc.frequency.exponentialRampToValueAtTime(880, t + 0.04);
-          gain.gain.setValueAtTime(0.12, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+        if (type === 'type') {
+          // Crisp subtle mechanical key click (~12ms)
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(1400, t);
+          osc.frequency.exponentialRampToValueAtTime(320, t + 0.012);
+          gain.gain.setValueAtTime(0.08, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.012);
           osc.start(t);
-          osc.stop(t + 0.04);
+          osc.stop(t + 0.012);
+        } else if (type === 'hit') {
+          // Pleasant high-pitch blip for correct letter
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(650, t);
+          osc.frequency.exponentialRampToValueAtTime(980, t + 0.035);
+          gain.gain.setValueAtTime(0.12, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.035);
+          osc.start(t);
+          osc.stop(t + 0.035);
         } else if (type === 'bonus') {
-          // Melodic arpeggio chime
+          // Melodic arpeggio chime for correct word completion
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(523.25, t); // C5
           osc.frequency.setValueAtTime(659.25, t + 0.05); // E5
           osc.frequency.setValueAtTime(783.99, t + 0.10); // G5
           osc.frequency.setValueAtTime(1046.50, t + 0.15); // C6
           gain.gain.setValueAtTime(0.18, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
           osc.start(t);
-          osc.stop(t + 0.25);
+          osc.stop(t + 0.28);
         } else if (type === 'error') {
-          // Dissonant low buzz
+          // Subtle low buzz error sound for incorrect letter
           osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(160, t);
-          osc.frequency.linearRampToValueAtTime(110, t + 0.08);
-          gain.gain.setValueAtTime(0.2, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+          osc.frequency.setValueAtTime(150, t);
+          osc.frequency.linearRampToValueAtTime(95, t + 0.06);
+          gain.gain.setValueAtTime(0.15, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
           osc.start(t);
-          osc.stop(t + 0.08);
+          osc.stop(t + 0.06);
         } else if (type === 'miss') {
-          // Descending warning swoop
+          // Descending warning swoop for missed boundary
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(400, t);
-          osc.frequency.exponentialRampToValueAtTime(180, t + 0.2);
-          gain.gain.setValueAtTime(0.25, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+          osc.frequency.setValueAtTime(380, t);
+          osc.frequency.exponentialRampToValueAtTime(150, t + 0.18);
+          gain.gain.setValueAtTime(0.2, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
           osc.start(t);
-          osc.stop(t + 0.2);
+          osc.stop(t + 0.18);
         } else if (type === 'pop') {
           // Soft bubble pop
           osc.type = 'sine';
@@ -221,6 +233,39 @@
       this.canvasWidth = 360;
       this.canvasHeight = 600;
       this.pixelRatio = window.devicePixelRatio || 1;
+      this.soundEnabled = true;
+    }
+
+    toggleSound() {
+      this.soundEnabled = !this.soundEnabled;
+      isGameSoundEnabled = this.soundEnabled;
+      const soundBtn = document.getElementById('gameSoundBtn');
+      if (soundBtn) {
+        soundBtn.textContent = this.soundEnabled ? '🔊' : '🔇';
+        soundBtn.title = this.soundEnabled ? 'Sound Effects: ON' : 'Sound Effects: MUTED';
+      }
+      if (typeof window.toast === 'function') {
+        window.toast(this.soundEnabled ? '🔊 Game Sound Effects: Enabled' : '🔇 Game Sound Effects: Muted');
+      }
+      return this.soundEnabled;
+    }
+
+    getSpeedForWord() {
+      const elapsedSec = Math.max(0, (Date.now() - (this.startTime || Date.now())) / 1000);
+      const isBubble = (this.gameType === 'bubble');
+      if (!isBubble) {
+        // Falling Words: Starts slow & student-friendly at 0.55 px/frame (~33 px/sec)
+        // Over the first 25 seconds, smoothly ramps from 0.55 to 1.15 px/frame
+        const timeProgress = Math.min(1.0, elapsedSec / 25.0);
+        const smoothProgress = timeProgress * (2 - timeProgress); // quadratic ease-out
+        const rampSpeed = 0.55 + (smoothProgress * 0.60);
+        // Score bonus scales smoothly
+        const scoreBonus = Math.min(0.70, (this.score / 100) * 0.35);
+        return Number((rampSpeed + scoreBonus).toFixed(2));
+      } else {
+        const timeProgress = Math.min(1.0, elapsedSec / 30.0);
+        return Number((0.60 + (timeProgress * 0.35) + Math.min(0.5, this.score / 150)).toFixed(2));
+      }
     }
 
     init() {
@@ -440,13 +485,8 @@
       const graphemes = splitGraphemes(wordText, this.lang);
       const isBubble = (this.gameType === 'bubble');
 
-      // Base speed
-      let speed = isBubble ? 0.65 : 0.75;
-      if (!isBubble) {
-        speed += Math.min(this.score / 50, 2.2) * 0.35;
-      } else {
-        speed += Math.min(this.score / 60, 1.5) * 0.2;
-      }
+      // Dynamic progressive speed (student-friendly 25s curve + score bonus)
+      const speed = this.getSpeedForWord();
 
       const numLetters = graphemes.length;
       // Dynamically adapt bubble radius to letter count so bubbles never crowd
@@ -619,6 +659,9 @@
 
     handleKeystroke(char) {
       if (!this.active || this.paused || this.activeWords.length === 0) return;
+
+      // Typing key sound feedback on every keystroke by default
+      playSound('type');
 
       const targetWord = this.activeWords[this.currentWordIdx];
       if (!targetWord) return;
@@ -845,10 +888,17 @@
       }
 
       // Spawn periodic words if below max concurrent words
-      const maxConcurrent = isBubble ? 1 : 2;
+      // In Falling Words, exactly 1 word block falls at a time to prevent any overlaps, bunching, or target mismatch!
+      const maxConcurrent = 1;
       if (now - this.lastSpawnTime > this.spawnInterval && this.activeWords.length < maxConcurrent) {
         this.spawnWord();
         this.lastSpawnTime = now;
+      }
+
+      // Smooth progressive speed update (no sudden jumps, 25s ramp + score bonus)
+      const dynamicSpeed = this.getSpeedForWord();
+      for (let s = 0; s < this.activeWords.length; s++) {
+        this.activeWords[s].speed = dynamicSpeed;
       }
 
       // Update active words
@@ -1157,15 +1207,44 @@
         this.drawRoundRect(ctx, baseBarX, baseBarY, baseBarWidth, baseBarHeight, 6);
         ctx.stroke();
 
-        // Target word text inside landing slot
-        const curTarget = this.activeWords[this.currentWordIdx];
+        // Target word text inside landing slot - guaranteed synchronized with falling word!
+        const curTarget = this.activeWords[this.currentWordIdx] || this.activeWords[0];
         if (curTarget) {
           ctx.save();
-          ctx.fillStyle = '#64748b';
-          ctx.font = 'bold 15px Georgia, "Mukta Malar", serif';
-          ctx.textAlign = 'center';
+          const targetGraphemes = curTarget.graphemes || [];
+          const isTamil = (this.lang === 'ta');
+          const fontSize = isTamil ? 16 : 17;
+          ctx.font = `bold ${fontSize}px Georgia, "Times New Roman", "Mukta Malar", system-ui, serif`;
           ctx.textBaseline = 'middle';
-          ctx.fillText(curTarget.text, dockX + dockWidth / 2, baseBarY + baseBarHeight / 2);
+          ctx.textAlign = 'left';
+
+          const gWidths = targetGraphemes.map(g => ctx.measureText(g).width);
+          const totalW = gWidths.reduce((a, b) => a + b, 0);
+          let startX = dockX + (dockWidth - totalW) / 2;
+          const slotTextY = baseBarY + baseBarHeight / 2;
+
+          for (let g = 0; g < targetGraphemes.length; g++) {
+            const char = targetGraphemes[g];
+            const cw = gWidths[g];
+            if (g < this.charIndex) {
+              // Typed letter: emerald green
+              ctx.fillStyle = '#16a34a';
+              ctx.fillText(char, startX, slotTextY);
+            } else if (g === this.charIndex) {
+              // Current target letter: vivid blue with underline
+              ctx.fillStyle = '#2563eb';
+              ctx.fillText(char, startX, slotTextY);
+              ctx.save();
+              ctx.fillStyle = '#2563eb';
+              ctx.fillRect(startX, slotTextY + 9, cw, 2);
+              ctx.restore();
+            } else {
+              // Untyped letter: slate grey
+              ctx.fillStyle = '#64748b';
+              ctx.fillText(char, startX, slotTextY);
+            }
+            startX += cw;
+          }
           ctx.restore();
         }
       }
@@ -1852,6 +1931,10 @@
     });
 
     container.innerHTML = html;
+  };
+
+  window.toggleGameSound = function () {
+    return engine.toggleSound();
   };
 
   // Auto initialize on DOM ready

@@ -50,6 +50,8 @@ jobs:
           node test_games_module.js
           echo "=== 5. OTG Physical Keyboard Suite ==="
           node test_otg_keyboard.js
+          echo "=== 6. Latest Features & UI Fixes Suite ==="
+          node test_latest_features.js
 
       - name: Sync Capacitor Android Project
         run: npx cap sync android
