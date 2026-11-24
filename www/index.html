@@ -105,6 +105,50 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
   display: block !important;
   animation: screenFadeIn .22s ease-out;
 }
+.games-hub-header {
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: 12px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  height: auto !important;
+  min-height: 48px !important;
+  max-height: none !important;
+  padding: 8px 12px !important;
+  box-sizing: border-box !important;
+}
+@media (max-width: 580px) {
+  .games-hub-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 10px !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  .games-hub-header > div:first-child {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+  .games-hub-actions {
+    width: 100% !important;
+    display: flex !important;
+    gap: 8px !important;
+    justify-content: space-between !important;
+  }
+  .games-hub-actions .ghostbtn {
+    flex: 1 !important;
+    text-align: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    padding: 7px 10px !important;
+  }
+}
 #screen-games {
   display: none;
   position: fixed;
@@ -112,7 +156,7 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
   width: 100vw;
   height: 100dvh;
   z-index: 9999;
-  background: #020617;
+  background: #a8b6fc;
   flex-direction: column;
   overflow: hidden;
   touch-action: none;
@@ -127,46 +171,39 @@ body:has(#screen-games.active) .app-header,
 body:has(#screen-games.active) .bottom-nav-bar {
   display: none !important;
 }
-.game-hud-bar {
+.game-top-close-btn {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top));
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  background: #2563eb;
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 6px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin: calc(8px + env(safe-area-inset-top)) 12px 6px;
-  padding: 8px 16px;
-  background: rgba(22, 17, 19, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  color: #ffffff;
-  flex-shrink: 0;
-  z-index: 10;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  gap: 12px;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 30;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.4);
+  transition: transform 0.15s ease, background 0.15s ease;
 }
-.game-hud-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 9999px;
-  padding: 4px 10px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #f8fafc;
+.game-top-close-btn:active {
+  transform: scale(0.92);
+  background: #1d4ed8;
 }
 .game-arena-wrap {
   flex: 1 1 auto;
   position: relative;
-  width: calc(100% - 24px);
-  margin: 4px 12px 10px;
-  border-radius: 14px;
+  width: 100%;
+  margin: 0;
+  border-radius: 0;
   overflow: hidden;
   touch-action: none;
-  background: #190f12;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.7);
+  background: transparent;
 }
 #gameCanvas {
   position: absolute;
@@ -175,6 +212,105 @@ body:has(#screen-games.active) .bottom-nav-bar {
   height: 100%;
   display: block;
   touch-action: none;
+}
+.game-bottom-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px calc(10px + env(safe-area-inset-bottom));
+  background: #dbeafe;
+  border-top: 2.5px solid #2563eb;
+  flex-shrink: 0;
+  z-index: 25;
+  gap: 12px;
+  box-sizing: border-box;
+}
+.game-bottom-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.game-score-large {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1d4ed8;
+  line-height: 1;
+  min-width: 24px;
+}
+.game-missed-cluster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.game-missed-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2563eb;
+}
+.game-hearts-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.game-bottom-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.game-btn-next {
+  background: #1d4ed8;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 24px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.3);
+}
+.game-btn-next:active {
+  transform: scale(0.95);
+  background: #1e40af;
+}
+.game-btn-cancel {
+  background: #ffffff;
+  color: #1d4ed8;
+  border: 1.5px solid #2563eb;
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.game-btn-cancel:active {
+  transform: scale(0.95);
+  background: #eff6ff;
+}
+@media (max-width: 480px) {
+  .game-bottom-panel {
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    gap: 8px;
+  }
+  .game-bottom-left {
+    gap: 8px;
+  }
+  .game-score-large {
+    font-size: 24px;
+  }
+  .game-missed-label {
+    font-size: 13.5px;
+  }
+  .game-btn-next {
+    padding: 7px 16px;
+    font-size: 13px;
+  }
+  .game-btn-cancel {
+    padding: 7px 14px;
+    font-size: 13px;
+  }
 }
 .anti-choke-chip {
   display: inline-flex;
@@ -424,11 +560,15 @@ body {
   justify-content: space-between;
   margin-bottom: 16px;
   padding: 4px 2px;
+  gap: 8px;
+  min-width: 0;
 }
 .brand-group {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
+  min-width: 0;
 }
 .brand-emblem {
   width: 38px;
@@ -442,12 +582,20 @@ body {
   color: #fff;
   flex-shrink: 0;
 }
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
 .brand-text h1 {
   font-size: 16px;
   font-weight: 800;
   letter-spacing: -0.2px;
   color: var(--ink);
-  line-height: 1.1;
+  line-height: 1.15;
+  white-space: nowrap !important;
+  margin: 0;
 }
 .brand-text h1 span {
   background: var(--primary-gradient);
@@ -455,17 +603,106 @@ body {
   -webkit-text-fill-color: transparent;
 }
 .brand-tag {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.15;
 }
 
 .header-tools {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex-shrink: 1;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+@media (max-width: 520px) {
+  .app-header {
+    gap: 6px;
+    padding: 2px 0;
+    margin-bottom: 12px;
+  }
+  .brand-group {
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .brand-emblem {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+  .brand-emblem svg {
+    width: 18px;
+    height: 18px;
+  }
+  .brand-text h1 {
+    font-size: 15px;
+    white-space: nowrap !important;
+  }
+  .brand-tag {
+    font-size: 8.5px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .header-tools {
+    gap: 4px;
+  }
+  .tool-btn {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+  }
+  .streak-chip {
+    padding: 3px 6px !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+    border-radius: 14px !important;
+  }
+  .avatar-pill {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  #btnFullscreen {
+    display: none !important;
+  }
+}
+@media (max-width: 380px) {
+  .brand-emblem {
+    width: 30px;
+    height: 30px;
+  }
+  .brand-emblem svg {
+    width: 16px;
+    height: 16px;
+  }
+  .brand-text h1 {
+    font-size: 13.5px;
+    white-space: nowrap !important;
+  }
+  .brand-tag {
+    font-size: 7.5px;
+    letter-spacing: 0.2px;
+  }
+  .header-tools {
+    gap: 3px;
+  }
+  .tool-btn {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 13px !important;
+  }
+  .streak-chip {
+    padding: 2px 5px !important;
+    font-size: 10px !important;
+  }
 }
 .streak-chip {
   display: flex;
@@ -3233,14 +3470,16 @@ body:has(#screen-test.active) .bottom-nav-bar {
        SCREEN 5: GAMES HUB (ARCADE ARENA)
   =================================================================== -->
   <section class="screen" id="screen-games-hub">
-    <div class="test-cockpit-bar" style="margin-bottom:16px;">
-      <button class="test-back-btn" onclick="showScreen('screen-config')">&lt; Back to App</button>
-      <div style="font-weight:800;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:6px;">
-        <span>🎮</span> Typing Arcade Arena
+    <div class="games-hub-header" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="test-back-btn" onclick="showScreen('screen-config')" style="white-space:nowrap;flex-shrink:0;">&lt; Back to App</button>
+        <div style="font-weight:800;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:6px;white-space:nowrap;">
+          <span>🎮</span> Typing Arcade Arena
+        </div>
       </div>
-      <div style="display:flex;gap:6px;">
-        <button class="ghostbtn" style="padding:4px 10px;font-size:11.5px;font-weight:700;" onclick="openLeaderboardModal()">🏆 Hall of Legends</button>
-        <button class="ghostbtn" style="padding:4px 10px;font-size:11.5px;font-weight:700;" onclick="openGameHistoryModal()">📜 My History</button>
+      <div class="games-hub-actions">
+        <button class="ghostbtn" onclick="openLeaderboardModal()">🏆 Hall of Legends</button>
+        <button class="ghostbtn" onclick="openGameHistoryModal()">📜 My History</button>
       </div>
     </div>
 
@@ -3276,12 +3515,12 @@ body:has(#screen-test.active) .bottom-nav-bar {
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
           <div style="font-size:36px;">🫧</div>
           <div>
-            <span style="font-size:10px;font-weight:800;background:#2563eb;color:#fff;padding:2px 8px;border-radius:9999px;text-transform:uppercase;">Flotation Defense</span>
+            <span style="font-size:10px;font-weight:800;background:#2563eb;color:#fff;padding:2px 8px;border-radius:9999px;text-transform:uppercase;">Top-to-Bottom Defense</span>
             <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:4px 0 0;">Bubble Word Challenge</h3>
           </div>
         </div>
         <p style="font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:14px;">
-          Animated word bubbles float upward towards a high-voltage ceiling. Pop them letter-by-letter with pure precision before they burst!
+          Vibrant letter bubbles fall from the sky toward the baseline. Pop them letter-by-letter with pure precision before they touch down!
         </p>
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">
           <span style="font-size:11px;font-weight:700;padding:3px 8px;background:rgba(16,185,129,0.12);color:#10b981;border-radius:6px;">+1 pt / letter</span>
@@ -3335,45 +3574,34 @@ body:has(#screen-test.active) .bottom-nav-bar {
        SCREEN 6: ACTIVE GAME ARENA (FULL-SCREEN 100DVH HUD & CANVAS)
   =================================================================== -->
   <section class="screen" id="screen-games">
-    <!-- TOP FLOATING HUD MATCHING REFERENCE DESIGN -->
-    <div class="game-hud-bar">
-      <!-- Left cluster: Title, Score, Speed, Misses tracker -->
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <div style="display:flex;align-items:center;gap:6px;font-size:15px;font-weight:700;color:#f8fafc;letter-spacing:0.2px;">
-          <span style="font-size:18px;">🫧</span> Bubble Pop
-        </div>
-
-        <div id="gameScoreDisplay" style="font-size:22px;font-weight:800;color:#f59e0b;letter-spacing:0.5px;min-width:20px;line-height:1;">
-          0
-        </div>
-
-        <div class="game-hud-pill" style="display:inline-flex;align-items:center;gap:5px;background:#182234;border:1px solid #1e3a5f;border-radius:9999px;padding:3px 12px;font-size:12px;font-weight:700;color:#38bdf8;">
-          <span>⚡</span> Speed <span id="gameSpeedDisplay">1</span>
-        </div>
-
-        <!-- 6 Circular Misses / Lives Indicators -->
-        <div id="gameHeartsDisplay" style="display:flex;align-items:center;gap:6px;">
-          <!-- Populated dynamically via updateHUD() -->
-        </div>
-
-        <!-- Hidden accuracy display to maintain test and model compatibility -->
-        <span id="gameAccuracyDisplay" style="display:none;">100%</span>
-      </div>
-
-      <!-- Right cluster: Quit button -->
-      <button class="test-back-btn" style="background:rgba(255,255,255,0.06);color:#f1f5f9;border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:4px;cursor:pointer;" onclick="quitGame()">✕ Quit</button>
-    </div>
-
     <!-- MAIN GAMING CANVAS ARENA -->
     <div class="game-arena-wrap" id="gameArenaContainer">
+      <!-- TOP-RIGHT ROYAL BLUE CLOSE BUTTON MATCHING REFERENCE SCREENSHOT -->
+      <button class="game-top-close-btn" id="gameTopCloseBtn" onclick="quitGame()" title="Quit Game">✕</button>
+
       <canvas id="gameCanvas"></canvas>
       <input type="text" id="gameKeyInput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text" style="position:absolute;top:-200px;left:-200px;opacity:0;pointer-events:none;" />
     </div>
 
-    <!-- BOTTOM KEYSTROKE STATUS BAR -->
-    <div style="padding:6px 14px;background:rgba(15,23,42,0.95);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#94a3b8;border-top:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
-      <div>Correct: <b id="gameCorrectStrokes" style="color:#10b981;">0</b> | Mistyped: <b id="gameWrongStrokes" style="color:#ef4444;">0</b></div>
-      <div style="color:#60a5fa;font-weight:600;">⌨️ Type the glowing letter</div>
+    <!-- BOTTOM GAME HUD PANEL MATCHING REFERENCE DESIGN -->
+    <div class="game-bottom-panel" id="gameBottomPanel">
+      <div class="game-bottom-left">
+        <div id="gameScoreDisplay" class="game-score-large">0</div>
+        <div class="game-missed-cluster">
+          <span class="game-missed-label">Missed</span>
+          <div id="gameHeartsDisplay" class="game-hearts-wrap"></div>
+        </div>
+        <div class="game-hud-pill" id="gameSpeedPill" style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;font-size:11.5px;font-weight:700;background:rgba(37,99,235,0.1);color:#2563eb;border:1px solid rgba(37,99,235,0.25);border-radius:20px;">
+          <span>⚡</span> Speed <span id="gameSpeedDisplay">1</span>
+        </div>
+        <span id="gameAccuracyDisplay" style="display:none;">100%</span>
+        <span id="gameCorrectStrokes" style="display:none;">0</span>
+        <span id="gameWrongStrokes" style="display:none;">0</span>
+      </div>
+      <div class="game-bottom-right">
+        <button id="btnGameNext" class="game-btn-next" onclick="GamesEngine.skipWord()">Next</button>
+        <button id="btnGameCancel" class="game-btn-cancel" onclick="quitGame()">Cancel</button>
+      </div>
     </div>
   </section>
 

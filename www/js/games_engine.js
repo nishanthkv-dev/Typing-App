@@ -271,12 +271,20 @@
       if (!arena) return;
 
       const rect = arena.getBoundingClientRect();
-      this.canvasWidth = rect.width || 360;
-      this.canvasHeight = rect.height || 600;
+      this.canvasWidth = Math.round(rect.width) || window.innerWidth || 360;
+      this.canvasHeight = Math.round(rect.height) || (window.innerHeight - 60) || 600;
 
-      this.canvas.width = this.canvasWidth * this.pixelRatio;
-      this.canvas.height = this.canvasHeight * this.pixelRatio;
-      this.ctx.scale(this.pixelRatio, this.pixelRatio);
+      this.pixelRatio = window.devicePixelRatio || 1;
+      this.canvas.width = Math.round(this.canvasWidth * this.pixelRatio);
+      this.canvas.height = Math.round(this.canvasHeight * this.pixelRatio);
+
+      if (this.ctx) {
+        if (typeof this.ctx.setTransform === 'function') {
+          this.ctx.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
+        } else if (typeof this.ctx.scale === 'function') {
+          this.ctx.scale(this.pixelRatio, this.pixelRatio);
+        }
+      }
     }
 
     bindEvents() {
@@ -347,13 +355,7 @@
       this.lastSpawnTime = 0;
       this.spawnInterval = 3000;
 
-      this.resizeCanvas();
-      this.updateHUD();
-
-      // Spawn initial word immediately
-      this.spawnWord();
-
-      // Show gaming screen
+      // Show gaming screen FIRST so canvas has active DOM bounding box
       if (typeof window.showScreen === 'function') {
         window.showScreen('screen-games');
       } else {
@@ -361,6 +363,12 @@
         const sc = document.getElementById('screen-games');
         if (sc) sc.classList.add('active');
       }
+
+      this.resizeCanvas();
+      this.updateHUD();
+
+      // Spawn initial word immediately
+      this.spawnWord();
 
       // Focus input
       setTimeout(() => {
@@ -441,24 +449,56 @@
       }
 
       const numLetters = graphemes.length;
-      const bubbleRadius = (this.canvasWidth <= 500) ? 30 : 34;
+      // Dynamically adapt bubble radius to letter count so bubbles never crowd
+      const bubbleRadius = (numLetters >= 8) ? 24 : ((this.canvasWidth <= 500) ? 28 : 32);
       const isFirstSpawn = (this.activeWords.length === 0 && this.score === 0);
 
-      // Distribute letter bubbles horizontally and stagger them vertically
-      const usableWidth = Math.max(160, this.canvasWidth - (bubbleRadius * 2 + 50));
-      const colStep = usableWidth / Math.max(numLetters, 1);
-      const startX = bubbleRadius + 25;
+      const BUBBLE_PALETTES = [
+        { main: '#e11d48', dark: '#9f1239', light: '#fda4af' }, // Vivid ruby red/pink ('i' in reference)
+        { main: '#65a30d', dark: '#3f6212', light: '#bef264' }, // Apple/lime green ('l' and 'k' in reference)
+        { main: '#4f46e5', dark: '#3730a3', light: '#a5b4fc' }, // Periwinkle/royal blue ('h' and 't' in reference)
+        { main: '#7c3aed', dark: '#5b21b6', light: '#c4b5fd' }, // Purple/violet
+        { main: '#ea580c', dark: '#9a3412', light: '#fdba74' }, // Vibrant amber/orange
+        { main: '#0284c7', dark: '#075985', light: '#7dd3fc' }, // Sky cyan
+      ];
 
       const bubbles = [];
+      const padding = bubbleRadius + 18;
+      const minX = padding;
+      const maxX = this.canvasWidth - padding;
+      const minY = 60;
+      const maxY = Math.min(this.canvasHeight - 160, 380);
+
+      // Distribute bubbles organically across screen avoiding collisions
+      // Letter 0 is positioned lower (closer to danger boundary), subsequent letters are staggered higher
       for (let i = 0; i < numLetters; i++) {
-        const bx = startX + (i + 0.5) * colStep + (Math.random() - 0.5) * Math.min(25, colStep * 0.35);
-        let by;
-        if (isFirstSpawn) {
-          // On start, distribute gracefully across screen like reference mockup
-          by = Math.max(140, this.canvasHeight * 0.28) + (i * 105) + (Math.random() * 20);
-        } else {
-          // Normal spawn: rises from bottom letter-by-letter
-          by = (this.canvasHeight - 50) + (i * 95) + (Math.random() * 20);
+        let bx, by;
+        let attempts = 0;
+        let valid = false;
+
+        const progressFrac = i / Math.max(numLetters - 1, 1);
+        const baseLayerY = isFirstSpawn
+          ? (minY + (maxY - minY) * (0.85 - progressFrac * 0.7))
+          : (minY + (maxY - minY) * (0.65 - progressFrac * 0.55));
+
+        const colIndex = (i * 2 + 1) % 4;
+        const colWidth = (maxX - minX) / 4;
+
+        while (attempts < 60 && !valid) {
+          attempts++;
+          bx = minX + (colIndex + 0.5) * colWidth + (Math.random() - 0.5) * (colWidth * 0.6);
+          bx = Math.max(minX, Math.min(maxX, bx));
+          by = baseLayerY + (Math.random() - 0.5) * 35;
+          by = Math.max(minY, Math.min(maxY, by));
+
+          valid = true;
+          for (let j = 0; j < bubbles.length; j++) {
+            const dist = Math.hypot(bx - bubbles[j].x, by - bubbles[j].y);
+            if (dist < bubbleRadius * 2.15) {
+              valid = false;
+              break;
+            }
+          }
         }
 
         bubbles.push({
@@ -468,8 +508,9 @@
           y: by,
           radius: bubbleRadius,
           phase: Math.random() * Math.PI * 2,
-          wobbleSpeed: 0.02 + Math.random() * 0.015,
-          wobbleAmp: 12 + Math.random() * 6,
+          wobbleSpeed: 0.018 + Math.random() * 0.012,
+          wobbleAmp: 8 + Math.random() * 4,
+          color: BUBBLE_PALETTES[i % BUBBLE_PALETTES.length],
           popped: false,
           shakeFrames: 0,
           shakeOffset: 0
@@ -477,7 +518,7 @@
       }
 
       const initialX = bubbles[0] ? bubbles[0].x : this.canvasWidth / 2;
-      const initialY = isBubble ? (bubbles[0] ? bubbles[0].y : this.canvasHeight - 50) : 40;
+      const initialY = isBubble ? (bubbles[0] ? bubbles[0].y : 60) : 40;
       const boxWidth = Math.max(80, graphemes.length * 50);
 
       const wordObj = {
@@ -492,7 +533,7 @@
         speed: speed,
         phase: Math.random() * Math.PI * 2,
         wobbleSpeed: 0.03 + Math.random() * 0.02,
-        wobbleAmp: isBubble ? 12 : 4,
+        wobbleAmp: isBubble ? 10 : 4,
         shakeOffset: 0,
         shakeFrames: 0,
         spawnTime: Date.now()
@@ -511,29 +552,67 @@
     getWordBubbles(wordObj) {
       if (!wordObj) return [];
       if (!wordObj.bubbles || wordObj.bubbles.length !== (wordObj.graphemes || []).length) {
-        const bubbleRadius = (this.canvasWidth <= 500) ? 30 : 34;
         const numLetters = (wordObj.graphemes || []).length;
-        const usableWidth = Math.max(160, this.canvasWidth - (bubbleRadius * 2 + 50));
-        const colStep = usableWidth / Math.max(numLetters, 1);
-        const startX = bubbleRadius + 25;
+        const bubbleRadius = (numLetters >= 8) ? 24 : ((this.canvasWidth <= 500) ? 28 : 32);
+        const padding = bubbleRadius + 18;
+        const minX = padding;
+        const maxX = this.canvasWidth - padding;
+        const minY = 60;
+        const maxY = Math.min(this.canvasHeight - 160, 380);
 
-        wordObj.bubbles = (wordObj.graphemes || []).map((char, i) => {
-          const bx = startX + (i + 0.5) * colStep;
-          const by = (wordObj.y || (this.canvasHeight - 50)) + (i * 95);
-          return {
+        const BUBBLE_PALETTES = [
+          { main: '#e11d48', dark: '#9f1239', light: '#fda4af' },
+          { main: '#65a30d', dark: '#3f6212', light: '#bef264' },
+          { main: '#4f46e5', dark: '#3730a3', light: '#a5b4fc' },
+          { main: '#7c3aed', dark: '#5b21b6', light: '#c4b5fd' },
+          { main: '#ea580c', dark: '#9a3412', light: '#fdba74' },
+          { main: '#0284c7', dark: '#075985', light: '#7dd3fc' }
+        ];
+
+        const bubbles = [];
+        (wordObj.graphemes || []).forEach((char, i) => {
+          const progressFrac = i / Math.max(numLetters - 1, 1);
+          const baseLayerY = (wordObj.y || minY) + (maxY - minY) * (0.75 - progressFrac * 0.6);
+          const colIndex = (i * 2 + 1) % 4;
+          const colWidth = (maxX - minX) / 4;
+
+          let bx, by;
+          let attempts = 0;
+          let valid = false;
+
+          while (attempts < 60 && !valid) {
+            attempts++;
+            bx = minX + (colIndex + 0.5) * colWidth + (Math.random() - 0.5) * (colWidth * 0.6);
+            bx = Math.max(minX, Math.min(maxX, bx));
+            by = baseLayerY + (Math.random() - 0.5) * 35;
+            by = Math.max(minY, Math.min(maxY, by));
+
+            valid = true;
+            for (let j = 0; j < bubbles.length; j++) {
+              const dist = Math.hypot(bx - bubbles[j].x, by - bubbles[j].y);
+              if (dist < bubbleRadius * 2.15) {
+                valid = false;
+                break;
+              }
+            }
+          }
+
+          bubbles.push({
             char: char,
             x: bx,
             baseX: bx,
             y: by,
             radius: bubbleRadius,
             phase: Math.random() * Math.PI * 2,
-            wobbleSpeed: 0.025,
-            wobbleAmp: 12,
+            wobbleSpeed: 0.018 + Math.random() * 0.012,
+            wobbleAmp: 8 + Math.random() * 4,
+            color: BUBBLE_PALETTES[i % BUBBLE_PALETTES.length],
             popped: false,
             shakeFrames: 0,
             shakeOffset: 0
-          };
+          });
         });
+        wordObj.bubbles = bubbles;
       }
       return wordObj.bubbles;
     }
@@ -791,7 +870,8 @@
         // Movement
         if (isBubble) {
           const bubbles = this.getWordBubbles(w);
-          let ceilingHit = false;
+          let floorHit = false;
+          const floorBoundary = this.canvasHeight - 65;
 
           for (let bIdx = 0; bIdx < bubbles.length; bIdx++) {
             const b = bubbles[bIdx];
@@ -805,12 +885,12 @@
               b.shakeOffset = 0;
             }
 
-            // Move letter bubble upwards towards the top
-            b.y -= w.speed;
+            // Move letter bubble downwards toward the bottom baseline
+            b.y += w.speed;
 
-            // Check if any unpopped letter bubble hits the ceiling boundary
-            if (!b.popped && b.y <= 45) {
-              ceilingHit = true;
+            // Check if any unpopped letter bubble hits the bottom boundary
+            if (!b.popped && b.y >= floorBoundary) {
+              floorHit = true;
             }
           }
 
@@ -820,17 +900,17 @@
             w.y = unpopped[0].y;
             w.x = unpopped[0].x;
           } else {
-            w.y -= w.speed;
+            w.y += w.speed;
           }
 
-          if (ceilingHit || w.y <= 45) {
+          if (floorHit || w.y >= floorBoundary) {
             this.handleWordMiss(i);
           }
         } else {
           // Falling downward
           w.y += w.speed;
-          // Floor boundary collision: word reached bottom incomplete!
-          if (w.y >= this.canvasHeight - 60) {
+          // Floor boundary collision: word reached bottom dock incomplete!
+          if (w.y >= this.canvasHeight - 110) {
             this.handleWordMiss(i);
           }
         }
@@ -892,6 +972,24 @@
       }
     }
 
+    skipWord() {
+      if (!this.active || this.paused || this.activeWords.length === 0) return;
+      this.wordsMissed++;
+      this.lives--;
+      playSound('miss');
+      triggerHaptic('miss');
+      this.activeWords.splice(this.currentWordIdx, 1);
+      this.currentWordIdx = 0;
+      this.charIndex = 0;
+      this.composer = { raw: '', outLen: 0 };
+      this.updateHUD();
+      if (this.lives <= 0) {
+        this.gameOver();
+      } else if (this.activeWords.length === 0) {
+        this.spawnWord();
+      }
+    }
+
     updateHUD() {
       // Score
       const scoreEl = document.getElementById('gameScoreDisplay');
@@ -910,18 +1008,18 @@
         speedEl.textContent = speedTier;
       }
 
-      // Misses Tracker (6 slots matching reference UI)
+      // Misses Tracker (6 slots matching reference UI: Missed Ø Ø Ø Ø Ø Ø)
       const heartsContainer = document.getElementById('gameHeartsDisplay');
       if (heartsContainer) {
         let heartsHtml = '';
         const totalSlots = this.maxLives || 6;
         for (let i = 0; i < totalSlots; i++) {
           if (i < this.wordsMissed) {
-            // Missed slot: Red circle with X
-            heartsHtml += `<span class="game-miss-slot missed" title="Missed" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:2px solid #ef4444;background:rgba(239,68,68,0.18);color:#ef4444;font-size:12px;font-weight:900;line-height:1;">✕</span>`;
+            // Missed slot: Red circle with slash Ø
+            heartsHtml += `<span class="game-miss-slot missed" title="Missed" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:2px solid #ef4444;background:rgba(239,68,68,0.18);color:#ef4444;font-size:13px;font-weight:900;line-height:1;margin:0 1px;">Ø</span>`;
           } else {
-            // Open life slot: Outline circle
-            heartsHtml += `<span class="game-miss-slot open" title="Life available" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:2px solid #52525b;background:transparent;"></span>`;
+            // Open life slot: Blue outline circle with slash Ø matching reference
+            heartsHtml += `<span class="game-miss-slot open" title="Life available" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:2px solid #3b82f6;background:transparent;color:#3b82f6;font-size:13px;font-weight:700;line-height:1;margin:0 1px;">Ø</span>`;
           }
         }
         heartsContainer.innerHTML = heartsHtml;
@@ -946,19 +1044,19 @@
 
       // Render Arena Ambience Background
       if (isBubble) {
-        // Warm dark vignette matching reference mockup (#2e1b20 -> #1e1115 -> #0c0709)
-        const vignette = ctx.createRadialGradient(w / 2, h / 2, 10, w / 2, h / 2, Math.max(w, h) * 0.7);
-        vignette.addColorStop(0.0, '#2e1b20');
-        vignette.addColorStop(0.55, '#1e1115');
-        vignette.addColorStop(1.0, '#0c0709');
-        ctx.fillStyle = vignette;
+        // Soft pastel lavender/periwinkle background matching media_1795477409140_b427bece.png
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+        skyGrad.addColorStop(0.0, '#b8c6fa');
+        skyGrad.addColorStop(0.5, '#a8b6fc');
+        skyGrad.addColorStop(1.0, '#9cb0f6');
+        ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, w, h);
 
-        // Center Sri Kalaimagal Institute Watermark (seamless low-opacity blend)
+        // Center Sri Kalaimagal Institute Watermark (subtle soft blend)
         if (this.watermarkImg && this.watermarkImg.complete && this.watermarkImg.naturalWidth > 0) {
           ctx.save();
-          ctx.globalAlpha = 0.32;
-          const wmWidth = Math.min(w * 0.58, 290);
+          ctx.globalAlpha = 0.12;
+          const wmWidth = Math.min(w * 0.55, 260);
           const wmAspect = this.watermarkImg.naturalWidth / this.watermarkImg.naturalHeight;
           const wmHeight = wmWidth / wmAspect;
           const wmX = (w - wmWidth) / 2;
@@ -967,40 +1065,109 @@
           ctx.restore();
         }
 
-        // Ambient golden dust motes drifting gracefully
+        // Ambient white sparkle dust motes drifting gently (matching reference)
         if (this.ambientDust) {
           ctx.save();
           for (let i = 0; i < this.ambientDust.length; i++) {
             const d = this.ambientDust[i];
-            ctx.fillStyle = `rgba(254, 240, 138, ${d.alpha})`;
+            ctx.fillStyle = `rgba(255, 255, 255, ${d.alpha * 1.2})`;
             ctx.beginPath();
             ctx.arc(d.x, d.y, d.radius, 0, Math.PI * 2);
             ctx.fill();
           }
           ctx.restore();
         }
+
+        // Baseline defense boundary line at bottom of canvas
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(0, h - 1);
+        ctx.lineTo(w, h - 1);
+        ctx.stroke();
       } else {
-        // Falling mode space background
-        const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-        bgGrad.addColorStop(0, '#020617');
-        bgGrad.addColorStop(1, '#0f172a');
-        ctx.fillStyle = bgGrad;
+        // Falling mode: Clean vertical chute with bottom container matching media_1795477576059_bea0a671.png
+        ctx.fillStyle = '#eef2f9';
         ctx.fillRect(0, 0, w, h);
 
-        // Laser defense floor line at bottom (y = h - 60)
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([6, 6]);
-        ctx.beginPath();
-        ctx.moveTo(10, h - 60);
-        ctx.lineTo(w - 10, h - 60);
-        ctx.stroke();
-        ctx.setLineDash([]);
+        // Vertical Play Chute / Track
+        const trackWidth = Math.min(w * 0.84, 340);
+        const trackX = (w - trackWidth) / 2;
+        const trackY = 12;
+        const trackHeight = h - 24;
 
-        ctx.fillStyle = '#ef4444';
-        ctx.font = 'bold 10px system-ui, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('🛡️ BASELINE DEFENSE SHIELD — STOP FALLING METEORS 🛡️', w / 2, h - 45);
+        ctx.save();
+        // Track background: Crisp white card with soft shadow
+        ctx.shadowColor = 'rgba(15, 23, 42, 0.08)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetY = 4;
+        ctx.fillStyle = '#f8faff';
+        this.drawRoundRect(ctx, trackX, trackY, trackWidth, trackHeight, 10);
+        ctx.fill();
+        ctx.restore();
+
+        // Track border
+        ctx.strokeStyle = '#d5defc';
+        ctx.lineWidth = 1.5;
+        this.drawRoundRect(ctx, trackX, trackY, trackWidth, trackHeight, 10);
+        ctx.stroke();
+
+        // Bottom U-shaped container / dock matching reference
+        const dockWidth = trackWidth * 0.94;
+        const dockHeight = 110;
+        const dockX = trackX + (trackWidth - dockWidth) / 2;
+        const dockY = trackY + trackHeight - dockHeight - 8;
+        const wallThickness = 14;
+
+        ctx.save();
+        // Draw U-dock outer shape
+        ctx.fillStyle = '#9cb0f8';
+        ctx.shadowColor = 'rgba(99, 102, 241, 0.25)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetY = 4;
+        this.drawRoundRect(ctx, dockX, dockY, dockWidth, dockHeight, 12);
+        ctx.fill();
+        ctx.restore();
+
+        // Inner cut-out for U-dock cavity
+        ctx.fillStyle = '#f8faff';
+        this.drawRoundRect(ctx, dockX + wallThickness, dockY, dockWidth - (wallThickness * 2), dockHeight - wallThickness, 6);
+        ctx.fill();
+
+        // Dock rim outline
+        ctx.strokeStyle = '#7c8fe6';
+        ctx.lineWidth = 1.5;
+        this.drawRoundRect(ctx, dockX, dockY, dockWidth, dockHeight, 12);
+        ctx.stroke();
+
+        // Dock base bar / landing slot matching reference (showing dinosaur-style target)
+        const baseBarWidth = dockWidth - (wallThickness * 2) - 10;
+        const baseBarHeight = 36;
+        const baseBarX = dockX + wallThickness + 5;
+        const baseBarY = dockY + dockHeight - wallThickness - baseBarHeight - 4;
+
+        const baseBarGrad = ctx.createLinearGradient(baseBarX, baseBarY, baseBarX, baseBarY + baseBarHeight);
+        baseBarGrad.addColorStop(0, '#ffffff');
+        baseBarGrad.addColorStop(1, '#e2e8f0');
+        ctx.fillStyle = baseBarGrad;
+        this.drawRoundRect(ctx, baseBarX, baseBarY, baseBarWidth, baseBarHeight, 6);
+        ctx.fill();
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+        this.drawRoundRect(ctx, baseBarX, baseBarY, baseBarWidth, baseBarHeight, 6);
+        ctx.stroke();
+
+        // Target word text inside landing slot
+        const curTarget = this.activeWords[this.currentWordIdx];
+        if (curTarget) {
+          ctx.save();
+          ctx.fillStyle = '#64748b';
+          ctx.font = 'bold 15px Georgia, "Mukta Malar", serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(curTarget.text, dockX + dockWidth / 2, baseBarY + baseBarHeight / 2);
+          ctx.restore();
+        }
       }
 
       // Render Words / Bubbles
@@ -1052,29 +1219,29 @@
 
       const bx = b.x + (b.shakeOffset || 0);
       const by = b.y;
-      const r = b.radius || 34;
+      const r = b.radius || 30;
+      const palette = b.color || { main: '#4f46e5', dark: '#3730a3', light: '#a5b4fc' };
 
       ctx.save();
 
-      // Outer golden glow
+      // Outer glow / shadow
       if (isCurrentTarget) {
-        ctx.shadowColor = 'rgba(251, 191, 36, 0.85)';
-        ctx.shadowBlur = 22;
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
+        ctx.shadowBlur = 18;
       } else {
-        ctx.shadowColor = 'rgba(245, 158, 11, 0.35)';
-        ctx.shadowBlur = 12;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 3;
       }
 
-      // 3D Spherical Radial Gradient (Focal point top-left)
+      // 3D Spherical Radial Gradient (Light source at top-left)
       const grad = ctx.createRadialGradient(
         bx - r * 0.35, by - r * 0.35, r * 0.08,
         bx, by, r
       );
-      grad.addColorStop(0.0, '#fffbeb'); // pure creamy highlight
-      grad.addColorStop(0.2, '#fef08a'); // soft lemon gold
-      grad.addColorStop(0.55, '#f59e0b'); // core warm amber body
-      grad.addColorStop(0.85, '#d97706'); // warm shadow
-      grad.addColorStop(1.0, '#78350f'); // deep rim shade
+      grad.addColorStop(0.0, palette.light); // Bright highlight
+      grad.addColorStop(0.35, palette.main);  // Core vibrant color
+      grad.addColorStop(1.0, palette.dark);  // Deep shadow rim
 
       ctx.fillStyle = grad;
       ctx.beginPath();
@@ -1082,64 +1249,61 @@
       ctx.fill();
 
       // Delicate outer rim stroke
-      ctx.strokeStyle = isCurrentTarget ? 'rgba(254, 240, 138, 0.9)' : 'rgba(251, 191, 36, 0.4)';
+      ctx.strokeStyle = isCurrentTarget ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
       ctx.lineWidth = isCurrentTarget ? 2.5 : 1.2;
       ctx.stroke();
 
-      // Top-Left Glossy Crescent Reflection
+      // Signature Glossy Specular Reflection (top-left shiny oval dot from reference)
       ctx.save();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
       ctx.beginPath();
-      ctx.ellipse(
-        bx - r * 0.32, by - r * 0.32,
-        r * 0.28, r * 0.14,
-        -Math.PI / 4, 0, Math.PI * 2
-      );
+      ctx.arc(bx - r * 0.36, by - r * 0.36, r * 0.22, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Mini secondary highlight dot
+      ctx.beginPath();
+      ctx.arc(bx - r * 0.18, by - r * 0.52, r * 0.09, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Bottom-Right Soft Inner Specular Rim
-      ctx.save();
-      ctx.strokeStyle = 'rgba(254, 240, 138, 0.3)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(bx, by, r - 2, 0.25 * Math.PI, 0.65 * Math.PI);
-      ctx.stroke();
-      ctx.restore();
-
-      // Active Target Pulsating Aura Ring
+      // Active Target Pulsating Aura
       if (isCurrentTarget) {
         ctx.save();
         const pulse = (Math.sin(Date.now() * 0.008) + 1) * 0.5;
-        ctx.strokeStyle = `rgba(254, 240, 138, ${0.4 + pulse * 0.5})`;
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.5 + pulse * 0.5})`;
+        ctx.lineWidth = 2.5;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
-        ctx.arc(bx, by, r + 6 + pulse * 3, 0, Math.PI * 2);
+        ctx.arc(bx, by, r + 5 + pulse * 3, 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
       }
 
-      ctx.restore(); // restore shadow
+      ctx.restore(); // Restore shadow
 
-      // Render the single centered Letter
+      // Render crisp, bold white letter in the center
       ctx.save();
       const isTamil = (this.lang === 'ta');
-      const fontSize = isTamil ? Math.round(r * 0.75) : Math.round(r * 0.88);
-      ctx.font = `bold ${fontSize}px Georgia, "Times New Roman", "Mukta Malar", serif`;
+      const fontSize = isTamil ? Math.round(r * 0.78) : Math.round(r * 0.88);
+      ctx.font = `bold ${fontSize}px Georgia, "Times New Roman", "Mukta Malar", system-ui, serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      // Text shadow for sharp legibility
-      ctx.shadowColor = 'rgba(255, 255, 255, 0.35)';
-      ctx.shadowBlur = 1;
+      // Crisp contrast drop shadow
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+      ctx.shadowBlur = 3;
       ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 1;
+      ctx.shadowOffsetY = 1.5;
 
-      // Deep rich chocolate espresso color (#241208)
-      ctx.fillStyle = '#241208';
-      const displayText = isTamil ? b.char : b.char.toUpperCase();
+      ctx.fillStyle = '#ffffff';
+      const displayText = b.char; // Preserves case as in reference
       ctx.fillText(displayText, bx, by + 1);
+
+      // Active letter underline indicator (like in reference screenshot)
+      if (isCurrentTarget) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(bx - r * 0.28, by + fontSize * 0.44, r * 0.56, 2.5);
+      }
 
       ctx.restore();
     }
@@ -1159,89 +1323,79 @@
 
     renderFallingWordEntity(wordObj, isActiveTarget) {
       const ctx = this.ctx;
-      const x = wordObj.x + wordObj.shakeOffset;
-      const y = wordObj.y;
+      const w = this.canvasWidth;
       const isBubble = (this.gameType === 'bubble');
 
+      if (isBubble) return;
+
+      // Vertical chute geometry matching reference
+      const trackWidth = Math.min(w * 0.84, 340);
+      const trackX = (w - trackWidth) / 2;
+      const blockWidth = trackWidth * 0.88;
+      const blockHeight = 44;
+      const bx = trackX + (trackWidth - blockWidth) / 2 + (wordObj.shakeOffset || 0);
+      const by = wordObj.y;
+
       ctx.save();
 
-      if (isBubble) {
-        // Render Floating Bubble Container
-        const radius = Math.max(wordObj.width / 2, 32);
-
-        // Active target aura
-        if (isActiveTarget) {
-          ctx.shadowColor = 'rgba(59, 130, 246, 0.8)';
-          ctx.shadowBlur = 18;
-        }
-
-        // Bubble gradient fill
-        const bubbleGrad = ctx.createRadialGradient(x - radius * 0.3, y - radius * 0.3, radius * 0.1, x, y, radius);
-        bubbleGrad.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
-        bubbleGrad.addColorStop(0.3, isActiveTarget ? 'rgba(59, 130, 246, 0.35)' : 'rgba(99, 102, 241, 0.25)');
-        bubbleGrad.addColorStop(1, isActiveTarget ? 'rgba(37, 99, 235, 0.65)' : 'rgba(79, 70, 229, 0.4)');
-
-        ctx.fillStyle = bubbleGrad;
-        ctx.strokeStyle = isActiveTarget ? '#60a5fa' : 'rgba(165, 180, 252, 0.6)';
-        ctx.lineWidth = isActiveTarget ? 2.5 : 1.5;
-
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        // Glossy bubble highlight
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
-        ctx.beginPath();
-        ctx.ellipse(x - radius * 0.35, y - radius * 0.35, radius * 0.25, radius * 0.12, Math.PI / 4, 0, Math.PI * 2);
-        ctx.fill();
+      // Block shadow
+      if (isActiveTarget) {
+        ctx.shadowColor = 'rgba(101, 163, 13, 0.45)';
+        ctx.shadowBlur = 14;
+        ctx.shadowOffsetY = 4;
       } else {
-        // Render Falling Meteor Pod
-        const w = wordObj.width;
-        const h = wordObj.height;
-        const rx = x - w / 2;
-        const ry = y - h / 2;
-
-        if (isActiveTarget) {
-          ctx.shadowColor = 'rgba(245, 158, 11, 0.8)';
-          ctx.shadowBlur = 18;
-        }
-
-        const podGrad = ctx.createLinearGradient(rx, ry, rx + w, ry + h);
-        podGrad.addColorStop(0, isActiveTarget ? '#1e293b' : '#0f172a');
-        podGrad.addColorStop(1, isActiveTarget ? '#334155' : '#1e293b');
-
-        ctx.fillStyle = podGrad;
-        ctx.strokeStyle = isActiveTarget ? '#f59e0b' : 'rgba(255, 255, 255, 0.25)';
-        ctx.lineWidth = isActiveTarget ? 2.5 : 1.5;
-
-        // Rounded pill pod
-        this.drawRoundRect(ctx, rx, ry, w, h, 20);
-        ctx.fill();
-        ctx.stroke();
-
-        // Propulsion engine glow on top
-        ctx.fillStyle = isActiveTarget ? '#f59e0b' : '#60a5fa';
-        ctx.beginPath();
-        ctx.arc(x, ry, 4, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
+        ctx.shadowBlur = 6;
+        ctx.shadowOffsetY = 2;
       }
 
+      // Vivid lime green block matching media_1795477576059_bea0a671.png
+      const blockGrad = ctx.createLinearGradient(bx, by, bx, by + blockHeight);
+      blockGrad.addColorStop(0.0, '#7cb305'); // Bright vibrant top bevel
+      blockGrad.addColorStop(0.4, '#65a30d'); // Rich core apple green
+      blockGrad.addColorStop(1.0, '#4d7c0f'); // Solid bottom edge shade
+
+      ctx.fillStyle = blockGrad;
+      this.drawRoundRect(ctx, bx, by, blockWidth, blockHeight, 6);
+      ctx.fill();
+
+      // Crisp outer stroke
+      ctx.strokeStyle = isActiveTarget ? '#3f6212' : '#4d7c0f';
+      ctx.lineWidth = 1.5;
+      this.drawRoundRect(ctx, bx, by, blockWidth, blockHeight, 6);
+      ctx.stroke();
+
+      // Top subtle bevel highlight line
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(bx + 6, by + 1.5);
+      ctx.lineTo(bx + blockWidth - 6, by + 1.5);
+      ctx.stroke();
       ctx.restore();
 
-      // Render Letters with letter-by-letter highlighting
+      ctx.restore(); // Restore shadow
+
+      // Render Word inside the block: perfectly centered, crisp bold white letters
       ctx.save();
-      ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
+      const isTamil = (this.lang === 'ta');
+      const fontSize = isTamil ? 20 : 21;
+      ctx.font = `bold ${fontSize}px Georgia, "Times New Roman", "Mukta Malar", system-ui, serif`;
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'left';
 
-      // Compute total text width
+      // Drop shadow for text readability
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+      ctx.shadowBlur = 2;
+      ctx.shadowOffsetY = 1;
+
       const graphemes = wordObj.graphemes;
       const graphemeWidths = graphemes.map(g => ctx.measureText(g).width);
       const totalTextWidth = graphemeWidths.reduce((a, b) => a + b, 0);
 
-      let curX = x - totalTextWidth / 2;
-      const textY = y;
+      let curX = bx + (blockWidth - totalTextWidth) / 2;
+      const textY = by + blockHeight / 2 + 1;
 
       for (let i = 0; i < graphemes.length; i++) {
         const char = graphemes[i];
@@ -1249,27 +1403,28 @@
 
         if (isActiveTarget) {
           if (i < this.charIndex) {
-            // Already typed correctly: Electric Green
-            ctx.fillStyle = '#10b981';
-            ctx.shadowColor = 'rgba(16, 185, 129, 0.6)';
-            ctx.shadowBlur = 8;
+            // Already typed: Bright lime/gold checkmark highlight
+            ctx.fillStyle = '#fef08a';
+            ctx.shadowColor = 'rgba(254, 240, 138, 0.8)';
+            ctx.shadowBlur = 6;
           } else if (i === this.charIndex) {
-            // Current letter to type: Bright Glowing Gold with indicator
-            ctx.fillStyle = '#fbbf24';
-            ctx.shadowColor = 'rgba(251, 191, 36, 0.9)';
-            ctx.shadowBlur = 12;
-
-            // Target indicator pill under current letter
-            ctx.fillStyle = '#fbbf24';
-            ctx.fillRect(curX, textY + 12, charW, 3);
-          } else {
-            // Upcoming letter: Crisp White
+            // Current target letter: Bright glowing white with underline
             ctx.fillStyle = '#ffffff';
-            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
+            ctx.shadowBlur = 10;
+
+            // Target underline indicator
+            ctx.save();
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(curX, textY + 11, charW, 2.5);
+            ctx.restore();
+          } else {
+            // Upcoming letter: Crisp bold white
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+            ctx.shadowBlur = 2;
           }
         } else {
-          // Inactive background word: Muted
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
           ctx.shadowBlur = 0;
         }
 
