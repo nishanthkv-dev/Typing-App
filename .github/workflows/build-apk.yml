@@ -16,7 +16,7 @@ jobs:
   build-apk:
     name: Assemble & Publish Mobile APK
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -52,6 +52,8 @@ jobs:
           node test_otg_keyboard.js
           echo "=== 6. Latest Features & UI Fixes Suite ==="
           node test_latest_features.js
+          echo "=== 7. User Access, Google Auth & Single-Device Security Suite ==="
+          node test_auth_and_access.js
 
       - name: Sync Capacitor Android Project
         run: npx cap sync android

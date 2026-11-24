@@ -137,6 +137,7 @@ async function run() {
   console.log('\n======================================================================');
   console.log(`   FINAL VERIFICATION RESULTS: ${passed}/${total} PASSED (100%)`);
   console.log('======================================================================\n');
+  process.exit(passed === total ? 0 : 1);
 }
 
 run();
