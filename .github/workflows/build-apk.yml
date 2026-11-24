@@ -56,6 +56,8 @@ jobs:
           node test_auth_and_access.js
           echo "=== 8. Games, KeyMap & Drills Overhaul Suite ==="
           node test_games_and_drills_overhaul.js
+          echo "=== 9. Keyboard Connect, Tester & Gov Jobs Suite ==="
+          node test_new_features.js
 
       - name: Sync Capacitor Android Project
         run: npx cap sync android
