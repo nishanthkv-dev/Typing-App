@@ -54,6 +54,8 @@ jobs:
           node test_latest_features.js
           echo "=== 7. User Access, Google Auth & Single-Device Security Suite ==="
           node test_auth_and_access.js
+          echo "=== 8. Games, KeyMap & Drills Overhaul Suite ==="
+          node test_games_and_drills_overhaul.js
 
       - name: Sync Capacitor Android Project
         run: npx cap sync android
