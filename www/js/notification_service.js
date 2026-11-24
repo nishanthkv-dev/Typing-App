@@ -257,7 +257,7 @@ const NotificationService = {
 
     // 4. In-App Floating Toast
     if (!scheduleAt && typeof window.toast === 'function') {
-      window.toast(`🔔 ${title}: ${body}`);
+      window.toast(`🔔 ${title}`);
     }
 
     return true;
