@@ -487,8 +487,25 @@
       const goModal = document.getElementById('gameOverModal');
       if (goModal) goModal.style.display = 'none';
 
-      // Return to games hub or studio
+      // Return to games hub
       this.openHub();
+    }
+
+    exitToApp() {
+      this.active = false;
+      this.paused = false;
+      if (this.animFrameId) cancelAnimationFrame(this.animFrameId);
+      const modal = document.getElementById('gamePauseModal');
+      if (modal) modal.style.display = 'none';
+      const goModal = document.getElementById('gameOverModal');
+      if (goModal) goModal.style.display = 'none';
+
+      // Return to main app navigation (Studio or previous tab)
+      if (typeof window.switchTab === 'function') {
+        window.switchTab(window.previousAppTab || 'speed');
+      } else if (typeof window.showScreen === 'function') {
+        window.showScreen('screen-config');
+      }
     }
 
     openHub() {
@@ -556,6 +573,10 @@
         const bubbleWidth = Math.max(68, textLen * (isTamil ? 22 : 18) + 34);
         const bubbleRadius = Math.round(bubbleHeight / 2);
 
+        // When spawning the initial bubble on game start, place it immediately visible
+        const isFirstWord = (this.activeWords.length === 0);
+        const startY = isFirstWord ? (bubbleRadius + 18) : (-bubbleRadius - 8);
+
         // Word bubble entity
         const wordObj = {
           text: wordText,
@@ -563,7 +584,7 @@
           lane: chosenLane,
           x: bx,
           baseX: bx,
-          y: -bubbleRadius - 8, // Start smoothly above the top of screen
+          y: startY,
           width: bubbleWidth,
           height: bubbleHeight,
           radius: bubbleRadius,
@@ -721,15 +742,10 @@
         let strikeY = targetWord.y;
 
         if (this.gameType === 'bubble') {
-          const bubbles = this.getWordBubbles(targetWord);
-          const poppedBubble = bubbles[this.charIndex];
-          if (poppedBubble) {
-            poppedBubble.popped = true;
-            strikeX = poppedBubble.x;
-            strikeY = poppedBubble.y;
-            this.spawnBubblePopBurst(poppedBubble.x, poppedBubble.y);
-            this.addFloatingTip(poppedBubble.x, poppedBubble.y - 20, '+1', '#fbbf24');
-          }
+          strikeX = targetWord.x;
+          strikeY = targetWord.y;
+          this.spawnBubblePopBurst(strikeX, strikeY);
+          this.addFloatingTip(strikeX, strikeY - 20, '+1', '#fbbf24');
         }
 
         this.charIndex++;
@@ -745,6 +761,10 @@
           // --- WORD BONUS COMPLETION ---
           this.score += 5; // 5 bonus points for completing a word
           this.wordsCompleted++;
+          targetWord.popped = true;
+          if (targetWord.bubbles) {
+            targetWord.bubbles.forEach(b => { b.popped = true; });
+          }
           playSound('bonus');
           this.spawnWordExplosion(strikeX, strikeY);
           this.addFloatingTip(strikeX, strikeY - 24, '+5 WORD BONUS! 🔥', '#fbbf24');
@@ -766,12 +786,8 @@
         this.composer = { raw: '', outLen: 0 };
 
         if (this.gameType === 'bubble') {
-          const bubbles = this.getWordBubbles(targetWord);
-          const activeBubble = bubbles[this.charIndex];
-          if (activeBubble) {
-            activeBubble.shakeFrames = 14;
-            this.addFloatingTip(activeBubble.x, activeBubble.y + 26, `Oops! Typed '${typedChar}' not '${targetGrapheme}'`, '#ef4444');
-          }
+          targetWord.shakeFrames = 14;
+          this.addFloatingTip(targetWord.x, targetWord.y + 26, `Oops! Typed '${typedChar}' not '${targetGrapheme}'`, '#ef4444');
         }
 
         // Log exact mistake for anti-choke diagnostic
@@ -923,41 +939,22 @@
 
         // Movement
         if (isBubble) {
-          const bubbles = this.getWordBubbles(w);
-          let floorHit = false;
+          // Bubble moves smoothly downward from sky toward floor baseline
+          w.y += w.speed;
+
+          // Keep bubbles in sync for backward compatibility with tests
+          if (w.bubbles && w.bubbles.length > 0) {
+            for (let bIdx = 0; bIdx < w.bubbles.length; bIdx++) {
+              const b = w.bubbles[bIdx];
+              b.x = w.x;
+              b.y = w.y;
+              b.shakeOffset = w.shakeOffset;
+              b.shakeFrames = w.shakeFrames;
+            }
+          }
+
           const floorBoundary = this.canvasHeight - 65;
-
-          for (let bIdx = 0; bIdx < bubbles.length; bIdx++) {
-            const b = bubbles[bIdx];
-            b.phase += b.wobbleSpeed;
-            b.x = b.baseX + Math.sin(b.phase) * b.wobbleAmp;
-
-            if (b.shakeFrames > 0) {
-              b.shakeFrames--;
-              b.shakeOffset = (b.shakeFrames % 2 === 0 ? 1 : -1) * (b.shakeFrames * 0.8);
-            } else {
-              b.shakeOffset = 0;
-            }
-
-            // Move letter bubble downwards toward the bottom baseline
-            b.y += w.speed;
-
-            // Check if any unpopped letter bubble hits the bottom boundary
-            if (!b.popped && b.y >= floorBoundary) {
-              floorHit = true;
-            }
-          }
-
-          // Keep w.y aligned with leading unpopped bubble
-          const unpopped = bubbles.filter(b => !b.popped);
-          if (unpopped.length > 0) {
-            w.y = unpopped[0].y;
-            w.x = unpopped[0].x;
-          } else {
-            w.y += w.speed;
-          }
-
-          if (floorHit || w.y >= floorBoundary) {
+          if (w.y >= floorBoundary) {
             this.handleWordMiss(i);
           }
         } else {
@@ -1785,6 +1782,10 @@
 
   window.quitGame = function () {
     engine.quit();
+  };
+
+  window.exitGames = function () {
+    engine.exitToApp();
   };
 
   // --- LEADERBOARD & HISTORY MODALS ---

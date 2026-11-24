@@ -58,6 +58,8 @@ jobs:
           node test_games_and_drills_overhaul.js
           echo "=== 9. Keyboard Connect, Tester & Gov Jobs Suite ==="
           node test_new_features.js
+          echo "=== 10. Bubble Word Challenge & Bottom Nav Fixes Suite ==="
+          node test_bubble_and_bottom_nav_fixes.js
 
       - name: Sync Capacitor Android Project
         run: npx cap sync android

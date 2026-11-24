@@ -1304,30 +1304,34 @@ body[data-theme="golden"] select option {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 2px;
   color: var(--muted) !important;
   font-family: inherit;
   font-size: 10px !important;
   font-weight: 700;
-  padding: 3px 2px;
+  padding: 4px 2px;
   border-radius: 10px;
   transition: all .15s ease;
   outline: none !important;
   -webkit-tap-highlight-color: transparent !important;
   flex: 1 1 0;
-  max-width: 58px;
+  max-width: 62px;
   min-width: 0;
+  text-align: center;
 }
 .nav-tab-item svg {
   width: 18px;
   height: 18px;
   fill: var(--muted) !important;
   transition: transform .15s ease;
+  flex-shrink: 0;
 }
 .nav-tab-item span {
   font-size: 10px !important;
-  line-height: 1.1;
+  line-height: 1.15;
   white-space: nowrap;
+  letter-spacing: 0.1px;
 }
 .nav-tab-item.active {
   color: var(--primary) !important;
@@ -3959,7 +3963,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
   <section class="screen" id="screen-games-hub">
     <div class="games-hub-header" style="margin-bottom:16px;">
       <div class="games-hub-title-row" style="display:flex;align-items:center;gap:10px;">
-        <button class="test-back-btn" onclick="showScreen('screen-config')" style="white-space:nowrap;flex-shrink:0;">&lt; Back to App</button>
+        <button class="test-back-btn" onclick="exitGames()" style="white-space:nowrap;flex-shrink:0;">&lt; Back to App</button>
         <div style="font-weight:800;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:6px;white-space:nowrap;">
           <span>🎮</span> Typing Arcade Arena
         </div>
@@ -4401,7 +4405,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
     <div style="display:flex;gap:8px;">
       <button class="solidbtn" style="flex:1;padding:11px;font-size:13px;font-weight:800;border-radius:10px;" onclick="restartGame()">🔄 Play Again</button>
       <button class="ghostbtn" style="flex:1;padding:11px;font-size:13px;font-weight:700;border-radius:10px;" onclick="openLeaderboardModal()">🏆 Leaderboard</button>
-      <button class="ghostbtn" style="padding:11px 14px;font-size:13px;font-weight:700;border-radius:10px;" onclick="quitGame()">🏠 Exit</button>
+      <button class="ghostbtn" style="padding:11px 14px;font-size:13px;font-weight:700;border-radius:10px;" onclick="exitGames()">🏠 Exit</button>
     </div>
   </div>
 </div>
@@ -4925,6 +4929,9 @@ function switchTab(name) {
     return;
   }
 
+  // Record previous active app tab so exiting games returns cleanly to this tab
+  window.previousAppTab = name;
+
   showScreen('screen-config');
   const validTabs = ['speed', 'practice', 'progress', 'history', 'academy', 'profile'];
   
@@ -4964,6 +4971,15 @@ function switchTab(name) {
   }
   if(name === 'speed' && typeof syncContinueCard === 'function') syncContinueCard();
 }
+
+function exitGames() {
+  if (window.GamesEngine && typeof window.GamesEngine.exitToApp === 'function') {
+    window.GamesEngine.exitToApp();
+  } else {
+    switchTab(window.previousAppTab || 'speed');
+  }
+}
+window.exitGames = exitGames;
 
 const KEYMAP_TYPEWRITER = {"m": "அ", "M": "ஆ", ",": "இ", "<": "ஈ", "c": "உ", "C": "ஊ", "v": "எ", "V": "ஏ", "I": "ஐ", "x": "ஒ", "X": "ஓ", "xs": "ஔ", "`": "ஃ", "b": "◌ெ", "n": "◌ே", "i": "◌ை", "h": "◌ா", ";f": "க்", "f": "க", "fh": "கா", "pf": "கி", "Pf": "கீ", "F": "கு", "T": "கூ", "bf": "கெ", "nf": "கே", "if": "கை", "bfh": "கொ", "nfh": "கோ", "bfs": "கௌ", ";'": "ங்", "'": "ங", "'h": "ஙா", "p'": "ஙி", "P'": "ஙீ", "['": "ஙு", "{'": "ஙூ", "b'": "ஙெ", "n'": "ஙே", "i'": "ஙை", "b'h": "ஙொ", "n'h": "ஙோ", "b's": "ஙௌ", ";r": "ச்", "r": "ச", "rh": "சா", "pr": "சி", "Pr": "சீ", "R": "சு", "N": "சூ", "br": "செ", "nr": "சே", "ir": "சை", "brh": "சொ", "nrh": "சோ", "brs": "சௌ", ";\"": "ஞ்", "\"": "ஞ", "\"h": "ஞா", "p\"": "ஞி", "P\"": "ஞீ", "Q": "ஞு", "Q}": "ஞூ", "[\"": "ஞு", "{\"": "ஞூ", "b\"": "ஞெ", "n\"": "ஞே", "i\"": "ஞை", "b\"h": "ஞொ", "n\"h": "ஞோ", "b\"s": "ஞௌ", ";l": "ட்", "l": "ட", "lh": "டா", "o": "டி", "pl": "டி", "O": "டீ", "Pl": "டீ", "L": "டு", ":L": "டூ", "bl": "டெ", "nl": "டே", "il": "டை", "blh": "டொ", "nlh": "டோ", "bls": "டௌ", ";z": "ண்", "z": "ண", "zh": "ணா", "pz": "ணி", "Pz": "ணீ", "q": "ணு", "q}": "ணூ", "bz": "ணெ", "nz": "ணே", "iz": "ணை", "bzh": "ணொ", "nzh": "ணோ", "bzs": "ணௌ", ";j": "த்", "j": "த", "jh": "தா", "pj": "தி", "Pj": "தீ", "J": "து", "J}": "தூ", "bj": "தெ", "nj": "தே", "ij": "தை", "bjh": "தொ", "njh": "தோ", "bjs": "தௌ", ";e": "ந்", "e": "ந", "eh": "நா", "pe": "நி", "Pe": "நீ", "E": "நு", "E}": "நூ", "be": "நெ", "ne": "நே", "ie": "நை", "beh": "நொ", "neh": "நோ", "bes": "நௌ", ";g": "ப்", "g": "ப", "gh": "பா", "pg": "பி", "Pg": "பீ", "[g": "பு", "{g": "பூ", "bg": "பெ", "ng": "பே", "ig": "பை", "bgh": "பொ", "ngh": "போ", "bgs": "பௌ", ";k": "ம்", "k": "ம", "kh": "மா", "pk": "மி", "Pk": "மீ", "K": "மு", ":K": "மூ", "bk": "மெ", "nk": "மே", "ik": "மை", "bkh": "மொ", "nkh": "மோ", "bks": "மௌ", ";a": "ய்", "a": "ய", "ah": "யா", "pa": "யி", "Pa": "யீ", "[a": "யு", "{a": "யூ", "ba": "யெ", "na": "யே", "ia": "யை", "bah": "யொ", "nah": "யோ", "bas": "யௌ", ";u": "ர்", "u": "ர", "uh": "ரா", "pu": "ரி", "Pu": "ரீ", "U": "ரு", ":U": "ரூ", "bu": "ரெ", "nu": "ரே", "iu": "ரை", "buh": "ரொ", "nuh": "ரோ", "bns": "ரௌ", ";y": "ல்", "y": "ல", "yh": "லா", "py": "லி", "Py": "லீ", "Y": "லு", "Y}": "லூ", "by": "லெ", "ny": "லே", "iy": "லை", "byh": "லொ", "nyh": "லோ", "bys": "லௌ", ";t": "வ்", "t": "வ", "th": "வா", "pt": "வி", "Pt": "வீ", "[t": "வு", "{t": "வூ", "bt": "வெ", "nt": "வே", "it": "வை", "bth": "வொ", "nth": "வோ", "bts": "வௌ", ";H": "ழ்", "H": "ழ", "Hh": "ழா", "pH": "ழி", "PH": "ழீ", "G": "ழு", ":G": "ழூ", "{H": "ழூ", "bH": "ழெ", "nH": "ழே", "iH": "ழை", "bHh": "ழொ", "nHh": "ழோ", "bHs": "ழௌ", ";s": "ள்", "s": "ள", "sh": "ளா", "ps": "ளி", "Ps": "ளீ", "S": "ளு", ":S": "ளூ", "bs": "ளெ", "ns": "ளே", "is": "ளை", "]s": "ளை", "bsh": "ளொ", "nsh": "ளோ", "bss": "ளௌ", ";w": "ற்", "w": "ற", "wh": "றா", "pw": "றி", "Pw": "றீ", "W": "று", "W}": "றூ", "bw": "றெ", "nw": "றே", "iw": "றை", "bwh": "றொ", "nwh": "றோ", "bws": "றௌ", ";d": "ன்", "d": "ன", "dh": "னா", "pd": "னி", "Pd": "னீ", "D": "னு", "D}": "னூ", "bd": "னெ", "nd": "னே", "id": "னை", "bdh": "னொ", "ndh": "னோ", "bds": "னௌ", ";$": "ஜ்", "$": "ஜ", "$h": "ஜா", "p$": "ஜி", "P$": "ஜீ", "$%": "ஜு", "$^": "ஜூ", "b$": "ஜெ", "n$": "ஜே", "i$": "ஜை", "b$h": "ஜொ", "n$h": "ஜோ", "b$s": "ஜௌ", ";AY": "ஶ்", "AY": "ஶ", "AYh": "ஶா", "pAY": "ஶி", "PAY": "ஶீ", "AY%": "ஶு", "AY^": "ஶூ", "bAY": "ஶெ", "nAY": "ஶே", "iAY": "ஶை", "bAYh": "ஶொ", "nAYh": "ஶோ", "bAYs": "ஶௌ", ";Z": "ஷ்", "Z": "ஷ", "Zh": "ஷா", "pZ": "ஷி", "PZ": "ஷீ", "Z%": "ஷு", "Z^": "ஷூ", "bZ": "ஷெ", "nZ": "ஷே", "iZ": "ஷை", "bZh": "ஷொ", "nZh": "ஷோ", "bZs": "ஷௌ", ";!": "ஸ்", "!": "ஸ", "!h": "ஸா", "p!": "ஸி", "P!": "ஸீ", "!%": "ஸு", "!^": "ஸூ", "b!": "ஸெ", "n!": "ஸே", "i!": "ஸை", "b!h": "ஸொ", "n!h": "ஸோ", "b!s": "ஸௌ", ";]": "ஹ்", "]": "ஹ", "]h": "ஹா", "p]": "ஹி", "P]": "ஹீ", "]%": "ஹு", "]^": "ஹூ", "b]": "ஹெ", "n]": "ஹே", "i]": "ஹை", "b]h": "ஹொ", "n]h": "ஹோ", "b]s": "ஹௌ", ";f;": "க்", ";f;Z": "க்‌ஷ்", ";fZ": "க்‌ஷ", ";fZh": "க்‌ஷா", ";fp": "க்", ";fpZ": "க்‌ஷி", ";fP": "க்", ";fPZ": "க்‌ஷீ", ";fZ%": "க்‌ஷு", ";fZ^": "க்‌ஷூ", ";fb": "க்", ";fbZ": "க்‌ஷெ", ";fn": "க்", ";fnZ": "க்‌ஷே", ";fi": "க்", ";fiZ": "க்‌ஷை", ";fbZh": "க்‌ஷொ", ";fnZh": "க்‌ஷோ", ";fbZs": "க்‌ஷௌ", ";B": "க்ஷ்", "B": "க்ஷ", "Bh": "க்ஷா", "pB": "க்ஷி", "PB": "க்ஷீ", "B%": "க்ஷு", "B^": "க்ஷூ", "bB": "க்ஷெ", "nB": "க்ஷே", "iB": "க்ஷை", "bBh": "க்ஷொ", "nBh": "க்ஷோ", "bBs": "க்ஷௌ", "_": "ஶ்ரீ", "A": "}", "As": "\u00a0", "A_": "ஸ்ரீ", "AZ": "௳", "AX": "௴", "AC": "௵", "AV": "௶", "AB": "௷", "AD": "௸", "AA": "௹", "AS": "௺", "AF": "ௐ", "A[": "[", "A]": "]", "A\"": "\"", "A:": ":", "A;": ";", "A<": "<", "A>": ">", "A?": "?", "A2": "½", "A3": "¾", "A4": "¼", "AO": "‘", "AP": "’", "AU": "“", "AI": "”", "A.": "•", "Ac": "©", "A^": "^", "Al": "◌்", "Ah": "◌ா", "Ap": "◌ி", "Ao": "◌ீ", "Au": "◌ு", "Ay": "◌ூ", "Ab": "◌ெ", "An": "◌ே", "Ai": "◌ை", "Ax": "◌ொ", "Az": "◌ோ", "Av": "◌ௌ", "A~": "~", "A`": "`", "~": "*", "@": "@", "&": "&", "*": "*", "-": "/", "(": "(", ")": ")", "+": "+", "1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "0": "0", "=": "=", "|": "|", "\\": "\\", ".": ",", "/": ".", ">": "?", "?": "-"};
 const KEYMAP_TAMIL99 = {"!": "!", "1": "1", "@": "@", "2": "2", "3": "3", "$": "$", "4": "4", "%": "%", "5": "5", "6": "6", "&": "&", "7": "7", "8": "8", "(": "(", "9": "9", ")": ")", "0": "0", "_": "_", "-": "-", "+": "+", "=": "=", ".": ".", ",": ",", "~": "~", "|": "|", "\\": "\\", "<": "<", ">": ">", "?": "?", "a": "அ", "q": "ஆ", "s": "இ", "w": "ஈ", "d": "உ", "e": "ஊ", "g": "எ", "t": "ஏ", "r": "ஐ", "c": "ஒ", "x": "ஓ", "z": "ஔ", "F": "ஃ", "f": "ஃ", "hf": "க்", "h": "க", "hq": "கா", "hs": "கி", "hw": "கீ", "hd": "கு", "he": "கூ", "hg": "கெ", "ht": "கே", "hr": "கை", "hc": "கொ", "hx": "கோ", "hz": "கௌ", "bf": "ங்", "b": "ங", "bq": "ஙா", "bs": "ஙி", "bw": "ஙீ", "bd": "ஙு", "be": "ஙூ", "bg": "ஙெ", "bt": "ஙே", "br": "ஙை", "bc": "ஙொ", "bx": "ஙோ", "bz": "ஙௌ", "[f": "ச்", "[": "ச", "[q": "சா", "[s": "சி", "[w": "சீ", "[d": "சு", "[e": "சூ", "[g": "செ", "[t": "சே", "[r": "சை", "[c": "சொ", "[x": "சோ", "[z": "சௌ", "]f": "ஞ்", "]": "ஞ", "]q": "ஞா", "]s": "ஞி", "]w": "ஞீ", "]d": "ஞு", "]e": "ஞூ", "]g": "ஞெ", "]t": "ஞே", "]r": "ஞை", "]c": "ஞொ", "]x": "ஞோ", "]z": "ஞௌ", "of": "ட்", "o": "ட", "oq": "டா", "os": "டி", "ow": "டீ", "od": "டு", "oe": "டூ", "og": "டெ", "ot": "டே", "or": "டை", "oc": "டொ", "ox": "டோ", "oz": "டௌ", "pf": "ண்", "p": "ண", "pq": "ணா", "ps": "ணி", "pw": "ணீ", "pd": "ணு", "pe": "ணூ", "pg": "ணெ", "pt": "ணே", "pr": "ணை", "pc": "ணொ", "px": "ணோ", "pz": "ணௌ", "lf": "த்", "l": "த", "lq": "தா", "ls": "தி", "lw": "தீ", "ld": "து", "le": "தூ", "lg": "தெ", "lt": "தே", "lr": "தை", "lc": "தொ", "lx": "தோ", "lz": "தௌ", ";f": "ந்", ";": "ந", ";q": "நா", ";s": "நி", ";w": "நீ", ";d": "நு", ";e": "நூ", ";g": "நெ", ";t": "நே", ";r": "நை", ";c": "நொ", ";x": "நோ", ";z": "நௌ", "jf": "ப்", "j": "ப", "jq": "பா", "js": "பி", "jw": "பீ", "jd": "பு", "je": "பூ", "jg": "பெ", "jt": "பே", "jr": "பை", "jc": "பொ", "jx": "போ", "jz": "பௌ", "kf": "ம்", "k": "ம", "kq": "மா", "ks": "மி", "kw": "மீ", "kd": "மு", "ke": "மூ", "kg": "மெ", "kt": "மே", "kr": "மை", "kc": "மொ", "kx": "மோ", "kz": "மௌ", "'f": "ய்", "'": "ய", "'q": "யா", "'s": "யி", "'w": "யீ", "'d": "யு", "'e": "யூ", "'g": "யெ", "'t": "யே", "'r": "யை", "'c": "யொ", "'x": "யோ", "'z": "யௌ", "mf": "ர்", "m": "ர", "mq": "ரா", "ms": "ரி", "mw": "ரீ", "md": "ரு", "me": "ரூ", "mg": "ரெ", "mt": "ரே", "mr": "ரை", "mc": "ரொ", "mx": "ரோ", "mz": "ரௌ", "nf": "ல்", "n": "ல", "nq": "லா", "ns": "லி", "nw": "லீ", "nd": "லு", "ne": "லூ", "ng": "லெ", "nt": "லே", "nr": "லை", "nc": "லொ", "nx": "லோ", "nz": "லௌ", "vf": "வ்", "v": "வ", "vq": "வா", "vs": "வி", "vw": "வீ", "vd": "வு", "ve": "வூ", "vg": "வெ", "vt": "வே", "vr": "வை", "vc": "வொ", "vx": "வோ", "vz": "வௌ", "/f": "ழ்", "/": "ழ", "/q": "ழா", "/s": "ழி", "/w": "ழீ", "/d": "ழு", "/e": "ழூ", "/g": "ழெ", "/t": "ழே", "/r": "ழை", "/c": "ழொ", "/x": "ழோ", "/z": "ழௌ", "yf": "ள்", "y": "ள", "yq": "ளா", "ys": "ளி", "yw": "ளீ", "yd": "ளு", "ye": "ளூ", "yg": "ளெ", "yt": "ளே", "yr": "ளை", "yc": "ளொ", "yx": "ளோ", "yz": "ளௌ", "uf": "ற்", "u": "ற", "uq": "றா", "us": "றி", "uw": "றீ", "ud": "று", "ue": "றூ", "ug": "றெ", "ut": "றே", "ur": "றை", "uc": "றொ", "ux": "றோ", "uz": "றௌ", "if": "ன்", "i": "ன", "iq": "னா", "is": "னி", "iw": "னீ", "id": "னு", "ie": "னூ", "ig": "னெ", "it": "னே", "ir": "னை", "ic": "னொ", "ix": "னோ", "iz": "னௌ", "Ef": "ஜ்", "E": "ஜ", "Eq": "ஜா", "Es": "ஜி", "Ew": "ஜீ", "Ed": "ஜு", "Ee": "ஜூ", "Eg": "ஜெ", "Et": "ஜே", "Er": "ஜை", "Ec": "ஜொ", "Ex": "ஜோ", "Ez": "ஜௌ", "Uf": "ஶ்", "U": "ஶ", "Uq": "ஶா", "Us": "ஶி", "Uw": "ஶீ", "Ud": "ஶு", "Ue": "ஶூ", "Ug": "ஶெ", "Ut": "ஶே", "Ur": "ஶை", "Uc": "ஶொ", "Ux": "ஶோ", "Uz": "ஶௌ", "Wf": "ஷ்", "W": "ஷ", "Wq": "ஷா", "Ws": "ஷி", "Ww": "ஷீ", "Wd": "ஷு", "We": "ஷூ", "Wg": "ஷெ", "Wt": "ஷே", "Wr": "ஷை", "Wc": "ஷொ", "Wx": "ஷோ", "Wz": "ஷௌ", "Qf": "ஸ்", "Q": "ஸ", "Qq": "ஸா", "Qs": "ஸி", "Qw": "ஸீ", "Qd": "ஸு", "Qe": "ஸூ", "Qg": "ஸெ", "Qt": "ஸே", "Qr": "ஸை", "Qc": "ஸொ", "Qx": "ஸோ", "Qz": "ஸௌ", "Rf": "ஹ்", "R": "ஹ", "Rq": "ஹா", "Rs": "ஹி", "Rw": "ஹீ", "Rd": "ஹூ", "Re": "ஹூ", "Rg": "ஹெ", "Rt": "ஹே", "Rr": "ஹை", "Rc": "ஹொ", "Rx": "ஹோ", "Rz": "ஹௌ", "Tf": "க்ஷ்", "T": "க்ஷ", "Tq": "க்ஷா", "Ts": "க்ஷி", "Tw": "க்ஷீ", "Td": "க்ஷு", "Te": "க்ஷூ", "Tg": "க்ஷெ", "Tt": "க்ஷே", "Tr": "க்ஷை", "Tc": "க்ஷொ", "Tx": "க்ஷோ", "Tz": "க்ஷௌ", "Y": "ஶ்ரீ", "`Y": "ஸ்ரீ", "hhhhhh": "க்கக்கக்க", "hhhhh": "க்கக்கக", "hhhh": "க்கக்க", "hhh": "க்கக", "hh": "க்க", "ha": "க", "haa": "கஅ", "bb": "ங்ங", "bbb": "ங்ஙங", "bbbb": "ங்ஙங்ங", "ba": "ங", "baa": "ஙஅ", "bhbh": "ங்கங்க", "bhb": "ங்கங", "bh": "ங்க", "bha": "ங்க", "bhaa": "ங்கஅ", "[[[[": "ச்சச்ச", "[[[": "ச்சச", "[[": "ச்ச", "[a": "ச", "[aa": "சஅ", "]]]]": "ஞ்ஞஞ்ஞ", "]]]": "ஞ்ஞஞ", "]]": "ஞ்ஞ", "]a": "ஞ", "]aa": "ஞஅ", "][][": "ஞ்சஞ்ச", "][]": "ஞ்சஞ", "][": "ஞ்ச", "][a": "ஞ்ச", "][aa": "ஞ்சஅ", "oooo": "ட்டட்ட", "ooo": "ட்டட", "oo": "ட்ட", "oa": "ட", "oaa": "டஅ", "pp": "ண்ண", "ppp": "ண்ணண", "pppp": "ண்ணண்ண", "pa": "ண", "paa": "ணஅ", "popo": "ண்டண்ட", "pop": "ண்டண", "po": "ண்ட", "poa": "ண்ட", "poaa": "ண்டஅ", "llll": "த்தத்த", "lll": "த்தத", "ll": "த்த", "la": "த", "laa": "தஅ", ";;": "ந்ந", ";;;": "ந்நந", ";;;;": "ந்நந்ந", ";a": "ந", ";aa": "நஅ", ";l;l": "ந்தந்த", ";l;": "ந்தந", ";l": "ந்த", ";la": "ந்த", ";laa": "ந்தஅ", "jjjj": "ப்பப்ப", "jjj": "ப்பப", "jj": "ப்ப", "ja": "ப", "jaa": "பஅ", "kk": "ம்ம", "kkk": "ம்மம", "kkkk": "ம்மம்ம", "ka": "ம", "kaa": "மஅ", "kjkj": "ம்பம்ப", "kjk": "ம்பம", "kj": "ம்ப", "kja": "ம்ப", "kjaa": "ம்பஅ", "uuuu": "ற்றற்ற", "uuu": "ற்றற", "uu": "ற்ற", "ua": "ற", "uaa": "றஅ", "ii": "ன்ன", "iii": "ன்னன", "iiii": "ன்னன்ன", "ia": "ன", "iaa": "னஅ", "iuiu": "ன்றன்ற", "iui": "ன்றன", "iu": "ன்ற", "iua": "ன்ற", "iuaa": "ன்றஅ", "''''": "ய்யய்ய", "'''": "ய்யய", "''": "ய்ய", "'a": "ய", "'aa": "யஅ", "ma": "ர", "maa": "ரஅ", "nnnn": "ல்லல்ல", "nnn": "ல்லல", "nn": "ல்ல", "na": "ல", "naa": "லஅ", "vv": "வ்வ", "vvv": "வ்வவ", "vvvv": "வ்வவ்வ", "va": "வ", "vaa": "வஅ", "/a": "ழ", "/aa": "ழஅ", "yy": "ள்ள", "yyy": "ள்ளள", "yyyy": "ள்ளள்ள", "ya": "ள", "yaa": "ளஅ", "EEEE": "ஜ்ஜஜ்ஜ", "EEE": "ஜ்ஜஜ", "EE": "ஜ்ஜ", "Ea": "ஜ", "Eaa": "ஜஅ", "UU": "ஶ்ஶ", "UUU": "ஶ்ஶஶ", "UUUU": "ஶ்ஶஶ்ஶ", "Ua": "ஶ", "Uaa": "ஶஅ", "WWWW": "ஷ்ஷஷ்ஷ", "WWW": "ஷ்ஷஷ", "WW": "ஷ்ஷ", "Wa": "ஷ", "Waa": "ஷஅ", "QQ": "ஸ்ஸ", "QQQ": "ஸ்ஸஸ", "QQQQ": "ஸ்ஸஸ்ஸ", "Qa": "ஸ", "Qaa": "ஸஅ", "RRRR": "ஹ்ஹஹ்ஹ", "RRR": "ஹ்ஹஹ", "RR": "ஹ்ஹ", "Ra": "ஹ", "Raa": "ஹஅ", "TT": "க்ஷ்க்ஷ", "TTT": "க்ஷ்க்ஷக்ஷ", "TTTT": "க்ஷ்க்ஷக்ஷ்க்ஷ", "Ta": "க்ஷ", "Taa": "க்ஷஅ", "hfW": "க்‌ஷ", "Z": "௳", "X": "௴", "C": "௵", "V": "௶", "B": "௷", "D": "௸", "A": "௹", "S": "௺", "N": "ௐ", "O": "[", "P": "]", "{": "{", "}": "}", "K": "\"", "L": ":", ":": ";", "\"": "'", "^q": "◌ா", "^s": "◌ி", "^w": "◌ீ", "^d": "◌ு", "^e": "◌ூ", "^f": "◌்", "^g": "◌ெ", "^t": "◌ே", "^r": "◌ை", "^c": "◌ொ", "^x": "◌ோ", "^z": "◌ௌ", "^2": "½", "^3": "¾", "^4": "¼", "^7": "‘", "^8": "’", "^9": "“", "^0": "”", "^.": "•", "^C": "©", "^^": "^", "^^q": "^ஆ", "^^s": "^இ", "^^w": "^ஈ", "^^d": "^உ", "^^e": "^ஊ", "^^f": "^்", "^^g": "^எ", "^^t": "^ஏ", "^^r": "^ஐ", "^^c": "^ஒ", "^^x": "^ஓ", "^^z": "^ஔ", "^^2": "^2", "^^3": "^3", "^^4": "^4", "^^7": "^7", "^^8": "^8", "^^9": "^9", "^^0": "^0", "^^S": "^S", "^^.": "^.", "^^C": "^C", "^#0#": "௦", "^#1#": "௧", "^#2#": "௨", "^#3#": "௩", "^#4#": "௪", "^#5#": "௫", "^#6#": "௬", "^#7#": "௭", "^#8#": "௮", "^#9#": "௯", "^#10#": "௰", "^#100#": "௱", "^#1000#": "௲", "``": "`", "`0": "௦", "`1": "௧", "`2": "௨", "`3": "௩", "`4": "௪", "`5": "௫", "`6": "௬", "`7": "௭", "`8": "௮", "`9": "௯", "`10": "௰", "`100": "௱", "`1000": "௲", "``0": "`0", "``1": "`1", "``2": "`2", "``3": "`3", "``4": "`4", "``5": "`5", "``6": "`6", "``7": "`7", "``8": "`8", "``9": "`9", "``10": "`10", "``100": "`100", "``1000": "`1000"};
@@ -5513,6 +5529,20 @@ function showScreen(id){
   const isGame = (id === 'screen-games');
   document.body.classList.toggle('in-games', isGame);
   document.documentElement.classList.toggle('in-games', isGame);
+
+  // Synchronize bottom navigation active state cleanly
+  if (id === 'screen-config') {
+    const activePane = document.querySelector('.tab-content.active');
+    const paneName = activePane ? activePane.id.replace('tab-', '') : 'speed';
+    document.querySelectorAll('.nav-tab-item, .nav-tab').forEach(btn => btn.classList.remove('active'));
+    const targetBtn = document.getElementById('btnTab' + paneName.charAt(0).toUpperCase() + paneName.slice(1));
+    if (targetBtn) targetBtn.classList.add('active');
+  } else if (id === 'screen-games-hub') {
+    document.querySelectorAll('.nav-tab-item, .nav-tab').forEach(btn => btn.classList.remove('active'));
+    const gamesBtn = document.getElementById('btnTabGames');
+    if (gamesBtn) gamesBtn.classList.add('active');
+  }
+
   if(typeof updateFullscreenBtn === 'function') updateFullscreenBtn();
   if(!isTest && id !== 'screen-games' && typeof window.scrollTo === 'function') window.scrollTo(0,0);
 }
