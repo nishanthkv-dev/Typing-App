@@ -875,6 +875,90 @@
     return bank[rowKey] || bank.home;
   }
 
+  // --- REVERSE TYPING DRILLS (TYPE WORDS AND SENTENCES BACKWARDS) ---
+  function reverseGraphemes(str, lang) {
+    if (!str) return '';
+    let parts;
+    if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+      try {
+        const seg = new Intl.Segmenter(lang === 'ta' ? 'ta' : 'en', { granularity: 'grapheme' });
+        parts = Array.from(seg.segment(str), s => s.segment);
+      } catch (e) {
+        parts = Array.from(str);
+      }
+    } else {
+      parts = Array.from(str);
+    }
+    return parts.reverse().join('');
+  }
+
+  const REVERSE_DRILLS = {
+    en: {
+      isReverseTyping: true,
+      lesson: "Reverse Typing — Backwards Practice",
+      sub: "Type words and sentences backwards to strengthen finger reversal & focus",
+      keyHint: "Backwards words & sentences",
+      fingerGuide: {
+        left: ["Read carefully before typing backwards"],
+        right: ["Keep eyes on the target characters"],
+        homeKeys: true
+      },
+      text: [
+        "pots rats wolf emit live flow",
+        "gnipyt deeps lliks ecitcarp ymedaca",
+        "sdrawkcab sdrow epyt",
+        "ycarucca dna deeps dliub",
+        "ecitcarp hcuot ysub yad yreve",
+        "sdrawkcab secnetnes dna sdrow epyt"
+      ].join('\n')
+    },
+    tamil99: {
+      isReverseTyping: true,
+      lesson: "தலைகீழ் தட்டச்சு (Reverse Typing — Tamil99)",
+      sub: "சொற்கள் மற்றும் வாக்கியங்களை தலைகீழாகத் தட்டச்சு செய்து பயிற்சி செய்யவும்",
+      keyHint: "தமிழ் தலைகீழ் சொல் பயிற்சி",
+      fingerGuide: {
+        left: ["கண்கள் திரையில் — எழுத்து வரிசையைக் கவனிக்கவும்"],
+        right: ["தவறின்றி தலைகீழாகத் தட்டச்சு செய்யவும்"],
+        homeKeys: true
+      },
+      text: [
+        ["அகம்", "இகம்", "படம்", "மலர்", "நன்றி"].map(w => reverseGraphemes(w, 'ta')).join(' '),
+        ["அன்பு", "கல்வி", "பண்பு", "வெற்றி", "பயிற்சி"].map(w => reverseGraphemes(w, 'ta')).join(' '),
+        ["தமிழ்", "வானம்", "உலகம்", "பாடம்", "அறிவு"].map(w => reverseGraphemes(w, 'ta')).join(' '),
+        reverseGraphemes("தினமும் பயிற்சி செய்க", 'ta'),
+        reverseGraphemes("வெற்றி நிச்சயம்", 'ta')
+      ].join('\n')
+    },
+    typewriter: {
+      isReverseTyping: true,
+      lesson: "தலைகீழ் தட்டச்சு (Reverse Typing — Typewriter)",
+      sub: "இயந்திர தட்டச்சு விசைகளில் சொற்களைத் தலைகீழாகப் பயிற்சி செய்யவும்",
+      keyHint: "தமிழ் தட்டச்சு தலைகீழ் பயிற்சி",
+      fingerGuide: {
+        left: ["இடக்கை விசைக் கட்டுப்பாடு"],
+        right: ["வலக்கை விசைக் கட்டுப்பாடு"],
+        homeKeys: true
+      },
+      text: [
+        ["களம்", "பதம்", "பலம்", "மடம்", "கனம்"].map(w => reverseGraphemes(w, 'ta')).join(' '),
+        ["கல்வி", "பக்தி", "மலர்", "தமிழ்", "பாடம்"].map(w => reverseGraphemes(w, 'ta')).join(' '),
+        reverseGraphemes("முயற்சி உயர்வு தரும்", 'ta'),
+        reverseGraphemes("அறிவே ஆற்றல்", 'ta'),
+        reverseGraphemes("வெற்றி நிச்சயம்", 'ta')
+      ].join('\n')
+    }
+  };
+
+  function getReverseDrill(lang, layout) {
+    const l = lang || ((typeof pracLang !== 'undefined') ? pracLang : 'en');
+    const ly = layout || ((typeof pracLayout !== 'undefined') ? pracLayout : 'tamil99');
+    if (l === 'ta') {
+      return ly === 'typewriter' ? REVERSE_DRILLS.typewriter : REVERSE_DRILLS.tamil99;
+    }
+    return REVERSE_DRILLS.en;
+  }
+
   function checkPracCompletion(typedText) {
     if (pracLessonCompleted) return;
     const lesson = (typeof currentPracLesson === 'function') ? currentPracLesson() : null;
@@ -888,7 +972,10 @@
   // Export functions to window
   window.PRAC = PRAC;
   window.ROW_DRILLS = ROW_DRILLS;
+  window.REVERSE_DRILLS = REVERSE_DRILLS;
   window.getRowDrill = getRowDrill;
+  window.getReverseDrill = getReverseDrill;
+  window.reverseGraphemes = reverseGraphemes;
   window.getPracLessons = getPracLessons;
   window.setPracLayout = setPracLayout;
   window.generateAdaptiveReinforcement = generateAdaptiveReinforcement;

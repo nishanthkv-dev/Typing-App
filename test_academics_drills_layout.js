@@ -52,26 +52,46 @@ async function runSuite() {
   console.log('  [PASS] Academics DoTE logo verified');
 
   // =====================================================================
-  // 2. UNTIMED SKILL DRILLS — HOME, TOP, BOTTOM & MIXED ROWS
+  // 2. UNTIMED SKILL DRILLS — REVERSE TYPING & KEYBOARD ROW PRACTICE (2x2)
   // =====================================================================
-  console.log('\n--- TEST 2: UNTIMED SKILL DRILLS ROW MODULES ---');
+  console.log('\n--- TEST 2: REVERSE TYPING & KEYBOARD ROW PRACTICE MODULES ---');
   const tabPrac = document.getElementById('tab-practice');
   assert(tabPrac !== null, '#tab-practice exists');
   const pracTextAll = tabPrac.textContent;
+  assert(pracTextAll.includes('Reverse Typing'), 'Reverse Typing card present in Untimed Skill Drills');
+  assert(pracTextAll.includes('Type words and sentences backwards'), 'Reverse Typing description matches specification');
+  assert(pracTextAll.includes('Keyboard Row Practice'), 'Keyboard Row Practice heading present');
   assert(pracTextAll.includes('Home Row'), 'Home Row card present in Untimed Skill Drills');
   assert(pracTextAll.includes('Top Row'), 'Top Row card present in Untimed Skill Drills');
   assert(pracTextAll.includes('Bottom Row'), 'Bottom Row card present in Untimed Skill Drills');
   assert(pracTextAll.includes('Mixed Row'), 'Mixed Row card present in Untimed Skill Drills');
+  assert(html.includes('grid-template-columns: repeat(2, minmax(0, 1fr))'), 'Keyboard Row Practice uses clean 2x2 grid');
 
+  const btnRev = document.getElementById('btnStartReverseTyping');
   const btnHome = document.getElementById('btnStartRowHome');
   const btnTop = document.getElementById('btnStartRowTop');
   const btnBottom = document.getElementById('btnStartRowBottom');
   const btnMixed = document.getElementById('btnStartRowMixed');
-  assert(btnHome && btnTop && btnBottom && btnMixed, 'All 4 Row Start buttons exist');
+  assert(btnRev && btnHome && btnTop && btnBottom && btnMixed, 'Reverse Typing and all 4 Row Start buttons exist');
+
+  // Verify Reverse Typing across English, Tamil99, and Tamil Typewriter + grapheme reversal integrity
+  assert(window.reverseGraphemes('தமிழ்', 'ta') === 'ழ்மித', 'Tamil grapheme reversal preserves combining vowel/pulli marks');
+  document.getElementById('tabPracTrackSel').value = 'en';
+  window.onTabPracTrackChange('en');
+  window.openPracticeReverse();
+  assert(document.getElementById('screen-practice').classList.contains('active'), 'Reverse Typing opens #screen-practice');
+  assert(document.getElementById('pracLessonTitle').textContent.includes('Reverse Typing'), 'Header title updated to Reverse Typing');
+  assert(window.currentPracLesson().text.includes('sdrawkcab'), 'English Reverse Typing drill loaded with backwards words');
+
+  document.getElementById('tabPracTrackSel').value = 'tamil99';
+  window.onTabPracTrackChange('tamil99');
+  window.openPracticeReverse();
+  assert(document.getElementById('pracLessonTitle').textContent.includes('Tamil99'), 'Tamil99 Reverse Typing drill supported');
 
   // Verify English row drills launch properly
+  document.getElementById('tabPracTrackSel').value = 'en';
   window.onTabPracTrackChange('en');
-  assert(document.getElementById('rowKeysHome').textContent.includes('A S D F'), 'English Home Row key pill rendered');
+  assert(document.getElementById('rowKeysHome').textContent.includes('ASDF'), 'English Home Row key pill rendered');
 
   window.openPracticeRow('home');
   assert(document.getElementById('screen-practice').classList.contains('active'), 'Home Row opens #screen-practice');

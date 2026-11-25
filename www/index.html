@@ -179,9 +179,9 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
 }
 .row-drills-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 12px;
-  margin-top: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 8px;
   margin-bottom: 14px;
 }
 .row-drill-card {
@@ -189,20 +189,75 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
   flex-direction: column;
   justify-content: space-between;
   gap: 10px;
-  padding: 16px;
-  border-radius: 16px;
+  padding: 14px 12px;
+  border-radius: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  min-width: 0;
+  box-sizing: border-box;
 }
+.drill-circle-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+.row-start-btn {
+  width: 100%;
+  border: none;
+  border-radius: 9999px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  min-height: 36px;
+  transition: transform 0.14s ease, filter 0.14s ease;
+}
+.row-start-btn:active {
+  transform: scale(0.96);
+}
+.btn-tint-green {
+  background: rgba(16, 185, 129, 0.16);
+  color: #065f46;
+}
+.btn-tint-amber {
+  background: rgba(245, 158, 11, 0.18);
+  color: #92400e;
+}
+.btn-tint-red {
+  background: rgba(239, 68, 68, 0.14);
+  color: #991b1b;
+}
+.btn-tint-blue {
+  background: rgba(37, 99, 235, 0.14);
+  color: #1e40af;
+}
+[data-theme="dark"] .btn-tint-green { background: rgba(16, 185, 129, 0.24); color: #6ee7b7; }
+[data-theme="dark"] .btn-tint-amber { background: rgba(245, 158, 11, 0.24); color: #fcd34d; }
+[data-theme="dark"] .btn-tint-red { background: rgba(239, 68, 68, 0.24); color: #fca5a5; }
+[data-theme="dark"] .btn-tint-blue { background: rgba(37, 99, 235, 0.24); color: #93c5fd; }
 .row-drill-keys-pill {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: 10.5px;
   font-weight: 700;
   color: var(--primary);
   background: var(--primary-light);
   border: 1px solid rgba(37, 99, 235, 0.22);
-  border-radius: 8px;
-  padding: 4px 8px;
+  border-radius: 6px;
+  padding: 2px 6px;
   word-break: break-word;
+  margin-top: 4px;
 }
 
 /* =====================================================================
@@ -3392,74 +3447,73 @@ body:has(#screen-test.active) .bottom-nav-bar {
         </button>
       </div>
 
-      <!-- ROW PRACTICE MODULES -->
-      <div class="glass-card" style="padding:14px 16px;margin-bottom:12px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+      <!-- TRACK SELECTOR & SPECIALTY DRILLS + KEYBOARD ROW PRACTICE -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+        <div style="font-size:15px;font-weight:800;color:var(--ink);">Skill Modules</div>
+        <div class="custom-select-wrap" style="min-width:155px;">
+          <select id="tabPracTrackSel" onchange="onTabPracTrackChange(this.value)" style="font-size:12px;font-weight:700;">
+            <option value="en">English (QWERTY)</option>
+            <option value="tamil99">Tamil (Tamil99)</option>
+            <option value="typewriter">Tamil (Typewriter)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- REVERSE TYPING CARD -->
+      <div class="row-drill-card" style="margin-bottom:16px;">
+        <div>
+          <div class="drill-circle-icon" style="background:#1d4ed8;" aria-hidden="true">⇄</div>
+          <div style="font-size:16px;font-weight:800;color:var(--ink);margin-bottom:3px;">Reverse Typing</div>
+          <p id="reverseTypingDesc" style="font-size:12.5px;color:var(--muted);line-height:1.45;margin:0;">Type words and sentences backwards</p>
+        </div>
+        <button id="btnStartReverseTyping" type="button" class="row-start-btn btn-tint-green" onclick="openPracticeReverse()">Start</button>
+      </div>
+
+      <!-- KEYBOARD ROW PRACTICE (2x2 GRID) -->
+      <div style="font-size:16px;font-weight:800;color:var(--ink);margin-bottom:6px;">Keyboard Row Practice</div>
+      <div class="row-drills-grid" id="rowDrillsGrid">
+        <!-- HOME ROW -->
+        <div class="row-drill-card">
           <div>
-            <div style="font-size:10.5px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:0.8px;">Finger Placement &amp; Row Mastery</div>
-            <h3 style="font-size:15.5px;font-weight:800;color:var(--ink);margin:2px 0 0;">Letter Row Practice Drills</h3>
+            <div class="drill-circle-icon" style="background:#0f766e;" aria-hidden="true">⌨</div>
+            <div style="font-size:15px;font-weight:800;color:var(--ink);margin-bottom:3px;">Home Row</div>
+            <p id="rowDescHome" style="font-size:12px;color:var(--muted);line-height:1.4;margin:0;">Practice ASDF JKL; keys and finger positions</p>
+            <span id="rowKeysHome" class="row-drill-keys-pill">ASDF · JKL;</span>
           </div>
-          <div class="custom-select-wrap" style="min-width:155px;">
-            <select id="tabPracTrackSel" onchange="onTabPracTrackChange(this.value)" style="font-size:12px;font-weight:700;">
-              <option value="en">English (QWERTY)</option>
-              <option value="tamil99">Tamil (Tamil99)</option>
-              <option value="typewriter">Tamil (Typewriter)</option>
-            </select>
-          </div>
+          <button id="btnStartRowHome" type="button" class="row-start-btn btn-tint-green" onclick="openPracticeRow('home')">Start</button>
         </div>
 
-        <div class="row-drills-grid" id="rowDrillsGrid" style="margin-top:8px;margin-bottom:4px;">
-          <!-- HOME ROW -->
-          <div class="glass-card row-drill-card" style="margin:0;border:1.5px solid rgba(37,99,235,0.28);">
-            <div>
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
-                <span style="font-size:16px;font-weight:800;color:var(--ink);">🏠 Home Row</span>
-                <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;background:rgba(37,99,235,0.12);color:#2563eb;">ROW 2</span>
-              </div>
-              <p id="rowDescHome" style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 8px;">Practice ASDF and JKL; keys and correct anchor finger positioning.</p>
-              <span id="rowKeysHome" class="row-drill-keys-pill">A S D F · G H · J K L ;</span>
-            </div>
-            <button id="btnStartRowHome" class="solidbtn" style="width:100%;padding:10px 14px;font-size:13px;" onclick="openPracticeRow('home')">Start Home Row ▶</button>
+        <!-- TOP ROW -->
+        <div class="row-drill-card">
+          <div>
+            <div class="drill-circle-icon" style="background:#d97706;" aria-hidden="true">↑</div>
+            <div style="font-size:15px;font-weight:800;color:var(--ink);margin-bottom:3px;">Top Row</div>
+            <p id="rowDescTop" style="font-size:12px;color:var(--muted);line-height:1.4;margin:0;">Master QWERTY UIOP keys and reach</p>
+            <span id="rowKeysTop" class="row-drill-keys-pill">QWERTY · UIOP</span>
           </div>
+          <button id="btnStartRowTop" type="button" class="row-start-btn btn-tint-amber" onclick="openPracticeRow('top')">Start</button>
+        </div>
 
-          <!-- TOP ROW -->
-          <div class="glass-card row-drill-card" style="margin:0;border:1.5px solid rgba(16,185,129,0.28);">
-            <div>
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
-                <span style="font-size:16px;font-weight:800;color:var(--ink);">⬆️ Top Row</span>
-                <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;background:rgba(16,185,129,0.12);color:#059669;">ROW 1</span>
-              </div>
-              <p id="rowDescTop" style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 8px;">Practice QWERTY and UIOP keys and upward finger reach.</p>
-              <span id="rowKeysTop" class="row-drill-keys-pill">Q W E R T · Y U I O P</span>
-            </div>
-            <button id="btnStartRowTop" class="solidbtn" style="width:100%;padding:10px 14px;font-size:13px;" onclick="openPracticeRow('top')">Start Top Row ▶</button>
+        <!-- BOTTOM ROW -->
+        <div class="row-drill-card">
+          <div>
+            <div class="drill-circle-icon" style="background:#dc2626;" aria-hidden="true">↓</div>
+            <div style="font-size:15px;font-weight:800;color:var(--ink);margin-bottom:3px;">Bottom Row</div>
+            <p id="rowDescBottom" style="font-size:12px;color:var(--muted);line-height:1.4;margin:0;">Practice ZXCV BNM, keys and placement</p>
+            <span id="rowKeysBottom" class="row-drill-keys-pill">ZXCV · BNM</span>
           </div>
+          <button id="btnStartRowBottom" type="button" class="row-start-btn btn-tint-red" onclick="openPracticeRow('bottom')">Start</button>
+        </div>
 
-          <!-- BOTTOM ROW -->
-          <div class="glass-card row-drill-card" style="margin:0;border:1.5px solid rgba(245,158,11,0.32);">
-            <div>
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
-                <span style="font-size:16px;font-weight:800;color:var(--ink);">⬇️ Bottom Row</span>
-                <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;background:rgba(245,158,11,0.15);color:#d97706;">ROW 3</span>
-              </div>
-              <p id="rowDescBottom" style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 8px;">Practice ZXCV and BNM keys and downward finger placement.</p>
-              <span id="rowKeysBottom" class="row-drill-keys-pill">Z X C V · B N M , . /</span>
-            </div>
-            <button id="btnStartRowBottom" class="solidbtn" style="width:100%;padding:10px 14px;font-size:13px;" onclick="openPracticeRow('bottom')">Start Bottom Row ▶</button>
+        <!-- MIXED ROW -->
+        <div class="row-drill-card">
+          <div>
+            <div class="drill-circle-icon" style="background:#2563eb;" aria-hidden="true">☰</div>
+            <div style="font-size:15px;font-weight:800;color:var(--ink);margin-bottom:3px;">Mixed Row</div>
+            <p id="rowDescMixed" style="font-size:12px;color:var(--muted);line-height:1.4;margin:0;">Practice all the rows together</p>
+            <span id="rowKeysMixed" class="row-drill-keys-pill">All Rows Combined</span>
           </div>
-
-          <!-- MIXED ROW -->
-          <div class="glass-card row-drill-card" style="margin:0;border:1.5px solid rgba(124,58,237,0.28);">
-            <div>
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
-                <span style="font-size:16px;font-weight:800;color:var(--ink);">🔀 Mixed Row</span>
-                <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;background:rgba(124,58,237,0.12);color:#7c3aed;">ALL ROWS</span>
-              </div>
-              <p id="rowDescMixed" style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 8px;">Practice all keyboard rows together for complete transition mastery.</p>
-              <span id="rowKeysMixed" class="row-drill-keys-pill">Home + Top + Bottom Rows</span>
-            </div>
-            <button id="btnStartRowMixed" class="solidbtn" style="width:100%;padding:10px 14px;font-size:13px;" onclick="openPracticeRow('mixed')">Start Mixed Row ▶</button>
-          </div>
+          <button id="btnStartRowMixed" type="button" class="row-start-btn btn-tint-blue" onclick="openPracticeRow('mixed')">Start</button>
         </div>
       </div>
 
@@ -7714,10 +7768,10 @@ function onTabPracTrackChange(track){
   }
   const map = {
     en: {
-      home: { desc: 'Practice ASDF and JKL; keys and correct anchor finger positioning.', keys: 'A S D F · G H · J K L ;' },
-      top: { desc: 'Practice QWERTY and UIOP keys and upward finger reach.', keys: 'Q W E R T · Y U I O P' },
-      bottom: { desc: 'Practice ZXCV and BNM keys and downward finger placement.', keys: 'Z X C V · B N M , . /' },
-      mixed: { desc: 'Practice all keyboard rows together for complete transition mastery.', keys: 'Home + Top + Bottom Rows' }
+      home: { desc: 'Practice ASDF JKL; keys and finger positions', keys: 'ASDF · JKL;' },
+      top: { desc: 'Master QWERTY UIOP keys and reach', keys: 'QWERTY · UIOP' },
+      bottom: { desc: 'Practice ZXCV BNM, keys and placement', keys: 'ZXCV · BNM' },
+      mixed: { desc: 'Practice all the rows together', keys: 'All Rows Combined' }
     },
     tamil99: {
       home: { desc: 'Tamil99 நடுவரிசை: அ இ உ ் எ மற்றும் க ப ம த ந பயிற்சி.', keys: 'அ இ உ ் எ · க ப ம த ந' },
@@ -7740,6 +7794,43 @@ function onTabPracTrackChange(track){
     if(d) d.textContent = info[k].desc;
     if(p) p.textContent = info[k].keys;
   });
+  const revDesc = $('reverseTypingDesc');
+  if(revDesc){
+    revDesc.textContent = (track === 'en')
+      ? 'Type words and sentences backwards'
+      : 'தமிழ் சொற்கள் மற்றும் வாக்கியங்களை தலைகீழாகத் தட்டச்சு செய்யவும்';
+  }
+}
+
+function openPracticeReverse(){
+  pracScreenReturnTo = document.querySelector('.screen.active') ? document.querySelector('.screen.active').id : 'screen-config';
+  const trackSel = $('tabPracTrackSel');
+  if(trackSel){
+    const tv = trackSel.value;
+    if(tv === 'en'){ pracLang = 'en'; }
+    else { pracLang = 'ta'; pracLayout = (tv === 'typewriter') ? 'typewriter' : 'tamil99'; }
+  }
+  const drill = (typeof window.getReverseDrill === 'function')
+    ? window.getReverseDrill(pracLang, pracLayout)
+    : null;
+  if(!drill){ openPractice(); return; }
+
+  pracMode = 'letters';
+  pracCustomLesson = Object.assign({}, drill, { isReverseTyping: true });
+  pracIdx = -1;
+  pracComposer.raw = ''; pracComposer.outLen = 0;
+
+  $('plEn').classList.toggle('active', pracLang === 'en');
+  $('plEn').classList.toggle('on', pracLang === 'en');
+  $('plTa').classList.toggle('active', pracLang === 'ta');
+  $('plTa').classList.toggle('on', pracLang === 'ta');
+  $('pracLayoutField').style.display = pracLang === 'ta' ? 'block' : 'none';
+  if($('pracLayoutSel')) $('pracLayoutSel').value = pracLayout;
+  updatePracModeUI();
+  buildPracLessonChips();
+  loadPracLesson();
+  showScreen('screen-practice');
+  setTimeout(()=>{ if($('practiceInput')) $('practiceInput').focus({ preventScroll: true }); }, 80);
 }
 
 function openPracticeRow(rowKey){
@@ -7836,7 +7927,9 @@ function buildPracLessonChips(){
   if(pracCustomLesson){
     const customChipLabel = pracCustomLesson.rowKey
       ? pracCustomLesson.lesson
-      : (pracCustomLesson.isWordPractice ? '📝 Word Practice' : '🎯 Reinforcement Drill');
+      : (pracCustomLesson.isReverseTyping
+          ? '⇄ Reverse Typing'
+          : (pracCustomLesson.isWordPractice ? '📝 Word Practice' : '🎯 Reinforcement Drill'));
     html += `<button class="prac-chip${pracIdx===-1?' on':''}" onclick="selectPracLesson(-1)">${esc(customChipLabel)}</button>`;
   }
   lessons.forEach((l,i)=>{
