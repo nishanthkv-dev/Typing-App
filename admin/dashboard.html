@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — Typing Thalaiva</title>
+  <link rel="stylesheet" href="/admin/styles.css" />
+</head>
+<body>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo">TT</div>
+        <div>
+          <div class="title">Typing Thalaiva</div>
+          <div class="sub">Institute Admin Portal</div>
+        </div>
+      </div>
+
+      <button class="nav-item active" data-section="overview" onclick="switchSection('overview')">📊 Overview</button>
+      <button class="nav-item" data-section="enrollments" onclick="switchSection('enrollments')">🎓 Enrollments &amp; Exams</button>
+      <button class="nav-item" data-section="coupons" onclick="switchSection('coupons')">🎟️ Coupons &amp; Discounts</button>
+      <button class="nav-item" data-section="purchases" onclick="switchSection('purchases')">💳 Purchases &amp; Payments</button>
+      <button class="nav-item" data-section="students" onclick="switchSection('students')">👥 Students</button>
+      <button class="nav-item" data-section="courses" onclick="switchSection('courses')">📚 Courses</button>
+      <button class="nav-item" data-section="audit" onclick="switchSection('audit')">🛡️ Audit Logs</button>
+
+      <div class="sidebar-footer">
+        <div id="adminProfileLabel" style="font-weight:700;color:#fff;margin-bottom:8px;">Administrator</div>
+        <button class="btn btn-danger btn-sm btn-block" onclick="logoutAdmin()">🚪 Sign Out</button>
+      </div>
+    </aside>
+
+    <div class="main-wrap">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="menu-toggle" onclick="toggleSidebar(true)">☰</button>
+          <h1 id="pageTitle" style="margin:0;font-size:18px;font-weight:800;">Overview</h1>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="btn btn-ghost btn-sm" onclick="refreshCurrentSection()">🔄 Refresh</button>
+        </div>
+      </header>
+
+      <main class="content">
+        <div id="globalAlert" class="alert"></div>
+
+        <!-- SECTION: OVERVIEW -->
+        <section id="sec-overview" class="section-view active">
+          <div class="kpi-grid" id="overviewKpis"></div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>Recent Purchases &amp; Free Enrollments</h2>
+              <button class="btn btn-ghost btn-sm" onclick="switchSection('purchases')">View All</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Coupon</th>
+                    <th>Original</th>
+                    <th>Final Paid</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="overviewRecentPurchases"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION: ENROLLMENTS & EXAMS -->
+        <section id="sec-enrollments" class="section-view">
+          <div class="card">
+            <div class="card-head">
+              <h2>Course Enrollments &amp; Examination Scheduling</h2>
+            </div>
+            <div class="toolbar">
+              <input id="enrSearch" class="form-control" placeholder="Search student, course, coupon..." oninput="loadEnrollments()" />
+              <select id="enrStatusFilter" class="form-control" onchange="loadEnrollments()">
+                <option value="">All Statuses</option>
+                <option value="payment_pending">Payment Pending</option>
+                <option value="exam_date_pending">Exam Date Pending</option>
+                <option value="scheduled">Exam Scheduled</option>
+                <option value="completed">Completed</option>
+                <option value="rebooking_eligible">Rebooking Eligible</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <select id="enrCourseFilter" class="form-control" onchange="loadEnrollments()">
+                <option value="">All Courses</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Enrollment / Attempt</th>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Exam Date &amp; Center</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="enrollmentsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION: COUPONS -->
+        <section id="sec-coupons" class="section-view">
+          <div class="card">
+            <div class="card-head">
+              <h2>Coupon &amp; Discount Management</h2>
+              <button class="btn btn-primary btn-sm" onclick="openCouponModal()">➕ Create Coupon</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Discount</th>
+                    <th>Applicable Courses</th>
+                    <th>Usage / Quota</th>
+                    <th>Validity</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="couponsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION: PURCHASES -->
+        <section id="sec-purchases" class="section-view">
+          <div class="card">
+            <div class="card-head">
+              <h2>Purchases &amp; Payment Verification</h2>
+            </div>
+            <div class="toolbar">
+              <input id="purSearch" class="form-control" placeholder="Search student, ref, coupon..." oninput="loadPurchases()" />
+              <select id="purStatusFilter" class="form-control" onchange="loadPurchases()">
+                <option value="">All Payment Statuses</option>
+                <option value="pending">Pending Verification</option>
+                <option value="verified">Verified</option>
+                <option value="free_enrollment">Free Coupon (₹0)</option>
+                <option value="failed">Failed / Rejected</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Purchase ID / Ref</th>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Coupon</th>
+                    <th>Amount Breakdown</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="purchasesTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION: STUDENTS -->
+        <section id="sec-students" class="section-view">
+          <div class="card">
+            <div class="card-head">
+              <h2>Registered Students</h2>
+            </div>
+            <div class="toolbar">
+              <input id="stuSearch" class="form-control" placeholder="Search name, email, phone, reg no..." oninput="loadStudents()" />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Providers</th>
+                    <th>Enrollments &amp; Attempts</th>
+                    <th>Coupons Used</th>
+                    <th>Joined</th>
+                  </tr>
+                </thead>
+                <tbody id="studentsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION: COURSES -->
+        <section id="sec-courses" class="section-view">
+          <div class="card">
+            <div class="card-head">
+              <h2>Course Catalog Management</h2>
+              <button class="btn btn-primary btn-sm" onclick="openCourseModal()">➕ Add Course</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Course Title</th>
+                    <th>Language / Level</th>
+                    <th>Fee (INR)</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="coursesTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION: AUDIT -->
+        <section id="sec-audit" class="section-view">
+          <div class="card">
+            <div class="card-head">
+              <h2>Security &amp; Admin Audit Logs</h2>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Actor</th>
+                    <th>Action</th>
+                    <th>Target</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody id="auditTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: CREATE / EDIT COUPON -->
+  <div class="modal-backdrop" id="couponModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="couponModalTitle">Create Coupon</h3>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('couponModal')">✕</button>
+      </div>
+      <form id="couponForm" onsubmit="submitCouponForm(event)">
+        <input type="hidden" id="cpnEditId" />
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="cpnCode">Coupon Code</label>
+            <input id="cpnCode" class="form-control" required placeholder="WELCOME100" style="text-transform:uppercase;" />
+          </div>
+          <div class="form-group">
+            <label for="cpnType">Discount Type</label>
+            <select id="cpnType" class="form-control" onchange="onCouponTypeChange()">
+              <option value="free_100">100% Free Course Coupon (₹0 Checkout)</option>
+              <option value="percentage">Percentage Discount (%)</option>
+              <option value="fixed">Fixed Amount Discount (₹)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="cpnValue">Discount Value</label>
+            <input id="cpnValue" type="number" min="0" class="form-control" value="100" required />
+          </div>
+          <div class="form-group">
+            <label for="cpnMinPurchase">Minimum Course Fee (₹)</label>
+            <input id="cpnMinPurchase" type="number" min="0" class="form-control" value="0" />
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="cpnMaxRedemptions">Max Total Redemptions (blank = unlimited)</label>
+            <input id="cpnMaxRedemptions" type="number" min="1" class="form-control" placeholder="20" />
+          </div>
+          <div class="form-group">
+            <label for="cpnPerStudentLimit">Per-Student Limit</label>
+            <input id="cpnPerStudentLimit" type="number" min="1" class="form-control" value="1" required />
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="cpnExpiresAt">Expiry Date (optional)</label>
+            <input id="cpnExpiresAt" type="date" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="cpnActive">Status</label>
+            <select id="cpnActive" class="form-control">
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="cpnDescription">Description</label>
+          <input id="cpnDescription" class="form-control" placeholder="100% Free Offer for English Senior Course" />
+        </div>
+        <div class="form-group">
+          <label>Applicable Courses (leave all unchecked for All Courses)</label>
+          <div id="cpnCourseCheckboxes" class="checkbox-list"></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('couponModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">💾 Save Coupon</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: COUPON REDEMPTIONS -->
+  <div class="modal-backdrop" id="redemptionsModal">
+    <div class="modal-box" style="max-width:680px;">
+      <div class="modal-head">
+        <h3 id="redemptionsModalTitle">Coupon Redemptions</h3>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('redemptionsModal')">✕</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Course</th>
+              <th>Original / Discount / Final</th>
+              <th>Status</th>
+              <th>Redeemed At</th>
+            </tr>
+          </thead>
+          <tbody id="redemptionsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SCHEDULE EXAM -->
+  <div class="modal-backdrop" id="scheduleModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Assign / Reschedule Exam Date</h3>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('scheduleModal')">✕</button>
+      </div>
+      <form onsubmit="submitScheduleForm(event)">
+        <input type="hidden" id="schEnrollmentId" />
+        <div class="form-group">
+          <label for="schExamDate">Examination Date</label>
+          <input id="schExamDate" type="date" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label for="schExamSlot">Batch / Time Slot</label>
+          <input id="schExamSlot" class="form-control" value="10:00 AM Batch" required />
+        </div>
+        <div class="form-group">
+          <label for="schExamCenter">Examination Center</label>
+          <input id="schExamCenter" class="form-control" value="Sri Kalaimagal Typewriting Institute, Gummidipoondi" required />
+        </div>
+        <div class="form-group">
+          <label for="schExamRemarks">Instructions / Remarks</label>
+          <input id="schExamRemarks" class="form-control" placeholder="Bring Admit Card & Govt ID" />
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('scheduleModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">📅 Save Exam Schedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: COMPLETE EXAM -->
+  <div class="modal-backdrop" id="completeModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Mark Examination Completed</h3>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('completeModal')">✕</button>
+      </div>
+      <form onsubmit="submitCompleteForm(event)">
+        <input type="hidden" id="cmpEnrollmentId" />
+        <div class="form-group">
+          <label for="cmpScoreSummary">Score / Grade Summary</label>
+          <input id="cmpScoreSummary" class="form-control" required placeholder="First Class with Distinction (48 WPM / 98%)" />
+        </div>
+        <div class="form-group">
+          <label for="cmpRemarks">Remarks</label>
+          <input id="cmpRemarks" class="form-control" placeholder="Verified by DoTE Examiner" />
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input id="cmpEnableRebooking" type="checkbox" />
+            <span>Enable Rebooking Immediately (allow student to enroll in next attempt)</span>
+          </label>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('completeModal')">Cancel</button>
+          <button type="submit" class="btn btn-success">✅ Complete Examination</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT COURSE -->
+  <div class="modal-backdrop" id="courseModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="courseModalTitle">Add Course</h3>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('courseModal')">✕</button>
+      </div>
+      <form onsubmit="submitCourseForm(event)">
+        <input type="hidden" id="crsEditId" />
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="crsCode">Course Code</label>
+            <input id="crsCode" class="form-control" required placeholder="ENG-SR-PRO" />
+          </div>
+          <div class="form-group">
+            <label for="crsPrice">Fee (INR)</label>
+            <input id="crsPrice" type="number" min="0" class="form-control" required value="199" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="crsTitle">Course Title</label>
+          <input id="crsTitle" class="form-control" required placeholder="English Senior Speed Batch" />
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="crsLang">Language</label>
+            <select id="crsLang" class="form-control">
+              <option value="both">Both (Tamil &amp; English)</option>
+              <option value="en">English</option>
+              <option value="ta">Tamil</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="crsLevel">Level</label>
+            <select id="crsLevel" class="form-control">
+              <option value="senior">Senior</option>
+              <option value="junior">Junior</option>
+              <option value="coa">COA</option>
+              <option value="combo">Combo</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="crsDuration">Validity (Days)</label>
+            <input id="crsDuration" type="number" min="1" class="form-control" value="365" required />
+          </div>
+          <div class="form-group">
+            <label for="crsActive">Status</label>
+            <select id="crsActive" class="form-control">
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="crsDesc">Description</label>
+          <input id="crsDesc" class="form-control" placeholder="Course summary..." />
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('courseModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">💾 Save Course</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/admin/app.js"></script>
+</body>
+</html>

@@ -6,6 +6,8 @@
   "scripts": {
     "build": "echo \"Static app – no build step required\" && exit 0",
     "qa": "node run_playwright_qa.js",
+    "start:backend": "node backend/server.js",
+    "seed:backend": "node backend/seed.js",
     "cap:sync": "npx cap sync android",
     "cap:copy": "npx cap copy android",
     "cap:open": "npx cap open android"

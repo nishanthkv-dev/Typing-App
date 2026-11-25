@@ -3688,6 +3688,13 @@ body:has(#screen-test.active) .bottom-nav-bar {
           <div class="tile-title">Government Jobs &amp; Exams</div>
           <div class="tile-desc">Explore TNPSC, High Court, SSC, Railways &amp; CAPF typist eligibility and qualifications.</div>
         </div>
+
+        <div class="academy-tile" style="border-left: 4px solid #10b981; cursor: pointer;" onclick="if(window.StudentPortal) StudentPortal.openCoursesHub('catalog')">
+          <div class="tile-badge" style="background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;">Courses &amp; Coupons</div>
+          <div class="tile-icon">🎓</div>
+          <div class="tile-title">Courses, Coupons &amp; Exam Schedule</div>
+          <div class="tile-desc">Browse official DoTE courses, redeem scholarship coupons, check exam dates &amp; rebook attempts.</div>
+        </div>
       </div>
 
       <footer class="app-footer powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></footer>
@@ -3870,6 +3877,17 @@ body:has(#screen-test.active) .bottom-nav-bar {
             📢 View All Alerts
           </button>
         </div>
+      </div>
+
+      <!-- STUDENT COURSES, COUPONS, EXAM SCHEDULE & REBOOKING CARD -->
+      <div class="glass-card" id="cardStudentCourses" style="margin-bottom:16px;">
+        <div class="card-header-bar" style="display:flex;align-items:center;justify-content:space-between;">
+          <h2 style="display:flex;align-items:center;gap:8px;">
+            <span>🎓</span> My Courses &amp; Exam Schedule
+          </h2>
+          <button type="button" class="ghostbtn" style="padding:4px 10px;font-size:11px;border-radius:8px;" onclick="if(window.StudentPortal) StudentPortal.openCoursesHub('enrollments')">Open Portal</button>
+        </div>
+        <div id="studentCoursesSummaryCard" style="padding-top:4px;"></div>
       </div>
 
       <!-- ACCOUNT ACCESS & SINGLE-DEVICE SECURITY CARD -->
@@ -5337,6 +5355,10 @@ function switchTab(name) {
   if(name === 'profile') {
     loadProfile();
     if(typeof loadNotificationPreferencesToUI === 'function') loadNotificationPreferencesToUI();
+    if(window.StudentPortal) StudentPortal.syncDashboard({ silent: true });
+  }
+  if(name === 'academy') {
+    if(window.StudentPortal) StudentPortal.syncDashboard({ silent: true });
   }
   if(name === 'practice') {
     const selL = $('selLang') ? $('selLang').value : 'en';
@@ -9486,6 +9508,9 @@ function renderUpgradeAuthSection() {
           </svg>
           <span>Continue with Google</span>
         </button>
+        <button type="button" class="ghostbtn" style="width:100%;margin-top:8px;padding:10px 14px;font-size:12.5px;font-weight:700;border-radius:10px;" onclick="closeBiryaniUpgradeModal(); if(window.StudentPortal) StudentPortal.openCheckout('${selectedPkg === 'tamil_speed' ? 'tamil_senior' : selectedPkg === 'english_speed' ? 'english_senior' : selectedPkg}');">
+          🎟️ Sign In with Email / Apply Coupon Code
+        </button>
       </div>
     `;
   } else {
@@ -9512,6 +9537,9 @@ function renderUpgradeAuthSection() {
 
         <button type="button" class="solidbtn" style="width:100%;padding:12px 16px;font-size:14px;font-weight:800;border-radius:12px;background:linear-gradient(135deg,var(--primary),#4f46e5);display:flex;align-items:center;justify-content:center;gap:8px;" onclick="handlePurchaseActivation('${selectedPkg}')">
           <span>💳</span> Complete Payment (${pkgPrice}) &amp; Unlock
+        </button>
+        <button type="button" class="ghostbtn" style="width:100%;margin-top:8px;padding:10px 14px;font-size:12.5px;font-weight:700;border-radius:10px;" onclick="closeBiryaniUpgradeModal(); if(window.StudentPortal) StudentPortal.openCheckout('${selectedPkg === 'tamil_speed' ? 'tamil_senior' : selectedPkg === 'english_speed' ? 'english_senior' : selectedPkg}');">
+          🎟️ Apply Coupon Code / Full Checkout
         </button>
       </div>
     `;
@@ -9698,7 +9726,7 @@ function renderAccountAccessCard() {
             🍗 Upgrade Course (₹299)
           </button>
         ` : ''}
-        <button type="button" class="ghostbtn" style="padding:10px 14px;font-size:12.5px;font-weight:700;border-radius:12px;color:var(--coral);" onclick="if(confirm('Log out from this device?')) window.FirebaseService.signOut()">
+        <button type="button" class="ghostbtn" style="padding:10px 14px;font-size:12.5px;font-weight:700;border-radius:12px;color:var(--coral);" onclick="if(confirm('Log out from this device?')) { if(window.StudentPortal && StudentPortal.token) StudentPortal.logout(); else window.FirebaseService.signOut(); }">
           🚪 Sign Out
         </button>
       </div>
@@ -9770,8 +9798,136 @@ window.handleDeleteAccountConfirmation = handleDeleteAccountConfirmation;
   </div>
 </div>
 
+<!-- STUDENT AUTHENTICATION MODAL (EMAIL/PASSWORD + GOOGLE SIGN-IN + FORGOT PASSWORD) -->
+<div class="modalbg" id="studentAuthModal" style="display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);z-index:10006;overflow-y:auto;padding:16px;">
+  <div class="modalcard" style="max-width:440px;width:100%;border-radius:20px;padding:22px;background:var(--card-bg);border:1.5px solid var(--card-border);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div>
+        <h3 style="margin:0;font-size:17px;font-weight:900;color:var(--ink);">🎓 Student Account</h3>
+        <div style="font-size:11.5px;color:var(--muted);">Sign in or create an account to enroll &amp; track exams</div>
+      </div>
+      <button type="button" class="ghostbtn" style="padding:4px 10px;font-size:12px;" onclick="StudentPortal.closeAuthModal()">✕</button>
+    </div>
+
+    <div id="stuAuthIntentBanner" style="display:none;background:var(--primary-light);border:1px solid var(--primary);border-radius:10px;padding:10px;font-size:11.5px;color:var(--ink);margin-bottom:12px;"></div>
+    <div id="stuAuthAlert" style="display:none;background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.3);color:#dc2626;border-radius:10px;padding:10px;font-size:12px;font-weight:700;margin-bottom:12px;"></div>
+
+    <div class="seg-control" style="margin-bottom:14px;">
+      <button type="button" class="seg-btn active" id="stuAuthTab_login" onclick="StudentPortal.switchAuthTab('login')">Sign In</button>
+      <button type="button" class="seg-btn" id="stuAuthTab_register" onclick="StudentPortal.switchAuthTab('register')">Register</button>
+      <button type="button" class="seg-btn" id="stuAuthTab_forgot" onclick="StudentPortal.switchAuthTab('forgot')">Reset Password</button>
+    </div>
+
+    <!-- LOGIN PANE -->
+    <div id="stuAuthPane_login">
+      <button type="button" class="solidbtn" style="width:100%;padding:11px;margin-bottom:12px;background:#ffffff;color:#1e293b;border:1.5px solid #cbd5e1;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800;" onclick="StudentPortal.handleGoogleAuth()">
+        <span>🔑</span> Continue with Google
+      </button>
+      <div style="text-align:center;font-size:11px;color:var(--muted);margin-bottom:12px;">or sign in with email &amp; password</div>
+      <form onsubmit="StudentPortal.submitLogin(event)">
+        <div class="form-field">
+          <div class="form-label">Student Email</div>
+          <input id="stuLoginEmail" type="email" required placeholder="student@example.com" style="width:100%;padding:10px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
+        </div>
+        <div class="form-field">
+          <div class="form-label">Password</div>
+          <input id="stuLoginPassword" type="password" required placeholder="Enter password" style="width:100%;padding:10px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
+        </div>
+        <button type="submit" class="solidbtn" style="width:100%;padding:12px;font-weight:800;">Sign In</button>
+      </form>
+    </div>
+
+    <!-- REGISTER PANE -->
+    <div id="stuAuthPane_register" style="display:none;">
+      <form onsubmit="StudentPortal.submitRegister(event)">
+        <div class="form-field">
+          <div class="form-label">Full Student Name</div>
+          <input id="stuRegName" type="text" required placeholder="e.g. Karthik M" style="width:100%;padding:10px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
+        </div>
+        <div class="form-field">
+          <div class="form-label">Email Address</div>
+          <input id="stuRegEmail" type="email" required placeholder="student@example.com" style="width:100%;padding:10px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
+        </div>
+        <div class="form-field">
+          <div class="form-label">Password (min 6 characters)</div>
+          <input id="stuRegPassword" type="password" minlength="6" required placeholder="Create a password" style="width:100%;padding:10px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <input id="stuRegPhone" type="tel" placeholder="Mobile Number" style="padding:10px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
+          <input id="stuRegNo" type="text" placeholder="Reg No (optional)" style="padding:10px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
+        </div>
+        <input id="stuRegInstitute" type="hidden" value="Sri Kalaimagal Typewriting Institute" />
+        <button type="submit" class="solidbtn" style="width:100%;padding:12px;font-weight:800;">Create Student Account</button>
+      </form>
+    </div>
+
+    <!-- FORGOT PASSWORD PANE -->
+    <div id="stuAuthPane_forgot" style="display:none;">
+      <form onsubmit="StudentPortal.submitForgotPassword(event)">
+        <div class="form-field">
+          <div class="form-label">Registered Student Email</div>
+          <input id="stuForgotEmail" type="email" required placeholder="student@example.com" style="width:100%;padding:10px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
+        </div>
+        <button type="submit" class="solidbtn" style="width:100%;padding:11px;font-weight:800;">Send Reset Instructions</button>
+      </form>
+      <div id="stuForgotStatus" style="display:none;margin-top:10px;font-size:12px;color:#059669;font-weight:700;"></div>
+      <div id="stuResetTokenGroup" style="display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--card-border);">
+        <div class="form-field">
+          <div class="form-label">Reset Token</div>
+          <input id="stuResetToken" type="text" placeholder="Paste reset token" style="width:100%;padding:9px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
+        </div>
+        <div class="form-field">
+          <div class="form-label">New Password</div>
+          <input id="stuResetNewPassword" type="password" minlength="6" placeholder="Min 6 characters" style="width:100%;padding:9px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
+        </div>
+        <button type="button" class="solidbtn" style="width:100%;" onclick="StudentPortal.submitResetPassword()">Update Password</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT COURSES HUB MODAL (CATALOG / ENROLLMENTS / COMPLETED HISTORY / NOTIFICATIONS) -->
+<div class="modalbg" id="studentCoursesModal" style="display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);z-index:10005;overflow-y:auto;padding:14px;">
+  <div class="modalcard" style="max-width:560px;width:100%;max-height:90vh;overflow-y:auto;border-radius:20px;padding:20px;background:var(--card-bg);border:1.5px solid var(--card-border);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div>
+        <h3 style="margin:0;font-size:17px;font-weight:900;color:var(--ink);">🎓 Courses &amp; Exam Portal</h3>
+        <div style="font-size:11.5px;color:var(--muted);">Enrollments, Coupons, Exam Schedules &amp; Rebooking</div>
+      </div>
+      <button type="button" class="ghostbtn" style="padding:4px 10px;font-size:12px;" onclick="StudentPortal.closeCoursesHub()">✕</button>
+    </div>
+
+    <div class="seg-control" style="margin-bottom:14px;">
+      <button type="button" class="seg-btn active" id="stuHubTab_catalog" onclick="StudentPortal.switchCoursesHubTab('catalog')">Courses</button>
+      <button type="button" class="seg-btn" id="stuHubTab_enrollments" onclick="StudentPortal.switchCoursesHubTab('enrollments')">My Enrollments</button>
+      <button type="button" class="seg-btn" id="stuHubTab_history" onclick="StudentPortal.switchCoursesHubTab('history')">Exam History</button>
+      <button type="button" class="seg-btn" id="stuHubTab_notifications" onclick="StudentPortal.switchCoursesHubTab('notifications')">Updates</button>
+    </div>
+
+    <div id="studentCoursesModalBody"></div>
+  </div>
+</div>
+
+<!-- COURSE CHECKOUT & COUPON REDEMPTION MODAL -->
+<div class="modalbg" id="courseCheckoutModal" style="display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.82);z-index:10007;overflow-y:auto;padding:14px;">
+  <div class="modalcard" style="max-width:460px;width:100%;border-radius:20px;padding:20px;background:var(--card-bg);border:1.5px solid var(--primary);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="margin:0;font-size:17px;font-weight:900;color:var(--ink);">🛒 Course Checkout &amp; Coupon</h3>
+      <button type="button" class="ghostbtn" style="padding:4px 10px;font-size:12px;" onclick="StudentPortal.closeCheckoutModal()">✕</button>
+    </div>
+    <div id="courseCheckoutBody"></div>
+  </div>
+</div>
+
   <!-- FIREBASE AUTH & BACKEND ENGINE SCRIPT -->
   <script src="js/firebase_service.js"></script>
+  <!-- STUDENT COURSES, AUTH & COUPON PORTAL SCRIPT -->
+  <script src="js/student_portal.js"></script>
+  <script>
+    if (window.StudentPortal && typeof window.StudentPortal.init === 'function') {
+      window.StudentPortal.init();
+    }
+  </script>
   <!-- OTG PHYSICAL KEYBOARD ENGINE SCRIPT -->
   <script src="js/otg_keyboard_service.js"></script>
   <!-- NOTIFICATION SERVICE SCRIPT -->

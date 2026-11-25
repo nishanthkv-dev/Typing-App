@@ -10,6 +10,10 @@ android/local.properties
 android/.idea/
 *.iml
 *.apk
+*.aab
+.env
+.env.local
+backend/data/
 
 # macOS
 .DS_Store

@@ -64,6 +64,8 @@ jobs:
           node test_game_enhancements_suite.js
           echo "=== 12. Academics, Drills, Word Practice & Typing Layout Suite ==="
           node test_academics_drills_layout.js
+          echo "=== 13. Student Auth, Courses, Coupons & Admin Portal E2E Suite ==="
+          node test_courses_coupons_admin.js
 
       - name: Sync Capacitor Android Project
         run: npx cap sync android

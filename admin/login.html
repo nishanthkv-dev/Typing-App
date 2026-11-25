@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login — Typing Thalaiva Institute Portal</title>
+  <link rel="stylesheet" href="/admin/styles.css" />
+</head>
+<body class="auth-page">
+  <main class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-badge">TT</div>
+      <div>
+        <h1 class="auth-title">Typing Thalaiva Admin</h1>
+        <div class="auth-sub">Sri Kalaimagal Typewriting Institute • Web Portal</div>
+      </div>
+    </div>
+
+    <div id="loginAlert" class="alert alert-error"></div>
+
+    <form id="adminLoginForm" autocomplete="on">
+      <div class="form-group">
+        <label for="adminEmail">Administrator Email</label>
+        <input id="adminEmail" name="email" type="email" class="form-control" required placeholder="admin@srikalaimagal.in" />
+      </div>
+
+      <div class="form-group">
+        <label for="adminPassword">Password</label>
+        <input id="adminPassword" name="password" type="password" class="form-control" required placeholder="Enter administrator password" />
+      </div>
+
+      <button type="submit" id="btnLogin" class="btn btn-primary btn-block">
+        🔐 Sign In to Admin Portal
+      </button>
+    </form>
+
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:11.5px;color:var(--muted);line-height:1.5;">
+      Restricted to authorized institute administrators. Student accounts cannot access this portal. All admin actions are recorded in the audit log.
+    </div>
+  </main>
+
+  <script>
+    (async function () {
+      try {
+        const me = await fetch('/api/admin/auth/me', { credentials: 'include' });
+        if (me.ok) {
+          window.location.replace('/admin/dashboard');
+          return;
+        }
+      } catch (_) {}
+
+      const form = document.getElementById('adminLoginForm');
+      const alertBox = document.getElementById('loginAlert');
+      const btn = document.getElementById('btnLogin');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alertBox.classList.remove('show');
+        btn.disabled = true;
+        btn.textContent = 'Verifying...';
+
+        try {
+          const email = document.getElementById('adminEmail').value.trim();
+          const password = document.getElementById('adminPassword').value;
+          const res = await fetch('/api/admin/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password })
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || 'Login failed');
+          }
+          window.location.replace('/admin/dashboard');
+        } catch (err) {
+          alertBox.textContent = err.message || 'Authentication failed';
+          alertBox.classList.add('show');
+          btn.disabled = false;
+          btn.textContent = '🔐 Sign In to Admin Portal';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
