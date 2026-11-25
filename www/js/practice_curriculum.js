@@ -581,14 +581,19 @@
     if (typeof pracLayout !== 'undefined') pracLayout = layout;
     const sel = document.getElementById('pracLayoutSel');
     if (sel) sel.value = layout;
+    const tabSel = document.getElementById('tabPracTrackSel');
+    if (tabSel && typeof pracLang !== 'undefined' && pracLang === 'ta') tabSel.value = layout;
     if (typeof pracComposer !== 'undefined') {
       pracComposer.raw = '';
       pracComposer.outLen = 0;
     }
     if (typeof pracIdx !== 'undefined') pracIdx = 0;
+    if (typeof pracBaseLessonIdx !== 'undefined') pracBaseLessonIdx = 0;
     if (typeof pracCustomLesson !== 'undefined') pracCustomLesson = null;
+    if (typeof pracMode !== 'undefined') pracMode = 'letters';
     if (typeof pracLessonCompleted !== 'undefined') pracLessonCompleted = false;
 
+    if (typeof updatePracModeUI === 'function') updatePracModeUI();
     if (typeof buildPracLessonChips === 'function') buildPracLessonChips();
     if (typeof loadPracLesson === 'function') loadPracLesson();
   }
@@ -709,6 +714,167 @@
     if (typeof toast === 'function') toast('🧠 Adaptive Reinforcement Drill Loaded!');
   }
 
+  // --- DEDICATED ROW PRACTICE DRILLS (HOME, TOP, BOTTOM, MIXED) ---
+  const ROW_DRILLS = {
+    en: {
+      home: {
+        rowKey: 'home',
+        lesson: "Home Row — ASDF & JKL;",
+        sub: "Anchor left fingers on ASDF and right fingers on JKL; (include G & H reach)",
+        keyHint: "asdfgf ;lkjhj",
+        fingerGuide: {
+          left: ["Little→a", "Ring→s", "Middle→d", "Index→f, g"],
+          right: ["Index→h, j", "Middle→k", "Ring→l", "Little→;"],
+          homeKeys: true
+        },
+        text: "asdf ;lkj asdf ;lkj asdf ;lkj asdf ;lkj\nasdfgf ;lkjhj asdfgf ;lkjhj asdfgf ;lkjhj\na s d f g h j k l ; ; l k j h g f d s a\nask lad all fall sad dad adds; glass flask hall\njag flag glad hash dash gash shall slash salad\nsad lads ask dad; half glass falls as flags flash"
+      },
+      top: {
+        rowKey: 'top',
+        lesson: "Top Row — QWERTY & UIOP",
+        sub: "Practice upward finger reach across Q W E R T Y U I O P",
+        keyHint: "qwert yuiop",
+        fingerGuide: {
+          left: ["Little→q", "Ring→w", "Middle→e", "Index→r, t"],
+          right: ["Index→y, u", "Middle→i", "Ring→o", "Little→p"],
+          homeKeys: false
+        },
+        text: "qwert poiuy qwert poiuy qwert poiuy qwert poiuy\nq w e r t y u i o p p o i u y t r e w q\nawerqfa ;oiupj; gftfrf hjyjuj qwert yuiop\ntype quit pure pour poet rope write power trip\nquietly require priority report poetry quote tower\nproper route top priority write your true story"
+      },
+      bottom: {
+        rowKey: 'bottom',
+        lesson: "Bottom Row — ZXCV & BNM",
+        sub: "Practice downward finger reach across Z X C V B N M , . /",
+        keyHint: "zxcvb nm,./",
+        fingerGuide: {
+          left: ["Little→z", "Ring→x", "Middle→c", "Index→v, b"],
+          right: ["Index→n, m", "Middle→,", "Ring→.", "Little→/"],
+          homeKeys: false
+        },
+        text: "zxcvb mnbvc zxcvb mnbvc zxcvb mnbvc zxcvb mnbvc\nazxcvf lkmnbj azxcvf lkmnbj z x c v b n m\nzoom calm mix box van moon zone cave bench\ncomb move verb next climb exact vibrant exam\nzenith bronze, brave move. maximum victory box,\ncivic cabin mix, zero excuse, next climb, brave zone."
+      },
+      mixed: {
+        rowKey: 'mixed',
+        lesson: "Mixed Row — Full Keyboard Mastery",
+        sub: "Combine Home, Top, and Bottom rows in seamless rhythm",
+        keyHint: "abcdefghijklmnopqrstuvwxyz;.,",
+        fingerGuide: {
+          left: ["All Left Fingers: QAZ WSX EDC RFV TGB"],
+          right: ["All Right Fingers: YHN UJM IK, OL. P;/"],
+          homeKeys: true
+        },
+        text: "qaz wsx edc rfv tgb yhn ujm ik, ol. p;/\nasdf qwert zxcvb ;lkj yuiop mnbvc asdf qwert\nthe quick brown fox jumps over a lazy dog\npack my box with five dozen liquor jugs today\njumping wizards quickly vexed bright young scholars\ndaily touch typing practice builds speed and accuracy"
+      }
+    },
+    tamil99: {
+      home: {
+        rowKey: 'home',
+        lesson: "நடுவரிசைப் பயிற்சி (Tamil99 Home Row)",
+        sub: "அ இ உ ் எ | க ப ம த ந (asdfg hjkl;)",
+        keyHint: "asdfgf ;lkjhj",
+        fingerGuide: {
+          left: ["சுண்டு→அ (a)", "மோதிர→இ (s)", "நடு→உ (d)", "ஆள்காட்டி→் (f), எ (g)"],
+          right: ["ஆள்காட்டி→க (h), ப (j)", "நடு→ம (k)", "மோதிர→த (l)", "சுண்டு→ந (;)"],
+          homeKeys: true
+        },
+        text: "அ இ உ ் எ க ப ம த ந அ இ உ ் எ க ப ம த ந\nஅகம் இகம் உகம் பகம் மனம் தனம் நகம் பதம் மதம்\nஎது மெது பதம் களம் மடம் பலம் தவம் பணம் கனம்\nஅன்பு கல்வி பண்பு நன்றி பக்கம் சட்டம் தத்தம்\nமனம் தனம் பகம் உகம் இகம் அகம் கல்வி களம்"
+      },
+      top: {
+        rowKey: 'top',
+        lesson: "மேல்வரிசைப் பயிற்சி (Tamil99 Top Row)",
+        sub: "ஆ ஈ ஊ ஐ ஏ | ள ற ன ட ண ச (qwerty uiop[)",
+        keyHint: "qwerty uiop[",
+        fingerGuide: {
+          left: ["ஆ (q)", "ஈ (w)", "ஊ (e)", "ஐ (r)", "ஏ (t)"],
+          right: ["ள (y)", "ற (u)", "ன (i)", "ட (o)", "ண (p)", "ச ([)"],
+          homeKeys: false
+        },
+        text: "ஆ ஈ ஊ ஐ ஏ ள ற ன ட ண ச ஆ ஈ ஊ ஐ ஏ ள ற ன ட ண ச\nஆடல் ஈகை ஊக்கம் ஏணி ஐந்து சட்டம் படம் மணம்\nகண்ணன் கற்றல் பாடம் நாடக மன்றம் நன்றி\nஆசிரியர் பாடம் மாணவர் ஊக்கம் ஆக்கம் தரும்\nஎண்ணித் துணிக கருமம் கற்றல் நன்று சட்டம்"
+      },
+      bottom: {
+        rowKey: 'bottom',
+        lesson: "கீழ்வரிசைப் பயிற்சி (Tamil99 Bottom Row)",
+        sub: "ஔ ஓ ஒ வ ங | ல ர ழ (zxcvb nm/)",
+        keyHint: "zxcvb nm/",
+        fingerGuide: {
+          left: ["ஔ (z)", "ஓ (x)", "ஒ (c)", "வ (v)", "ங (b)"],
+          right: ["ல (n)", "ர (m)", "ழ (/)"],
+          homeKeys: false
+        },
+        text: "ஔ ஓ ஒ வ ங ல ர ழ ஔ ஓ ஒ வ ங ல ர ழ\nஒற்றுமை ஓட்டம் ஔவை வானம் தமிழ் வள்ளல் மலர்\nவெற்றி வேல் அழகு வழக்கம் உலகம் சிறப்பு நிலம்\nவாழ்க தமிழ் வளர்க பாரதம் ஒற்றுமை வலிமை\nஅழகு தமிழ் இனிமை வழக்கம் உலகம் மலர்"
+      },
+      mixed: {
+        rowKey: 'mixed',
+        lesson: "அனைத்து வரிசைப் பயிற்சி (Tamil99 Mixed Row)",
+        sub: "நடு, மேல் மற்றும் கீழ்வரிசை கூட்டுப் பயிற்சி",
+        keyHint: "Full Tamil99 Keyboard",
+        fingerGuide: {
+          left: ["அனைத்து இடக்கை விசைகள்"],
+          right: ["அனைத்து வலக்கை விசைகள்"],
+          homeKeys: true
+        },
+        text: "அ ஆ இ ஈ உ ஊ எ ஏ ஐ ஒ ஓ ஔ க ச ட த ப ற\nதமிழ்நாடு தொழில்நுட்பக் கல்வி இயக்ககம் தட்டச்சு\nஅறிவுடைமை ஆக்கம் தரும் ஒழுக்கம் உயர்வு தரும்\nமுயற்சி திருவினையாக்கும் கல்வி கரையில கற்பவர் நாள் சில\nதினமும் பயிற்சி செய்தால் அரசு தேர்வில் வெற்றி நிச்சயம்"
+      }
+    },
+    typewriter: {
+      home: {
+        rowKey: 'home',
+        lesson: "நடுவரிசைப் பயிற்சி (Typewriter Home Row)",
+        sub: "ய ள ன க ப ா த ம ல ் (asdfg hjkl;)",
+        keyHint: "asdfg hjkl;",
+        fingerGuide: {
+          left: ["ய (a)", "ள (s)", "ன (d)", "க (f)"],
+          right: ["ப (g)", "ா (h)", "த (j)", "ம (k)", "ல (l)", "் (;)"],
+          homeKeys: true
+        },
+        text: "ய ள ன க ப ா த ம ல ய ள ன க ப ா த ம ல\nகல்வி களம் கனம் பதம் படம் மடம் பலம் பணம்\nகபிலர் மலர் தமிழ் களம் பதம் மணம் தவம் பணம்\nபதம் பணம் மடம் பலம் களம் கல்வி கனம் மலர்\nபக்தி மணம் தவம் கபிலர் களம் மடம் படம்"
+      },
+      top: {
+        rowKey: 'top',
+        lesson: "மேல்வரிசைப் பயிற்சி (Typewriter Top Row)",
+        sub: "ணு று நு சு கூ லு ரு ஐ டி (qwerty uiop)",
+        keyHint: "qwerty uiop",
+        fingerGuide: {
+          left: ["q w e r t மேல் விசைகள்"],
+          right: ["y u i o p மேல் விசைகள்"],
+          homeKeys: false
+        },
+        text: "கூடு நூல் சுடர் வலம் நலம் ரதம் ஐந்து டமாரம்\nகாலை சூரியன் கிழக்கு திசையில் ஒளி வீசுகிறது\nபாடம் காலம் தீபம் தூய்மை வீரம் புயல் பூக்கள்\nகண்ணன் கற்றல் பாடம் மன்றம் நன்றி சட்டம்\nதுல்லியம் வேகம் பயிற்சி தினமும் தொடர வேண்டும்"
+      },
+      bottom: {
+        rowKey: 'bottom',
+        lesson: "கீழ்வரிசைப் பயிற்சி (Typewriter Bottom Row)",
+        sub: "ண ஒ உ எ ெ ே அ இ (zxcvb nm,.)",
+        keyHint: "zxcvb nm,.",
+        fingerGuide: {
+          left: ["z x c v b கீழ் விசைகள்"],
+          right: ["n m , . / கீழ் விசைகள்"],
+          homeKeys: false
+        },
+        text: "கெ தெ பெ மெ நெ செ வெ கே தே பே மே நே சே வே\nஅன்பு கல்வி ஒற்றுமை வெற்றி மேகம் செய்தி வேலை\nநல்ல சொல் வெல்லும் முயற்சி உயர்வு தரும்\nஅறிவே ஆற்றல் உழைப்பே உயர்வு நேர்மையே அறம்\nவிடாமுயற்சி வெற்றி தரும் தட்டச்சு கலை சிறந்தது"
+      },
+      mixed: {
+        rowKey: 'mixed',
+        lesson: "அனைத்து வரிசைப் பயிற்சி (Typewriter Mixed Row)",
+        sub: "முழு இயந்திர தட்டச்சு விசைப்பலகை கூட்டுப் பயிற்சி",
+        keyHint: "Full Typewriter Keyboard",
+        fingerGuide: {
+          left: ["அனைத்து இடக்கை விசைகள்"],
+          right: ["அனைத்து வலக்கை விசைகள்"],
+          homeKeys: true
+        },
+        text: "தமிழ் தட்டச்சு என்பது ஒரு அற்புதமான கைத்தொழில் ஆகும்.\nஅரசு தொழில்நுட்பக் கல்வி இயக்ககம் நடத்தும் தட்டச்சுத் தேர்வு\nவிரல்களை சரியான விசைகளில் வைத்து பார்க்காமல் தட்டச்சு செய்க\nவேகமும் துல்லியமும் இணைந்தால் தேர்வில் முதல் வகுப்பு உறுதி"
+      }
+    }
+  };
+
+  function getRowDrill(rowKey, lang, layout) {
+    const l = lang || ((typeof pracLang !== 'undefined') ? pracLang : 'en');
+    const ly = layout || ((typeof pracLayout !== 'undefined') ? pracLayout : 'tamil99');
+    const bank = (l === 'ta') ? (ly === 'typewriter' ? ROW_DRILLS.typewriter : ROW_DRILLS.tamil99) : ROW_DRILLS.en;
+    return bank[rowKey] || bank.home;
+  }
+
   function checkPracCompletion(typedText) {
     if (pracLessonCompleted) return;
     const lesson = (typeof currentPracLesson === 'function') ? currentPracLesson() : null;
@@ -721,6 +887,8 @@
 
   // Export functions to window
   window.PRAC = PRAC;
+  window.ROW_DRILLS = ROW_DRILLS;
+  window.getRowDrill = getRowDrill;
   window.getPracLessons = getPracLessons;
   window.setPracLayout = setPracLayout;
   window.generateAdaptiveReinforcement = generateAdaptiveReinforcement;

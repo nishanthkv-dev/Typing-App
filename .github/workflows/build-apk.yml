@@ -62,6 +62,8 @@ jobs:
           node test_bubble_and_bottom_nav_fixes.js
           echo "=== 11. Game Enhancements Suite ==="
           node test_game_enhancements_suite.js
+          echo "=== 12. Academics, Drills, Word Practice & Typing Layout Suite ==="
+          node test_academics_drills_layout.js
 
       - name: Sync Capacitor Android Project
         run: npx cap sync android

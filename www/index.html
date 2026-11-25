@@ -62,33 +62,147 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
 .rp-formula b{color:#4c1d95;}
 
 
-/* Practice Screen Dual-Split Styling */
+/* Practice Screen Dual-Split Styling & Mobile Stability */
+#screen-practice {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+#screen-practice .glass-card {
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+#pracLessonChips {
+  max-height: 86px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
+}
 .practice-split-container {
   display: flex !important;
   flex-direction: row !important;
-  gap: 10px !important;
+  gap: 8px !important;
   width: 100% !important;
+  max-width: 100% !important;
   box-sizing: border-box !important;
   margin-bottom: 12px !important;
   align-items: stretch !important;
+  overflow-x: hidden !important;
 }
 .practice-split-container .practice-panel-left,
 .practice-split-container .practice-panel-right {
-  flex: 1 1 50% !important;
-  width: calc(50% - 5px) !important;
-  max-width: calc(50% - 5px) !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  width: auto !important;
+  max-width: calc(50% - 4px) !important;
+  height: 280px !important;
   min-height: 220px !important;
-  max-height: 380px !important;
+  max-height: 360px !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
   padding: 0 !important;
+  position: relative !important;
+}
+#pracScrollWrap {
+  position: relative !important;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 10px !important;
+  box-sizing: border-box !important;
+  -webkit-overflow-scrolling: touch;
+}
+#pracExText {
+  position: relative !important;
+  font-family: var(--font-mono) !important;
+  font-size: 17px !important;
+  line-height: 1.7 !important;
+  white-space: pre-wrap !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  overflow: visible !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+#pracExText.tamil {
+  font-family: var(--font-tamil) !important;
+}
+#practiceInput {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  font-family: var(--font-mono) !important;
+  font-size: 17px !important;
+  line-height: 1.7 !important;
+  resize: none !important;
+  padding: 10px !important;
+  color: var(--ink) !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+}
+#practiceInput.tamil {
+  font-family: var(--font-tamil) !important;
 }
 @media (max-width: 480px) {
+  .practice-split-container {
+    gap: 6px !important;
+  }
   .practice-split-container .practice-panel-left,
   .practice-split-container .practice-panel-right {
-    min-height: 180px !important;
-    max-height: 320px !important;
+    max-width: calc(50% - 3px) !important;
+    height: 235px !important;
+    min-height: 195px !important;
+    max-height: 280px !important;
   }
+  #pracExText,
+  #practiceInput {
+    font-size: 15px !important;
+    line-height: 1.65 !important;
+    padding: 8px !important;
+  }
+  #pracScrollWrap {
+    padding: 8px !important;
+  }
+  .practice-panel-right .panelhead .prac-active-lbl {
+    display: none !important;
+  }
+}
+.row-drills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+.row-drill-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 16px;
+}
+.row-drill-keys-pill {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: 8px;
+  padding: 4px 8px;
+  word-break: break-word;
 }
 
 /* =====================================================================
@@ -2222,8 +2336,13 @@ body:has(#screen-test.active) .bottom-nav-bar {
   margin-bottom: 12px;
   max-height: 240px;
   overflow-y: auto;
+  overflow-x: hidden;
   scroll-behavior: smooth;
   box-shadow: var(--card-shadow);
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
 }
 .modelabel {
   font-size: 10.5px;
@@ -2754,32 +2873,44 @@ body:has(#screen-test.active) .bottom-nav-bar {
    ON-SCREEN LETTER OVERLAY TYPING MODE
 ===================================================================== */
 #screen-test.mode-overlay .testpanels {
-  display: block !important;
+  display: flex !important;
+  flex-direction: column !important;
   position: relative !important;
-  flex: 1 1 auto !important;
-  height: calc(100vh - 180px) !important;
-  min-height: 320px !important;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 #screen-test.mode-overlay .passcard {
   width: 100% !important;
   max-width: 100% !important;
+  flex: 1 1 0 !important;
   height: 100% !important;
+  min-height: 0 !important;
   max-height: none !important;
   border: 2px solid var(--primary);
   border-radius: 16px;
   background: var(--card-bg);
-  padding: 18px 22px !important;
+  padding: 14px 16px !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
+  position: relative !important;
+  box-sizing: border-box !important;
   cursor: text;
   box-shadow: var(--card-shadow);
 }
 #screen-test.mode-overlay #passDisplay {
+  position: relative;
   font-family: var(--font-mono, monospace);
-  font-size: calc(var(--typesize, 18px) * 1.18);
-  line-height: 2.1;
-  letter-spacing: 0.05em;
+  font-size: calc(var(--typesize, 18px) * 1.12);
+  line-height: 1.95;
+  letter-spacing: 0.03em;
   white-space: pre-wrap;
-  word-break: break-word;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 #screen-test.mode-overlay .typewrap {
   position: absolute !important;
@@ -2790,6 +2921,9 @@ body:has(#screen-test.active) .bottom-nav-bar {
   margin: 0 !important;
   padding: 0 !important;
   pointer-events: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 #screen-test.mode-overlay #typingArea {
   width: 100% !important;
@@ -2800,6 +2934,9 @@ body:has(#screen-test.active) .bottom-nav-bar {
   resize: none !important;
   border: none !important;
   outline: none !important;
+  padding: 14px 16px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
 }
 
 /* Overlay Character Classes */
@@ -3244,16 +3381,89 @@ body:has(#screen-test.active) .bottom-nav-bar {
           </div>
         </div>
       </div>
-      <div class="glass-card" style="text-align:center;padding:28px 20px;">
-        <div style="font-size:48px;margin-bottom:12px;">📚</div>
+      <div class="glass-card" style="text-align:center;padding:24px 18px;margin-bottom:14px;">
+        <div style="font-size:44px;margin-bottom:10px;">📚</div>
         <h2 style="font-size:19px;font-weight:800;color:var(--ink);margin-bottom:8px;">Untimed Skill Drills</h2>
-        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;">
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:18px;">
           Train your muscle memory, key precision, and finger placement across Home Row, Top Row, Bottom Row, and Tamil compound letters without timer pressure.
         </p>
         <button class="solidbtn" style="width:100%;" onclick="openPractice()">
           <span>📖</span> Open Practice Drill Studio
         </button>
       </div>
+
+      <!-- ROW PRACTICE MODULES -->
+      <div class="glass-card" style="padding:14px 16px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <div>
+            <div style="font-size:10.5px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:0.8px;">Finger Placement &amp; Row Mastery</div>
+            <h3 style="font-size:15.5px;font-weight:800;color:var(--ink);margin:2px 0 0;">Letter Row Practice Drills</h3>
+          </div>
+          <div class="custom-select-wrap" style="min-width:155px;">
+            <select id="tabPracTrackSel" onchange="onTabPracTrackChange(this.value)" style="font-size:12px;font-weight:700;">
+              <option value="en">English (QWERTY)</option>
+              <option value="tamil99">Tamil (Tamil99)</option>
+              <option value="typewriter">Tamil (Typewriter)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row-drills-grid" id="rowDrillsGrid" style="margin-top:8px;margin-bottom:4px;">
+          <!-- HOME ROW -->
+          <div class="glass-card row-drill-card" style="margin:0;border:1.5px solid rgba(37,99,235,0.28);">
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
+                <span style="font-size:16px;font-weight:800;color:var(--ink);">🏠 Home Row</span>
+                <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;background:rgba(37,99,235,0.12);color:#2563eb;">ROW 2</span>
+              </div>
+              <p id="rowDescHome" style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 8px;">Practice ASDF and JKL; keys and correct anchor finger positioning.</p>
+              <span id="rowKeysHome" class="row-drill-keys-pill">A S D F · G H · J K L ;</span>
+            </div>
+            <button id="btnStartRowHome" class="solidbtn" style="width:100%;padding:10px 14px;font-size:13px;" onclick="openPracticeRow('home')">Start Home Row ▶</button>
+          </div>
+
+          <!-- TOP ROW -->
+          <div class="glass-card row-drill-card" style="margin:0;border:1.5px solid rgba(16,185,129,0.28);">
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
+                <span style="font-size:16px;font-weight:800;color:var(--ink);">⬆️ Top Row</span>
+                <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;background:rgba(16,185,129,0.12);color:#059669;">ROW 1</span>
+              </div>
+              <p id="rowDescTop" style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 8px;">Practice QWERTY and UIOP keys and upward finger reach.</p>
+              <span id="rowKeysTop" class="row-drill-keys-pill">Q W E R T · Y U I O P</span>
+            </div>
+            <button id="btnStartRowTop" class="solidbtn" style="width:100%;padding:10px 14px;font-size:13px;" onclick="openPracticeRow('top')">Start Top Row ▶</button>
+          </div>
+
+          <!-- BOTTOM ROW -->
+          <div class="glass-card row-drill-card" style="margin:0;border:1.5px solid rgba(245,158,11,0.32);">
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
+                <span style="font-size:16px;font-weight:800;color:var(--ink);">⬇️ Bottom Row</span>
+                <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;background:rgba(245,158,11,0.15);color:#d97706;">ROW 3</span>
+              </div>
+              <p id="rowDescBottom" style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 8px;">Practice ZXCV and BNM keys and downward finger placement.</p>
+              <span id="rowKeysBottom" class="row-drill-keys-pill">Z X C V · B N M , . /</span>
+            </div>
+            <button id="btnStartRowBottom" class="solidbtn" style="width:100%;padding:10px 14px;font-size:13px;" onclick="openPracticeRow('bottom')">Start Bottom Row ▶</button>
+          </div>
+
+          <!-- MIXED ROW -->
+          <div class="glass-card row-drill-card" style="margin:0;border:1.5px solid rgba(124,58,237,0.28);">
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
+                <span style="font-size:16px;font-weight:800;color:var(--ink);">🔀 Mixed Row</span>
+                <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;background:rgba(124,58,237,0.12);color:#7c3aed;">ALL ROWS</span>
+              </div>
+              <p id="rowDescMixed" style="font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 8px;">Practice all keyboard rows together for complete transition mastery.</p>
+              <span id="rowKeysMixed" class="row-drill-keys-pill">Home + Top + Bottom Rows</span>
+            </div>
+            <button id="btnStartRowMixed" class="solidbtn" style="width:100%;padding:10px 14px;font-size:13px;" onclick="openPracticeRow('mixed')">Start Mixed Row ▶</button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="app-footer powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></footer>
     </div>
 
     <!-- ---------------- TAB 3: ANALYTICS (LIFETIME PROGRESS GRAPH & STAT CARDS ONLY) ---------------- -->
@@ -3351,7 +3561,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
       <div class="glass-card" style="margin-bottom:12px;padding:16px 18px;border-radius:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
           <div style="display:flex;align-items:center;gap:12px;min-width:0;">
-            <img src="data:image/png;base64,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" alt="Tamil Nadu State Emblem" style="width:42px;height:42px;border-radius:50%;object-fit:contain;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.12);background:#ffffff;padding:1px;" />
+            <img id="academyDoteLogo" src="img/dote_emblem.png" alt="DoTE Tamil Nadu Emblem" class="dote-logo-img" style="height:48px;width:auto;">
             <div style="font-size:14.5px;font-weight:800;color:var(--ink);line-height:1.2;letter-spacing:0.2px;">
               GOVERNMENT TECHNICAL<br>EXAM HUB
             </div>
@@ -3896,24 +4106,30 @@ body:has(#screen-test.active) .bottom-nav-bar {
        SCREEN 4: PRACTICE MODE DRILLS SCREEN
   =================================================================== -->
   <section class="screen" id="screen-practice">
-    <div class="test-cockpit-bar">
-      <button class="test-back-btn" onclick="closePractice()">‹ Done</button>
-      <div style="font-weight:800;font-size:15px;color:var(--ink);">Skill Drills Studio</div>
-      <button class="tool-btn" onclick="openKeyMapModal()" title="Keyboard Key Map" style="padding:4px 10px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px;border-radius:8px;background:var(--primary-glow);color:var(--primary);border:1px solid var(--primary-border);white-space:nowrap;height:32px;">🗺️ Key Map</button>
+    <div class="test-cockpit-bar" style="gap:8px;">
+      <button class="test-back-btn" onclick="closePractice()" style="flex-shrink:0;">‹ Done</button>
+      <div style="font-weight:800;font-size:clamp(13px, 3.6vw, 15px);color:var(--ink);flex:1;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Skill Drills Studio</div>
+      <button class="tool-btn" id="btnPracKeyMap" onclick="openKeyMapModal()" title="Keyboard Key Map" style="padding:4px 8px;font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:4px;border-radius:8px;background:var(--primary-glow);color:var(--primary);border:1px solid var(--primary-border);white-space:nowrap;height:30px;flex-shrink:0;">🗺️ Key Map</button>
     </div>
 
     <!-- DOTE PRACTICE PILL BANNER -->
-    <div class="dote-prep-pill" style="display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(245,158,11,0.09));border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:8px 12px;margin-bottom:12px;">
-      <img src="img/dote_emblem.png" alt="DoTE" class="dote-logo-img" style="height:34px;width:auto;">
-      <div style="font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.35;">
+    <div class="dote-prep-pill" style="display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(245,158,11,0.09));border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:7px 10px;margin-bottom:10px;">
+      <img src="img/dote_emblem.png" alt="DoTE" class="dote-logo-img" style="height:32px;width:auto;">
+      <div style="font-size:11px;font-weight:700;color:var(--ink);line-height:1.35;min-width:0;">
         Specially designed for DoTE Typewriting Examination preparation — practice smarter &amp; score higher grades!
       </div>
     </div>
 
     <div class="glass-card">
-      <div class="seg-control">
+      <div class="seg-control" style="margin-bottom:8px;">
         <button class="seg-btn active" id="plEn" type="button" onclick="setPracLang('en')">English Drills</button>
         <button class="seg-btn" id="plTa" type="button" onclick="setPracLang('ta')">Tamil Drills</button>
+      </div>
+
+      <!-- PRACTICE MODE SWITCHER: LESSON/ROW DRILLS vs WORD PRACTICE -->
+      <div class="seg-control" style="margin-bottom:10px;">
+        <button class="seg-btn active" id="pmLetters" type="button" onclick="setPracMode('letters')">🔤 Lesson &amp; Row Drills</button>
+        <button class="seg-btn" id="pmWords" type="button" onclick="setPracMode('words')">📝 Word Practice</button>
       </div>
 
       <div class="form-field" id="pracLayoutField" style="display:none;">
@@ -3926,48 +4142,48 @@ body:has(#screen-test.active) .bottom-nav-bar {
         </div>
       </div>
 
-      <div class="form-field">
-        <div class="form-label">Lesson Module:</div>
+      <div class="form-field" style="margin-bottom:0;">
+        <div class="form-label">Lesson / Row Module:</div>
         <div class="mb-chips" id="pracLessonChips"></div>
       </div>
     </div>
 
-    <div class="dash-metrics-grid drill-stats-row" style="display:flex !important;flex-direction:row !important;align-items:stretch !important;justify-content:space-between !important;gap:10px !important;width:100% !important;box-sizing:border-box !important;margin-bottom:12px !important;">
-      <div class="metric-card drill-stat-card" style="flex:1 1 0 !important;min-width:0 !important;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:10px 8px;text-align:center;box-shadow:var(--card-shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;">
-        <div class="metric-label drill-stat-label" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:4px;white-space:nowrap;">Accuracy</div>
-        <div class="metric-val drill-stat-val" id="pracAcc" style="font-size:20px;font-weight:800;color:var(--ink);line-height:1.2;">—</div>
+    <div class="dash-metrics-grid drill-stats-row" style="display:flex !important;flex-direction:row !important;align-items:stretch !important;justify-content:space-between !important;gap:8px !important;width:100% !important;box-sizing:border-box !important;margin-bottom:10px !important;">
+      <div class="metric-card drill-stat-card" style="flex:1 1 0 !important;min-width:0 !important;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:8px 6px;text-align:center;box-shadow:var(--card-shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;">
+        <div class="metric-label drill-stat-label" style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:2px;white-space:nowrap;">Accuracy</div>
+        <div class="metric-val drill-stat-val" id="pracAcc" style="font-size:18px;font-weight:800;color:var(--ink);line-height:1.2;">—</div>
       </div>
-      <div class="metric-card drill-stat-card" style="flex:1 1 0 !important;min-width:0 !important;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:10px 8px;text-align:center;box-shadow:var(--card-shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;">
-        <div class="metric-label drill-stat-label" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:4px;white-space:nowrap;">Correct</div>
-        <div class="metric-val drill-stat-val val-correct" id="pracCorrect" style="font-size:20px;font-weight:800;color:var(--emerald);line-height:1.2;">0</div>
+      <div class="metric-card drill-stat-card" style="flex:1 1 0 !important;min-width:0 !important;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:8px 6px;text-align:center;box-shadow:var(--card-shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;">
+        <div class="metric-label drill-stat-label" style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:2px;white-space:nowrap;">Correct</div>
+        <div class="metric-val drill-stat-val val-correct" id="pracCorrect" style="font-size:18px;font-weight:800;color:var(--emerald);line-height:1.2;">0</div>
       </div>
-      <div class="metric-card drill-stat-card" style="flex:1 1 0 !important;min-width:0 !important;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:10px 8px;text-align:center;box-shadow:var(--card-shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;">
-        <div class="metric-label drill-stat-label" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:4px;white-space:nowrap;">Mistakes</div>
-        <div class="metric-val drill-stat-val val-mistakes" id="pracMistakes" style="font-size:20px;font-weight:800;color:var(--rose);line-height:1.2;">0</div>
+      <div class="metric-card drill-stat-card" style="flex:1 1 0 !important;min-width:0 !important;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:8px 6px;text-align:center;box-shadow:var(--card-shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;">
+        <div class="metric-label drill-stat-label" style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:2px;white-space:nowrap;">Mistakes</div>
+        <div class="metric-val drill-stat-val val-mistakes" id="pracMistakes" style="font-size:18px;font-weight:800;color:var(--rose);line-height:1.2;">0</div>
       </div>
     </div>
 
     <div class="practice-split-container">
       <div class="passcard practice-panel-left" style="margin:0;display:flex;flex-direction:column;">
-        <div class="panelhead" style="display:flex;justify-content:space-between;align-items:center;padding:7px 12px 6px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--primary);background:var(--card-bg);border-bottom:1px solid var(--card-border);position:sticky;top:0;z-index:5;flex-shrink:0;">
-          <span id="pracLessonTitle">Lesson 1</span>
-          <span id="pracProgressPct">0%</span>
+        <div class="panelhead" style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding:7px 10px 6px;font-size:10.5px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--primary);background:var(--card-bg);border-bottom:1px solid var(--card-border);position:sticky;top:0;z-index:5;flex-shrink:0;">
+          <span id="pracLessonTitle" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Lesson 1</span>
+          <span id="pracProgressPct" style="flex-shrink:0;">0%</span>
         </div>
-        <div style="padding:10px 12px;flex:1;overflow-y:auto;display:flex;flex-direction:column;">
-          <div id="pracSub" style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;"></div>
-          <div id="pracExText" style="font-family:var(--font-mono);font-size:20px;line-height:1.8;overflow-y:auto;"></div>
+        <div id="pracScrollWrap">
+          <div id="pracSub" style="font-size:11.5px;color:var(--muted);margin-bottom:6px;font-weight:600;line-height:1.35;"></div>
+          <div id="pracExText"></div>
         </div>
       </div>
 
       <div class="inputcard practice-panel-right" style="margin:0;display:flex;flex-direction:column;">
-        <div class="panelhead" style="display:flex;justify-content:space-between;align-items:center;padding:7px 12px 6px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);background:var(--card-bg);border-bottom:1px solid var(--card-border);position:sticky;top:0;z-index:5;flex-shrink:0;">
-          <span>Your Typing</span>
-          <div style="display:flex;align-items:center;gap:6px;">
+        <div class="panelhead" style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding:7px 10px 6px;font-size:10.5px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--muted);background:var(--card-bg);border-bottom:1px solid var(--card-border);position:sticky;top:0;z-index:5;flex-shrink:0;">
+          <span style="white-space:nowrap;">Your Typing</span>
+          <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
             <span id="otgDrillBadge" class="otg-badge otg-fallback" onclick="OTGKeyboardService.showInfoModal()" title="OTG Status" style="cursor:pointer;">⌨️ Touch</span>
-            <span style="font-size:10px;font-weight:600;color:var(--primary);">Active Input</span>
+            <span class="prac-active-lbl" style="font-size:10px;font-weight:600;color:var(--primary);white-space:nowrap;">Active Input</span>
           </div>
         </div>
-        <textarea id="practiceInput" placeholder="Type the exercise..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%;flex:1 1 auto;min-height:120px;border:none;background:transparent;outline:none;font-family:var(--font-mono);font-size:20px;line-height:1.8;resize:none;padding:10px 12px;color:var(--ink);box-sizing:border-box;"></textarea>
+        <textarea id="practiceInput" placeholder="Type here..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text"></textarea>
       </div>
     </div>
 
@@ -5068,6 +5284,13 @@ function switchTab(name) {
     loadProfile();
     if(typeof loadNotificationPreferencesToUI === 'function') loadNotificationPreferencesToUI();
   }
+  if(name === 'practice') {
+    const selL = $('selLang') ? $('selLang').value : 'en';
+    const selLy = $('selLayout') ? $('selLayout').value : 'tamil99';
+    const track = (selL === 'ta') ? (selLy === 'typewriter' ? 'typewriter' : 'tamil99') : 'en';
+    if($('tabPracTrackSel')) $('tabPracTrackSel').value = track;
+    if(typeof onTabPracTrackChange === 'function') onTabPracTrackChange(track);
+  }
   if(name === 'speed' && typeof syncContinueCard === 'function') syncContinueCard();
 }
 
@@ -5885,13 +6108,15 @@ function renderOverlayPassage(typed){
 
   $('passDisplay').innerHTML = html;
 
-  // Auto-scroll to keep current character centered vertically
+  // Keep current character smoothly in view without sudden downward jumps on early lines
+  const card = $('passCard');
+  if (tLen === 0 && card) {
+    card.scrollTop = 0;
+    return;
+  }
   const curSpan = $('passDisplay').querySelector('.char-cur');
-  if (curSpan) {
-    const card = $('passCard');
-    const curTop = getElementOffsetInContainer(card, curSpan);
-    const target = Math.max(0, curTop - (card.clientHeight / 2));
-    card.scrollTop = target;
+  if (curSpan && card) {
+    smoothScrollIntoViewIfNeeded(card, curSpan, { force: true });
   }
 }
 
@@ -5965,6 +6190,14 @@ function followCurrent(){
 // smooth scroll is still animating (always the case with large text, where each word is a longer jump)
 // drifts and the current word ends up off-centre or out of view.
 function getElementOffsetInContainer(container, el) {
+  if (!container || !el) return 0;
+  if (typeof el.getBoundingClientRect === 'function' && typeof container.getBoundingClientRect === 'function') {
+    const cRect = container.getBoundingClientRect();
+    const eRect = el.getBoundingClientRect();
+    if (cRect.height > 0) {
+      return (eRect.top - cRect.top) + (container.scrollTop || 0);
+    }
+  }
   let top = 0, curr = el;
   while(curr && curr !== container) {
     top += curr.offsetTop || 0;
@@ -5973,6 +6206,14 @@ function getElementOffsetInContainer(container, el) {
   return top;
 }
 function getElementOffsetLeftInContainer(container, el) {
+  if (!container || !el) return 0;
+  if (typeof el.getBoundingClientRect === 'function' && typeof container.getBoundingClientRect === 'function') {
+    const cRect = container.getBoundingClientRect();
+    const eRect = el.getBoundingClientRect();
+    if (cRect.width > 0) {
+      return (eRect.left - cRect.left) + (container.scrollLeft || 0);
+    }
+  }
   let left = 0, curr = el;
   while(curr && curr !== container) {
     left += curr.offsetLeft || 0;
@@ -5990,17 +6231,18 @@ function smoothScrollToCurrentH(container, curEl){
   const left = Math.max(0, getElementOffsetLeftInContainer(container, curEl) - (container.clientWidth - curEl.offsetWidth) / 2);
   container.scrollLeft = left;
 }
-function smoothScrollIntoViewIfNeeded(container, curEl){
-  if(!curEl || !container || mode === 'manual') return;
-  const margin = 10;
+function smoothScrollIntoViewIfNeeded(container, curEl, opts){
+  const force = opts && opts.force;
+  if(!curEl || !container || (!force && mode === 'manual')) return;
+  const margin = 12;
   const top = getElementOffsetInContainer(container, curEl);
-  const bottom = top + curEl.offsetHeight;
+  const elH = curEl.offsetHeight || 24;
+  const bottom = top + elH;
+  const viewH = container.clientHeight || 200;
   if(top < container.scrollTop + margin){
-    const targetTop = Math.max(0, top - margin);
-    container.scrollTop = targetTop;
-  } else if(bottom > container.scrollTop + container.clientHeight - margin){
-    const targetTop = Math.max(0, bottom - container.clientHeight + margin);
-    container.scrollTop = targetTop;
+    container.scrollTop = Math.max(0, top - margin);
+  } else if(bottom > container.scrollTop + viewH - margin){
+    container.scrollTop = Math.max(0, bottom - viewH + margin);
   }
 }
 function resetPassageScroll(){
@@ -7419,6 +7661,8 @@ async function shareResultImage(){
 let pracLang = 'en';
 let pracLayout = 'tamil99';
 let pracIdx = 0;
+let pracBaseLessonIdx = 0;
+let pracMode = 'letters'; // 'letters' | 'words'
 let pracCustomLesson = null;
 let pracScreenReturnTo = 'screen-config';
 
@@ -7431,37 +7675,153 @@ function currentPracLesson(){
   return (PRAC[pracLang] && PRAC[pracLang][pracIdx]) || (PRAC.en && PRAC.en[0]);
 }
 
-function openPractice(){
+function updatePracModeUI(){
+  const btnLet = $('pmLetters');
+  const btnWrd = $('pmWords');
+  if(btnLet){
+    btnLet.classList.toggle('active', pracMode === 'letters');
+    btnLet.classList.toggle('on', pracMode === 'letters');
+  }
+  if(btnWrd){
+    btnWrd.classList.toggle('active', pracMode === 'words');
+    btnWrd.classList.toggle('on', pracMode === 'words');
+  }
+}
+
+function setPracMode(nextMode){
+  pracMode = (nextMode === 'words') ? 'words' : 'letters';
+  updatePracModeUI();
+  if(pracMode === 'words'){
+    if(pracIdx >= 0) pracBaseLessonIdx = pracIdx;
+    openWordPracticeForLesson();
+  } else {
+    if(pracIdx === -1 && pracCustomLesson && !pracCustomLesson.rowKey){
+      pracIdx = pracBaseLessonIdx || 0;
+      pracCustomLesson = null;
+    }
+    buildPracLessonChips();
+    loadPracLesson();
+  }
+  setTimeout(()=>{ if($('practiceInput')) $('practiceInput').focus({ preventScroll: true }); }, 40);
+}
+
+function onTabPracTrackChange(track){
+  if(track === 'en'){
+    pracLang = 'en';
+  } else {
+    pracLang = 'ta';
+    pracLayout = (track === 'typewriter') ? 'typewriter' : 'tamil99';
+  }
+  const map = {
+    en: {
+      home: { desc: 'Practice ASDF and JKL; keys and correct anchor finger positioning.', keys: 'A S D F · G H · J K L ;' },
+      top: { desc: 'Practice QWERTY and UIOP keys and upward finger reach.', keys: 'Q W E R T · Y U I O P' },
+      bottom: { desc: 'Practice ZXCV and BNM keys and downward finger placement.', keys: 'Z X C V · B N M , . /' },
+      mixed: { desc: 'Practice all keyboard rows together for complete transition mastery.', keys: 'Home + Top + Bottom Rows' }
+    },
+    tamil99: {
+      home: { desc: 'Tamil99 நடுவரிசை: அ இ உ ் எ மற்றும் க ப ம த ந பயிற்சி.', keys: 'அ இ உ ் எ · க ப ம த ந' },
+      top: { desc: 'Tamil99 மேல்வரிசை: ஆ ஈ ஊ ஐ ஏ மற்றும் ள ற ன ட ண ச.', keys: 'ஆ ஈ ஊ ஐ ஏ · ள ற ன ட ண ச' },
+      bottom: { desc: 'Tamil99 கீழ்வரிசை: ஔ ஓ ஒ வ ங மற்றும் ல ர ழ.', keys: 'ஔ ஓ ஒ வ ங · ல ர ழ' },
+      mixed: { desc: 'Tamil99 அனைத்து வரிசை விசைகளையும் சேர்த்து பயிற்சி செய்யவும்.', keys: 'நடு + மேல் + கீழ் வரிசைகள்' }
+    },
+    typewriter: {
+      home: { desc: 'Typewriter நடுவரிசை: ய ள ன க ப ா த ம ல ் பயிற்சி.', keys: 'ய ள ன க · ப ா த ம ல ்' },
+      top: { desc: 'Typewriter மேல்வரிசை விசைகள் மற்றும் துணைக்குறி பயிற்சி.', keys: 'Q W E R T · Y U I O P (தமிழ்)' },
+      bottom: { desc: 'Typewriter கீழ்வரிசை விசைகள் மற்றும் கொம்புகள் பயிற்சி.', keys: 'Z X C V B · N M , . / (தமிழ்)' },
+      mixed: { desc: 'Typewriter அனைத்து வரிசைகளையும் சேர்த்து பயிற்சி செய்யவும்.', keys: 'முழு தட்டச்சு விசைப்பலகை' }
+    }
+  };
+  const info = map[track] || map.en;
+  ['home','top','bottom','mixed'].forEach(k=>{
+    const cap = k.charAt(0).toUpperCase() + k.slice(1);
+    const d = $('rowDesc' + cap);
+    const p = $('rowKeys' + cap);
+    if(d) d.textContent = info[k].desc;
+    if(p) p.textContent = info[k].keys;
+  });
+}
+
+function openPracticeRow(rowKey){
   pracScreenReturnTo = document.querySelector('.screen.active') ? document.querySelector('.screen.active').id : 'screen-config';
-  pracIdx = 0; pracCustomLesson = null;
-  pracComposer.raw=''; pracComposer.outLen=0;
-  $('plEn').classList.toggle('on', pracLang==='en');
-  $('plTa').classList.toggle('on', pracLang==='ta');
-  $('pracLayoutField').style.display = pracLang==='ta' ? 'block' : 'none';
-  $('pracLayoutSel').value = pracLayout;
+  const trackSel = $('tabPracTrackSel');
+  if(trackSel){
+    const tv = trackSel.value;
+    if(tv === 'en'){ pracLang = 'en'; }
+    else { pracLang = 'ta'; pracLayout = (tv === 'typewriter') ? 'typewriter' : 'tamil99'; }
+  }
+  const drill = (typeof window.getRowDrill === 'function')
+    ? window.getRowDrill(rowKey, pracLang, pracLayout)
+    : null;
+  if(!drill){ openPractice(); return; }
+
+  pracMode = 'letters';
+  pracCustomLesson = Object.assign({}, drill, { rowKey: rowKey });
+  pracIdx = -1;
+  pracComposer.raw = ''; pracComposer.outLen = 0;
+
+  $('plEn').classList.toggle('active', pracLang === 'en');
+  $('plEn').classList.toggle('on', pracLang === 'en');
+  $('plTa').classList.toggle('active', pracLang === 'ta');
+  $('plTa').classList.toggle('on', pracLang === 'ta');
+  $('pracLayoutField').style.display = pracLang === 'ta' ? 'block' : 'none';
+  if($('pracLayoutSel')) $('pracLayoutSel').value = pracLayout;
+  updatePracModeUI();
   buildPracLessonChips();
   loadPracLesson();
   showScreen('screen-practice');
-  setTimeout(()=>$('practiceInput').focus(), 80);
+  setTimeout(()=>{ if($('practiceInput')) $('practiceInput').focus({ preventScroll: true }); }, 80);
+}
+
+function openPractice(){
+  pracScreenReturnTo = document.querySelector('.screen.active') ? document.querySelector('.screen.active').id : 'screen-config';
+  const trackSel = $('tabPracTrackSel');
+  if(trackSel){
+    const tv = trackSel.value;
+    if(tv === 'en'){ pracLang = 'en'; }
+    else { pracLang = 'ta'; pracLayout = (tv === 'typewriter') ? 'typewriter' : 'tamil99'; }
+  }
+  pracMode = 'letters';
+  pracIdx = 0; pracBaseLessonIdx = 0; pracCustomLesson = null;
+  pracComposer.raw=''; pracComposer.outLen=0;
+  $('plEn').classList.toggle('active', pracLang==='en');
+  $('plEn').classList.toggle('on', pracLang==='en');
+  $('plTa').classList.toggle('active', pracLang==='ta');
+  $('plTa').classList.toggle('on', pracLang==='ta');
+  $('pracLayoutField').style.display = pracLang==='ta' ? 'block' : 'none';
+  if($('pracLayoutSel')) $('pracLayoutSel').value = pracLayout;
+  updatePracModeUI();
+  buildPracLessonChips();
+  loadPracLesson();
+  showScreen('screen-practice');
+  setTimeout(()=>{ if($('practiceInput')) $('practiceInput').focus({ preventScroll: true }); }, 80);
 }
 function closePractice(){
   showScreen(pracScreenReturnTo || 'screen-config');
 }
 function setPracLang(l){
   pracLang = l;
-  pracIdx = 0; pracCustomLesson = null;
+  pracIdx = 0; pracBaseLessonIdx = 0; pracCustomLesson = null;
+  pracMode = 'letters';
   pracComposer.raw=''; pracComposer.outLen=0;
+  $('plEn').classList.toggle('active', l==='en');
   $('plEn').classList.toggle('on', l==='en');
+  $('plTa').classList.toggle('active', l==='ta');
   $('plTa').classList.toggle('on', l==='ta');
   $('pracLayoutField').style.display = l==='ta' ? 'block' : 'none';
+  if($('tabPracTrackSel')) $('tabPracTrackSel').value = (l === 'en') ? 'en' : pracLayout;
+  updatePracModeUI();
   buildPracLessonChips();
   loadPracLesson();
 }
 function setPracLayout(layout){
   pracLayout = layout;
   if($('pracLayoutSel')) $('pracLayoutSel').value = layout;
+  if($('tabPracTrackSel') && pracLang === 'ta') $('tabPracTrackSel').value = layout;
   pracComposer.raw=''; pracComposer.outLen=0;
-  pracIdx = 0; pracCustomLesson = null;
+  pracIdx = 0; pracBaseLessonIdx = 0; pracCustomLesson = null;
+  pracMode = 'letters';
+  updatePracModeUI();
   buildPracLessonChips();
   loadPracLesson();
 }
@@ -7474,7 +7834,10 @@ function buildPracLessonChips(){
   const lessons = (typeof window.getPracLessons === 'function') ? window.getPracLessons() : (PRAC[pracLang] || []);
   let html = '';
   if(pracCustomLesson){
-    html += `<button class="prac-chip${pracIdx===-1?' on':''}" onclick="selectPracLesson(-1)">🎯 Reinforcement Drill</button>`;
+    const customChipLabel = pracCustomLesson.rowKey
+      ? pracCustomLesson.lesson
+      : (pracCustomLesson.isWordPractice ? '📝 Word Practice' : '🎯 Reinforcement Drill');
+    html += `<button class="prac-chip${pracIdx===-1?' on':''}" onclick="selectPracLesson(-1)">${esc(customChipLabel)}</button>`;
   }
   lessons.forEach((l,i)=>{
     html += `<button class="prac-chip${i===pracIdx?' on':''}" onclick="selectPracLesson(${i})">${esc(l.lesson.replace(/^(Lesson \d+ . |பாடம் \d+ . |பயிற்சி \d+ . )/,''))}</button>`;
@@ -7483,8 +7846,15 @@ function buildPracLessonChips(){
 }
 function selectPracLesson(i){
   pracIdx = i;
-  if(i !== -1) pracCustomLesson = null;
+  if(i !== -1){
+    pracBaseLessonIdx = i;
+    pracCustomLesson = null;
+  }
   pracComposer.raw=''; pracComposer.outLen=0;
+  if(pracMode === 'words' && i !== -1){
+    openWordPracticeForLesson();
+    return;
+  }
   buildPracLessonChips();
   loadPracLesson();
 }
@@ -7492,20 +7862,30 @@ function selectPracLesson(i){
 function loadPracLesson(){
   const lesson = currentPracLesson();
   const isTA = pracLang === 'ta';
+  if($('pracLessonTitle')){
+    const rawTitle = lesson.lesson || (pracIdx >= 0 ? ('Lesson ' + (pracIdx + 1)) : 'Drill');
+    $('pracLessonTitle').textContent = rawTitle;
+  }
   $('pracSub').textContent = lesson.sub || '';
   const extEl = $('pracExText');
   extEl.className = 'prac-extext' + (isTA ? ' tamil' : '');
   const inputEl = $('practiceInput');
   inputEl.className = isTA ? 'tamil' : '';
   inputEl.value = '';
+  inputEl.scrollTop = 0;
+  lastPIValue = '';
+  lastPISelection = 0;
+  if(typeof window.pracLessonCompleted !== 'undefined') window.pracLessonCompleted = false;
   pracComposer.raw = ''; pracComposer.outLen = 0;
+  const sw = $('pracScrollWrap');
+  if(sw) sw.scrollTop = 0;
   renderPracticeText('');
   updatePracStats('');
 }
 
 function renderPracticeText(typed){
   const lesson = currentPracLesson();
-  const target = lesson.text;
+  const target = lesson.text || '';
   let html = '';
   for(let i=0;i<target.length;i++){
     const ch = target[i];
@@ -7518,13 +7898,20 @@ function renderPracticeText(typed){
     html += `<span class="${cls}">${esc(ch === '\n' ? '\n' : ch).replace(/\n/g,'<br>')}</span>`;
   }
   $('pracExText').innerHTML = html;
+  const scrollWrap = $('pracScrollWrap') || $('pracExText');
+  if(!typed || typed.length === 0){
+    if(scrollWrap) scrollWrap.scrollTop = 0;
+    return;
+  }
   const curEl = $('pracExText').querySelector('.pc-cur');
-  if(curEl) smoothScrollToCurrent($('pracExText'), curEl);
+  if(curEl && scrollWrap){
+    smoothScrollIntoViewIfNeeded(scrollWrap, curEl, { force: true });
+  }
 }
 
 function updatePracStats(typed){
   const lesson = currentPracLesson();
-  const target = lesson.text;
+  const target = lesson.text || '';
   let correct=0, wrong=0;
   const len = Math.min(typed.length, target.length);
   for(let i=0;i<len;i++){
@@ -7539,11 +7926,13 @@ function updatePracStats(typed){
 }
 
 function onPracticeChanged(){
-  const val = $('practiceInput').value;
+  const inputEl = $('practiceInput');
+  const val = inputEl.value;
   renderPracticeText(val);
   updatePracStats(val);
-  const inputEl = $('practiceInput');
-  inputEl.scrollTop = inputEl.scrollHeight;
+  if(inputEl.scrollHeight > inputEl.clientHeight){
+    inputEl.scrollTop = inputEl.scrollHeight - inputEl.clientHeight;
+  }
   if(typeof window.checkPracCompletion === 'function'){
     window.checkPracCompletion(val);
   }
@@ -7555,10 +7944,6 @@ let lastPISelection = 0;
 
 ['click', 'keyup', 'select', 'focus'].forEach(evt => {
   PI.addEventListener(evt, () => {
-    // Same reasoning as the main test's typing area (see there for the full
-    // explanation): reset the composer if the cursor lands somewhere other
-    // than where our own last edit left it, so a stray tap/click doesn't
-    // corrupt unrelated text on the next keystroke.
     if(PI.selectionStart !== lastPISelection && pracLang === 'ta'){
       pracComposer.raw = ''; pracComposer.outLen = 0;
     }
@@ -7570,57 +7955,61 @@ let lastPISelection = 0;
 PI.addEventListener('keydown', e=>{
   if(e.ctrlKey || e.metaKey || e.altKey) return;
   if(e.key === 'Delete' || e.key === 'Tab'){ e.preventDefault(); return; }
+  if(e.key === 'Backspace' && typeof AudioEngine !== 'undefined'){
+    AudioEngine.play('backspace');
+  }
 });
 
 PI.addEventListener('input', e=>{
+  const oldVal = lastPIValue;
   const newVal = PI.value;
-  const newSel = PI.selectionStart;
   const isTA = pracLang === 'ta';
 
-  if(newVal.length > lastPIValue.length){
-    // Character insertion occurred — extract the FULL inserted run (may be
-    // more than one char on fast/continuous typing), not just the last one.
-    const insLen = newVal.length - lastPIValue.length;
-    const inserted = newVal.slice(newSel - insLen, newSel);
-    PI.value = lastPIValue;
-    PI.setSelectionRange(lastPISelection, lastPISelection);
+  if(newVal === oldVal){
+    lastPISelection = PI.selectionStart;
+    return;
+  }
 
-    if(inserted){
-      for(const char of inserted){
-        if(isTA) tamilCharKey(PI, pracComposer, pracLayout, char);
-        else insertPlain(PI, char);
-      }
-      onPracticeChanged();
-      // Audio typing feedback for Speed Practice
-      try {
-        const val = PI.value;
-        const curIdx = val.length - 1;
-        const targetEl = document.getElementById('practiceText');
-        const targetText = targetEl ? targetEl.textContent : '';
-        const isCorrect = (targetText && curIdx >= 0 && curIdx < targetText.length && val[curIdx] === targetText[curIdx]);
-        if (typeof AudioEngine !== 'undefined') {
-          AudioEngine.playKey(isCorrect);
-        }
-      } catch(e){}
+  let prefixLen = 0;
+  const maxPrefix = Math.min(oldVal.length, newVal.length);
+  while(prefixLen < maxPrefix && oldVal[prefixLen] === newVal[prefixLen]) prefixLen++;
+
+  let oldEnd = oldVal.length, newEnd = newVal.length;
+  while(oldEnd > prefixLen && newEnd > prefixLen && oldVal[oldEnd - 1] === newVal[newEnd - 1]){
+    oldEnd--; newEnd--;
+  }
+
+  const removedLen = oldEnd - prefixLen;
+  const insertedStr = newVal.slice(prefixLen, newEnd);
+
+  if(isTA){
+    // Tamil transliteration: replay through tamilCharKey / tamilBackspace safely
+    PI.value = oldVal;
+    PI.setSelectionRange(oldEnd, oldEnd);
+    for(let i = 0; i < removedLen; i++){
+      tamilBackspace(PI, pracComposer, pracLayout);
     }
-  } else if(newVal.length < lastPIValue.length){
-    // Deletion occurred
-    PI.value = lastPIValue;
-    PI.setSelectionRange(lastPISelection, lastPISelection);
-
-    if (typeof AudioEngine !== 'undefined') {
+    for(const char of insertedStr){
+      tamilCharKey(PI, pracComposer, pracLayout, char);
+    }
+  } else {
+    // Plain English: keep browser's native input & selection intact so Android WebView never jumps
+    if(removedLen > 0 && insertedStr.length === 0 && typeof AudioEngine !== 'undefined'){
       AudioEngine.play('backspace');
     }
+  }
 
-    if(isTA) tamilBackspace(PI, pracComposer, pracLayout);
-    else {
-      const pos = PI.selectionStart;
-      if(pos>0){ PI.value = PI.value.slice(0,pos-1)+PI.value.slice(pos); PI.setSelectionRange(pos-1,pos-1); }
-    }
-    onPracticeChanged();
-  } else {
-    PI.value = lastPIValue;
-    PI.setSelectionRange(lastPISelection, lastPISelection);
+  onPracticeChanged();
+
+  if(insertedStr.length > 0){
+    try {
+      const curVal = PI.value;
+      const curIdx = curVal.length - 1;
+      const lesson = currentPracLesson();
+      const targetText = (lesson && lesson.text) ? lesson.text : '';
+      const isCorrect = (targetText && curIdx >= 0 && curIdx < targetText.length && curVal[curIdx] === targetText[curIdx]);
+      if(typeof AudioEngine !== 'undefined') AudioEngine.playKey(isCorrect);
+    } catch(err){}
   }
 
   lastPIValue = PI.value;
@@ -7630,57 +8019,105 @@ PI.addEventListener('input', e=>{
 PI.addEventListener('paste', e=>{ e.preventDefault(); });
 
 function resetPracticeAttempt(){
-  $('practiceInput').value = '';
+  const inputEl = $('practiceInput');
+  inputEl.value = '';
+  inputEl.scrollTop = 0;
+  lastPIValue = '';
+  lastPISelection = 0;
   pracComposer.raw=''; pracComposer.outLen=0;
+  const sw = $('pracScrollWrap');
+  if(sw) sw.scrollTop = 0;
   renderPracticeText('');
   updatePracStats('');
-  $('practiceInput').focus();
+  inputEl.focus({ preventScroll: true });
 }
 
-/* Word Practice — builds a drill of real words covering the letters
-   taught in the current lesson, drawn from the whole lesson bank. */
+/* Word Practice — builds a clean, progressive drill of real words covering the letters
+   taught in the current lesson or keyboard row, drawn across the active track's curriculum. */
 function cleanPracWord(w){ return w.replace(/[.,!?;:"'“”‘’()–—…]/g,''); }
 function pracLetterChars(w, isTA){
   return Array.from(w).filter(ch => isTA ? /[\u0B80-\u0BFF]/.test(ch) : /[a-zA-Z]/.test(ch));
 }
 function openWordPracticeForLesson(){
   const isTA = pracLang === 'ta';
-  const lesson = currentPracLesson();
+  const baseIdx = (pracIdx >= 0) ? pracIdx : (pracBaseLessonIdx || 0);
+  const trackLessons = (typeof window.getPracLessons === 'function') ? window.getPracLessons() : (PRAC[pracLang] || []);
+  const lesson = (pracIdx === -1 && pracCustomLesson && pracCustomLesson.rowKey)
+    ? pracCustomLesson
+    : (trackLessons[baseIdx] || trackLessons[0] || currentPracLesson());
   if(!lesson) return;
 
+  pracMode = 'words';
+  updatePracModeUI();
+
   const letterSource = (lesson.keyHint && lesson.keyHint.trim()) ? lesson.keyHint : lesson.text;
-  const targets = new Set(pracLetterChars(letterSource, isTA).map(ch => isTA?ch:ch.toLowerCase()));
+  const targets = new Set(pracLetterChars(letterSource, isTA).map(ch => isTA ? ch : ch.toLowerCase()));
 
-  const pool = new Set();
-  (PRAC[pracLang]||[]).forEach(l=>{
-    l.text.split(/\s+/).forEach(w=>{ const c=cleanPracWord(w); if(c) pool.add(c); });
-  });
-  const words = [...pool];
+  // Exclude raw finger-drill sequences so Word Practice presents real, meaningful words
+  const DRILL_TOKEN_RE = /^(asdf|asdfgf|lkj|lkjhj|awerqfa|oiupj|gftfrf|hjyjuj|azxcvf|lkmnbj|zxcvb|mnbvc|qwert|poiuy|yuiop|qaz|wsx|edc|rfv|tgb|yhn|ujm|ik|ol|abcdefghijklmnopqrstuvwxyz|zyxwvutsrqponmlkjihgfedcba)$/i;
+  const EXTRA_WORDS_EN = [
+    'ask','dad','sad','lad','add','all','fall','hall','tall','call','wall','ball','small','shall','glass','flask','salad','flash','dash','hash','glad','flag','half',
+    'quit','quiet','quite','pure','pour','poet','rope','ripe','type','trip','tree','true','write','wire','power','tower','water','paper','upper','outer','route','quote','equip','proper','report','poetry','require','priority',
+    'zoom','zone','zero','calm','comb','come','cave','coin','climb','combo','move','moon','main','mine','mint','mix','box','van','verb','very','vast','vine','brave','bench','cabin','civic','exact','exams','maxim','vibrant','victory','balance',
+    'quick','brown','jumps','fixed','extra','world','study','learn','train','focus','speed','skill','daily','grade','score','smart','clean','solid','clear','light'
+  ];
+  const EXTRA_WORDS_TA = [
+    'அகம்','இகம்','உகம்','பகம்','மனம்','தனம்','நகம்','பதம்','மதம்','படம்','மடம்','பலம்','களம்','கனம்','தவம்','பணம்',
+    'அன்பு','கல்வி','பண்பு','அறிவு','உழைப்பு','வெற்றி','நன்றி','பாடம்','ஆடல்','ஈகை','ஊக்கம்','ஏணி','ஐந்து','சட்டம்','மலர்','வானம்',
+    'தமிழ்','இனிமை','உலகம்','சிறப்பு','வலிமை','நட்பு','குழு','முயற்சி','உயர்வு','துல்லியம்','வேகம்','பயிற்சி'
+  ];
 
-  const isSubset = w=>{ const chars=pracLetterChars(w,isTA); return chars.length>0 && chars.every(ch=>targets.has(isTA?ch:ch.toLowerCase())); };
-  const hasTarget = w=>{ const chars=pracLetterChars(w,isTA); return chars.some(ch=>targets.has(isTA?ch:ch.toLowerCase())); };
+  const poolMap = new Map();
+  const addWord = (raw) => {
+    const c = cleanPracWord(raw);
+    if(!c || c.length < 2) return;
+    if(!isTA && (!/^[a-zA-Z]+$/.test(c) || DRILL_TOKEN_RE.test(c))) return;
+    if(isTA && !/[\u0B80-\u0BFF]/.test(c)) return;
+    const key = isTA ? c : c.toLowerCase();
+    if(!poolMap.has(key)) poolMap.set(key, isTA ? c : c.toLowerCase());
+  };
 
-  let candidatePool = words.filter(isSubset);
-  if(candidatePool.length < 6) candidatePool = words.filter(hasTarget);
-  candidatePool.sort((a,b)=>a.length-b.length);
+  trackLessons.forEach(l => (l.text || '').split(/\s+/).forEach(addWord));
+  if(typeof window.ROW_DRILLS === 'object' && window.ROW_DRILLS){
+    const rb = isTA ? (pracLayout === 'typewriter' ? window.ROW_DRILLS.typewriter : window.ROW_DRILLS.tamil99) : window.ROW_DRILLS.en;
+    if(rb) Object.values(rb).forEach(r => (r.text || '').split(/\s+/).forEach(addWord));
+  }
+  (isTA ? EXTRA_WORDS_TA : EXTRA_WORDS_EN).forEach(addWord);
+
+  const words = [...poolMap.values()];
+  const isSubset = w => { const chars = pracLetterChars(w, isTA); return chars.length >= 2 && chars.every(ch => targets.has(isTA ? ch : ch.toLowerCase())); };
+  const hasTarget = w => { const chars = pracLetterChars(w, isTA); return chars.length >= 2 && chars.some(ch => targets.has(isTA ? ch : ch.toLowerCase())); };
+
+  const subsetWords = words.filter(isSubset).sort((a, b) => a.length - b.length);
+  const targetWords = words.filter(hasTarget).sort((a, b) => a.length - b.length);
+  let candidatePool = [...subsetWords];
+  if(candidatePool.length < 16){
+    const existing = new Set(candidatePool);
+    targetWords.forEach(w => { if(!existing.has(w)){ candidatePool.push(w); existing.add(w); } });
+  }
+  if(candidatePool.length < 16){
+    const existing = new Set(candidatePool);
+    words.forEach(w => { if(!existing.has(w)){ candidatePool.push(w); existing.add(w); } });
+  }
 
   const seen = new Set(), chosen = [];
   candidatePool.forEach(w=>{
-    if(chosen.length>=30) return;
+    if(chosen.length >= 24) return;
     const chars = pracLetterChars(w,isTA).map(ch=>isTA?ch:ch.toLowerCase());
     const fresh = chars.some(ch=>!seen.has(ch));
-    if(fresh || chosen.length<24){ chosen.push(w); chars.forEach(ch=>seen.add(ch)); }
+    if(fresh || chosen.length < 24){ chosen.push(w); chars.forEach(ch=>seen.add(ch)); }
   });
 
+  // 4 real words per line so mobile split panels display clean unwrapped word rows
   const rows = [];
-  for(let i=0;i<chosen.length;i+=6) rows.push(chosen.slice(i,i+6).join(' '));
-  const block = rows.join('\n');
-  const text = block ? (block+'\n\n'+block) : (isTA?'இந்த பயிற்சிக்கு போதுமான வார்த்தைகள் கிடைக்கவில்லை.':'Not enough matching words found for this exercise.');
+  for(let i=0;i<chosen.length;i+=4) rows.push(chosen.slice(i,i+4).join(' '));
+  const text = rows.join('\n') || (isTA?'அன்பு கல்வி பண்பு வெற்றி':'ask lad fall glad flash');
 
   pracCustomLesson = {
-    lesson: (isTA?'வார்த்தை பயிற்சி — ':'Word Practice — ')+lesson.lesson,
-    sub: (isTA?'எழுத்துகள்: ':'Letters: ')+[...targets].join(' '),
-    keyHint: '',
+    isWordPractice: true,
+    lesson: (isTA ? 'வார்த்தை பயிற்சி — ' : 'Word Practice — ') + lesson.lesson.replace(/^(Lesson \d+ . |பாடம் \d+ . |பயிற்சி \d+ . )/,''),
+    sub: (isTA ? 'சொல் பயிற்சி (எழுத்துகள்: ' : 'Real-word fluency drill (') + ([...targets].slice(0,12).join(' ') || 'All Keys') + ')',
+    keyHint: lesson.keyHint || '',
     text: text
   };
   pracIdx = -1;
