@@ -302,9 +302,15 @@
       this.keystrokeMistakes = 0;
       this.currentWordHadMistake = false;
 
-      // Adaptive speed variables
-      this.adaptiveBaseSpeed = 0.48; // px/frame (~29 px/sec, comfortable student baseline)
+      // Adaptive speed variables (beginner-friendly 60fps baseline ~13.2 px/sec)
+      this.adaptiveBaseSpeed = 0.22;
+      this.cleanWordStreak = 0;
+      this.struggleCount = 0;
+      this.currentWordMistakeCount = 0;
       this.recentWordTimes = [];
+      this.lastFrameTimestamp = 0;
+      this.isSubmitting = false;
+      this._gameOverProcessed = false;
 
       // Word typing challenge state
       this.wordTypingList = [];
@@ -360,27 +366,23 @@
       if (this.gameType === 'word_typing') {
         return 0; // Static target
       } else if (this.gameType === 'falling') {
-        // 25-second student-friendly progressive ramp from 0.55 to 1.15 px/frame
-        const timeProgress = Math.min(1.0, elapsedSec / 25.0);
-        const smoothProgress = timeProgress * (2 - timeProgress); // quadratic ease-out
-        const rampSpeed = 0.55 + (smoothProgress * 0.60);
-        const scoreBonus = Math.min(0.70, ((this.score || 0) / 100) * 0.35);
+        // Beginner-friendly adaptive speed: slow comfortable baseline that adjusts only on sustained performance
+        const base = Math.max(0.16, Math.min(0.58, this.adaptiveBaseSpeed || 0.22));
+        // Gentle progression cap across extended runs (+0.03 per 100 pts, max +0.08)
+        const scoreBonus = Math.min(0.08, ((this.score || 0) / 100) * 0.03);
 
-        // Adaptive pace delta: 0 baseline at start (adaptiveBaseSpeed 0.48), adjusted by student performance
-        const adaptiveDelta = (this.adaptiveBaseSpeed !== undefined ? (this.adaptiveBaseSpeed - 0.48) : 0);
-
-        // Word length compensation: longer words fall proportionally slower to allow sufficient typing time
+        // Word length compensation: longer words (>5 chars) fall proportionally slower for generous reading & typing time
         let lengthFactor = 1.0;
         if (wordObj && wordObj.graphemes && wordObj.graphemes.length) {
           const len = wordObj.graphemes.length;
           if (len > 5) {
-            lengthFactor = Math.max(0.70, 5.0 / len);
+            lengthFactor = Math.max(0.50, 5.0 / len);
           } else if (len < 5) {
-            lengthFactor = Math.min(1.15, 5.0 / Math.max(3, len));
+            lengthFactor = Math.min(1.08, 5.0 / Math.max(4, len));
           }
         }
 
-        const finalSpeed = (rampSpeed + scoreBonus + adaptiveDelta) * lengthFactor;
+        const finalSpeed = Math.max(0.14, Math.min(0.65, (base + scoreBonus) * lengthFactor));
         return Number(finalSpeed.toFixed(2));
       } else {
         // Bubble Challenge: Starts slow at 0.45 px/frame, gentle progression up to 0.70 px/frame
@@ -510,7 +512,28 @@
       this.wordsIncorrect = 0;
       this.keystrokeMistakes = 0;
       this.currentWordHadMistake = false;
-      this.adaptiveBaseSpeed = 0.48;
+      this.currentWordMistakeCount = 0;
+      this.adaptiveBaseSpeed = 0.22;
+      this.cleanWordStreak = 0;
+      this.struggleCount = 0;
+      this.recentWordTimes = [];
+      this.lastFrameTimestamp = 0;
+      this.isSubmitting = false;
+      this._gameOverProcessed = false;
+
+      const submitBtn = document.getElementById('btnGameSubmit');
+      if (submitBtn) submitBtn.disabled = false;
+      const goModal = document.getElementById('gameOverModal');
+      if (goModal) goModal.style.display = 'none';
+      const pauseModal = document.getElementById('gamePauseModal');
+      if (pauseModal) pauseModal.style.display = 'none';
+
+      const topTitle = document.getElementById('gameTopTitle');
+      if (topTitle) {
+        if (this.gameType === 'bubble') topTitle.textContent = '🫧 Bubble Challenge';
+        else if (this.gameType === 'falling') topTitle.textContent = '☄️ Falling Words';
+        else topTitle.textContent = '🎯 Word Typing Challenge';
+      }
 
       this.correctChars = 0;
       this.incorrectChars = 0;
@@ -582,10 +605,21 @@
     resume() {
       if (!this.active || !this.paused) return;
       this.paused = false;
+      this.lastFrameTimestamp = 0;
       const modal = document.getElementById('gamePauseModal');
       if (modal) modal.style.display = 'none';
       if (this.inputEl) this.inputEl.focus();
       this.animFrameId = requestAnimationFrame(this.loop);
+    }
+
+    submitSession() {
+      if (!this.active || this.isSubmitting || this._gameOverProcessed) return;
+      this.isSubmitting = true;
+      const submitBtn = document.getElementById('btnGameSubmit');
+      if (submitBtn) submitBtn.disabled = true;
+
+      const hasActivity = (this.correctChars > 0 || this.incorrectChars > 0 || this.wordsCompleted > 0);
+      this.gameOver(false, { submittedByUser: true, noTypingActivity: !hasActivity });
     }
 
     restart() {
@@ -747,6 +781,7 @@
         this.currentWordIdx = 0;
         this.charIndex = 0;
         this.currentWordHadMistake = false;
+        this.currentWordMistakeCount = 0;
         this.composer = { raw: '', outLen: 0 };
       } else {
         // --- 3. FALLING WORDS CHALLENGE: EXACTLY 1 WORD FALLING AT A TIME ---
@@ -785,6 +820,7 @@
         this.currentWordIdx = 0;
         this.charIndex = 0;
         this.currentWordHadMistake = false;
+        this.currentWordMistakeCount = 0;
         this.composer = { raw: '', outLen: 0 };
       }
     }
@@ -985,11 +1021,33 @@
           this.addFloatingTip(targetWord.x, targetWord.y - 20, '+5 WORD BONUS! 🔥', '#fbbf24');
 
           if (this.gameType === 'falling') {
-            // Adaptive speed: slightly increase speed if typed without mistakes
+            // Sustained Adaptive Speed: never speed up from 1 word; require 3+ consecutive accurate & comfortable words
+            const wordDurSec = Math.max(0.2, (Date.now() - (targetWord.spawnTime || Date.now())) / 1000);
+            const wordWpm = (targetWord.graphemes.length / 5) / (wordDurSec / 60);
+            this.recentWordTimes.push({
+              wpm: wordWpm,
+              hadMistake: !!this.currentWordHadMistake,
+              yRatio: targetWord.y / Math.max(200, this.canvasHeight || 500)
+            });
+            if (this.recentWordTimes.length > 6) this.recentWordTimes.shift();
+
+            const totalStrokes = this.correctChars + this.incorrectChars;
+            const sessionAcc = totalStrokes > 0 ? (this.correctChars / totalStrokes) : 1.0;
+
             if (!this.currentWordHadMistake) {
-              this.adaptiveBaseSpeed = Math.min(0.85, this.adaptiveBaseSpeed + 0.035);
+              this.cleanWordStreak = (this.cleanWordStreak || 0) + 1;
+              this.struggleCount = 0;
+              // Only increase very gradually (+0.015) after 3 sustained clean words with good accuracy & comfortable margin
+              if (this.cleanWordStreak >= 3 && sessionAcc >= 0.88 && targetWord.y < (this.canvasHeight || 500) * 0.68) {
+                this.adaptiveBaseSpeed = Math.min(0.58, Number((this.adaptiveBaseSpeed + 0.015).toFixed(3)));
+                this.cleanWordStreak = 0;
+              }
             } else {
-              this.adaptiveBaseSpeed = Math.max(0.40, this.adaptiveBaseSpeed - 0.02);
+              this.cleanWordStreak = 0;
+              this.struggleCount = (this.struggleCount || 0) + 1;
+              if (this.struggleCount >= 2 || (this.currentWordMistakeCount || 0) >= 2) {
+                this.adaptiveBaseSpeed = Math.max(0.16, Number((this.adaptiveBaseSpeed - 0.02).toFixed(3)));
+              }
             }
             this.activeWords = [];
             this.charIndex = 0;
@@ -1022,11 +1080,15 @@
         this.incorrectChars++;
         this.keystrokeMistakes++;
         this.currentWordHadMistake = true;
+        this.currentWordMistakeCount = (this.currentWordMistakeCount || 0) + 1;
         this.composer = { raw: '', outLen: 0 };
 
-        // Adaptive speed: reduce speed slightly on mistake for student comfort
+        // Adaptive speed: reset clean streak and gently slow down on repeated struggles
         if (this.gameType === 'falling') {
-          this.adaptiveBaseSpeed = Math.max(0.38, this.adaptiveBaseSpeed - 0.035);
+          this.cleanWordStreak = 0;
+          if (this.currentWordMistakeCount >= 2) {
+            this.adaptiveBaseSpeed = Math.max(0.16, Number((this.adaptiveBaseSpeed - 0.015).toFixed(3)));
+          }
         }
 
         const mistakeEntry = {
@@ -1129,11 +1191,21 @@
       const isWordTyping = (this.gameType === 'word_typing');
       const now = Date.now();
 
+      // Frame-rate normalization (60 FPS reference) so 90Hz/120Hz phones do not fall faster
+      let dtScale = 1.0;
+      if (typeof timestamp === 'number' && timestamp > 0) {
+        if (this.lastFrameTimestamp && timestamp > this.lastFrameTimestamp) {
+          const dtMs = Math.min(50, timestamp - this.lastFrameTimestamp);
+          dtScale = dtMs / (1000 / 60);
+        }
+        this.lastFrameTimestamp = timestamp;
+      }
+
       // Ambient dust in bubble mode
       if (this.ambientDust && isBubble) {
         for (let i = 0; i < this.ambientDust.length; i++) {
           const d = this.ambientDust[i];
-          d.y -= d.speed;
+          d.y -= d.speed * dtScale;
           if (d.y < 0) {
             d.y = this.canvasHeight;
             d.x = Math.random() * this.canvasWidth;
@@ -1166,7 +1238,7 @@
 
         // Wobble physics
         if (w.wobbleSpeed) {
-          w.phase = (w.phase || 0) + w.wobbleSpeed;
+          w.phase = (w.phase || 0) + w.wobbleSpeed * dtScale;
           w.x = w.baseX + Math.sin(w.phase) * (w.wobbleAmp || 3);
         }
 
@@ -1180,7 +1252,7 @@
 
         if (isBubble) {
           // Bubble moves downward
-          w.y += w.speed;
+          w.y += w.speed * dtScale;
           if (w.bubbles && w.bubbles.length > 0) {
             w.bubbles[0].x = w.x;
             w.bubbles[0].y = w.y;
@@ -1194,7 +1266,7 @@
           }
         } else if (!isWordTyping) {
           // Falling words move downward
-          w.y += w.speed;
+          w.y += w.speed * dtScale;
           if (w.y >= this.canvasHeight - 110) {
             this.handleWordMiss(i);
           }
@@ -1221,9 +1293,18 @@
     }
 
     handleWordMiss(wordIndex) {
+      if (this.gameType === 'word_typing') return; // Word Typing Challenge has no missing words
+
       const missedWord = this.activeWords[wordIndex];
       this.wordsMissed++;
       this.lives--;
+
+      if (this.gameType === 'falling') {
+        this.cleanWordStreak = 0;
+        this.struggleCount = (this.struggleCount || 0) + 1;
+        // Slow down smoothly when a student misses a falling word
+        this.adaptiveBaseSpeed = Math.max(0.16, Number((this.adaptiveBaseSpeed - 0.03).toFixed(3)));
+      }
 
       playSound('miss');
       triggerHaptic('miss');
@@ -1254,11 +1335,9 @@
 
     skipWord() {
       if (!this.active || this.paused || this.activeWords.length === 0) return;
-      this.wordsMissed++;
-      playSound('miss');
-      triggerHaptic('miss');
 
       if (this.gameType === 'word_typing') {
+        // Word Typing Challenge does not track or penalize missing words
         this.wordTypingIndex++;
         this.activeWords = [];
         this.charIndex = 0;
@@ -1270,6 +1349,9 @@
           this.spawnWord();
         }
       } else {
+        this.wordsMissed++;
+        playSound('miss');
+        triggerHaptic('miss');
         this.lives--;
         this.activeWords.splice(this.currentWordIdx, 1);
         this.currentWordIdx = 0;
@@ -1295,10 +1377,23 @@
       const accEl = document.getElementById('gameAccuracyDisplay');
       if (accEl) accEl.textContent = `${acc}%`;
 
+      const missedCluster = document.getElementById('gameMissedCluster');
+      if (missedCluster) {
+        missedCluster.style.display = (this.gameType === 'word_typing') ? 'none' : 'flex';
+      }
+
+      const speedLabel = document.getElementById('gameSpeedLabel');
+      if (speedLabel) {
+        speedLabel.textContent = (this.gameType === 'word_typing') ? 'Word' : 'Speed';
+      }
+
       const speedEl = document.getElementById('gameSpeedDisplay');
       if (speedEl) {
         if (this.gameType === 'word_typing') {
-          speedEl.textContent = `${this.wordTypingIndex + 1}/${this.targetWordsCount}`;
+          speedEl.textContent = `${Math.min(this.targetWordsCount, this.wordTypingIndex + 1)}/${this.targetWordsCount}`;
+        } else if (this.gameType === 'falling') {
+          const speedTier = 1 + Math.max(0, Math.min(4, Math.floor((this.adaptiveBaseSpeed - 0.22) / 0.06)));
+          speedEl.textContent = speedTier;
         } else {
           const speedTier = 1 + Math.min(Math.floor(this.score / 25), 4);
           speedEl.textContent = speedTier;
@@ -1791,22 +1886,35 @@
       ctx.closePath();
     }
 
-    gameOver(isSessionVictory) {
+    gameOver(isSessionVictory, options = {}) {
+      if (this._gameOverProcessed) return;
+      this._gameOverProcessed = true;
+
       this.active = false;
       this.paused = false;
+      this.isSubmitting = false;
       if (this.animFrameId) cancelAnimationFrame(this.animFrameId);
+
+      const submitBtn = document.getElementById('btnGameSubmit');
+      if (submitBtn) submitBtn.disabled = false;
 
       this.endTime = Date.now();
       const durationSec = Math.max(1, Math.round((this.endTime - (this.startTime || this.endTime)) / 1000));
       const totalStrokes = this.correctChars + this.incorrectChars;
-      const accuracy = totalStrokes > 0 ? Number(((this.correctChars / totalStrokes) * 100).toFixed(1)) : 100;
-      const wpm = Number(((this.correctChars / 5) / (durationSec / 60)).toFixed(1));
+      const noTypingActivity = !!options.noTypingActivity || (totalStrokes === 0 && this.wordsCompleted === 0 && !!options.submittedByUser);
+      const accuracy = totalStrokes > 0 ? Number(((this.correctChars / totalStrokes) * 100).toFixed(1)) : (noTypingActivity ? 0 : 100);
+      const wpm = totalStrokes > 0 ? Number(((this.correctChars / 5) / (durationSec / 60)).toFixed(1)) : 0;
 
       let title = 'Bubble Letter Challenge';
       if (this.gameType === 'falling') title = 'Falling Words Challenge';
       else if (this.gameType === 'word_typing') title = 'Word Typing Challenge';
 
-      const wordsAttempted = Math.max(this.wordsCompleted + this.wordsMissed, (this.gameType === 'word_typing' ? this.wordTypingIndex : 0));
+      const isWordTyping = (this.gameType === 'word_typing');
+      const effectiveWordsMissed = isWordTyping ? 0 : this.wordsMissed;
+      const inProgressAttempt = (this.charIndex > 0 || this.currentWordHadMistake) ? 1 : 0;
+      const wordsAttempted = isWordTyping
+        ? Math.max(this.wordsCompleted + inProgressAttempt, this.wordTypingIndex)
+        : Math.max(this.wordsCompleted + effectiveWordsMissed, this.wordsCompleted + inProgressAttempt);
 
       const report = {
         id: `game_${Date.now()}`,
@@ -1822,18 +1930,22 @@
         wordsCompleted: this.wordsCompleted,
         wordsCorrect: this.wordsCorrect,
         wordsIncorrect: this.wordsIncorrect,
-        wordsMissed: this.wordsMissed,
+        wordsMissed: effectiveWordsMissed,
         keystrokeMistakes: this.keystrokeMistakes || this.incorrectChars,
         correctChars: this.correctChars,
         incorrectChars: this.incorrectChars,
         isVictory: !!isSessionVictory,
+        submittedByUser: !!options.submittedByUser,
+        noTypingActivity: noTypingActivity,
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         weakKeys: Object.entries(this.weakKeysMap).map(([k, c]) => ({ key: k, count: c })).sort((a, b) => b.count - a.count),
         troubleWords: Object.entries(this.wordMistakesMap).map(([w, c]) => ({ word: w, count: c })).sort((a, b) => b.count - a.count)
       };
 
-      // Persist to history and leaderboard
-      this.saveGameSession(report);
+      // Only persist real sessions with actual typing activity
+      if (!noTypingActivity) {
+        this.saveGameSession(report);
+      }
 
       // Render Modal
       this.renderGameOverModal(report);
@@ -1937,12 +2049,30 @@
       const modal = document.getElementById('gameOverModal');
       if (!modal) return;
 
+      const isWordTyping = (report.gameType === 'word_typing');
+      const noActivity = !!report.noTypingActivity;
+
       const titleEl = document.getElementById('goGameTitle');
       if (titleEl) {
-        if (report.isVictory) {
+        if (noActivity) {
+          titleEl.textContent = `${report.gameTitle} — No Typing Recorded`;
+        } else if (report.isVictory) {
           titleEl.textContent = `🎉 ${report.gameTitle} Completed!`;
         } else {
           titleEl.textContent = `${report.gameTitle} (${report.lang === 'ta' ? (report.layout === 'tamil99' ? 'Tamil99' : 'Tamil Typewriter') : 'English QWERTY'})`;
+        }
+      }
+
+      const subtitleEl = document.getElementById('goGameSubtitle');
+      if (subtitleEl) {
+        if (noActivity) {
+          subtitleEl.textContent = 'No keystrokes were entered before submitting';
+        } else if (report.submittedByUser) {
+          subtitleEl.textContent = 'Session Submitted • Match Analysis Complete';
+        } else if (report.isVictory) {
+          subtitleEl.textContent = 'Session Complete • Match Analysis Complete';
+        } else {
+          subtitleEl.textContent = `${report.wordsMissed || 0} Misses Reached • Match Analysis Complete`;
         }
       }
 
@@ -1950,17 +2080,23 @@
       if (scoreEl) scoreEl.textContent = report.score;
 
       const accEl = document.getElementById('goAccValue');
-      if (accEl) accEl.textContent = `${report.accuracy}%`;
+      if (accEl) accEl.textContent = noActivity ? '—' : `${report.accuracy}%`;
 
       const wpmEl = document.getElementById('goWpmValue');
       if (wpmEl) wpmEl.textContent = `${report.wpm} WPM`;
 
+      const wordsSummaryRow = document.getElementById('goWordsSummaryRow');
       const wordsEl = document.getElementById('goWordsCleared');
+      if (wordsSummaryRow) {
+        wordsSummaryRow.style.display = noActivity ? 'none' : 'block';
+      }
       if (wordsEl) {
-        if (report.isVictory) {
+        if (isWordTyping) {
+          wordsEl.textContent = `Words Completed: ${report.wordsCompleted} • Attempted: ${report.wordsAttempted}`;
+        } else if (report.isVictory) {
           wordsEl.textContent = `Session Complete: ${report.wordsCompleted} Cleared / ${report.wordsMissed} Missed`;
         } else {
-          wordsEl.textContent = `${report.wordsCompleted} Cleared / ${report.wordsMissed} Missed`;
+          wordsEl.textContent = `Words: ${report.wordsCompleted} Cleared / ${report.wordsMissed} Missed`;
         }
       }
 
@@ -1978,20 +2114,29 @@
       const wordsIncorEl = document.getElementById('goWordsIncorrect');
       if (wordsIncorEl) wordsIncorEl.textContent = report.wordsIncorrect;
       const wordsMisEl = document.getElementById('goWordsMissed');
-      if (wordsMisEl) wordsMisEl.textContent = report.wordsMissed;
+      if (wordsMisEl) {
+        if (isWordTyping) {
+          wordsMisEl.style.display = 'none';
+        } else {
+          wordsMisEl.style.display = '';
+          wordsMisEl.textContent = report.wordsMissed;
+        }
+      }
       const mistEl = document.getElementById('goKeystrokeMistakes');
       if (mistEl) mistEl.textContent = report.keystrokeMistakes;
 
       // New PB Banner
       const pbBanner = document.getElementById('goPbBanner');
       if (pbBanner) {
-        pbBanner.style.display = report.isNewPB ? 'block' : 'none';
+        pbBanner.style.display = (!noActivity && report.isNewPB) ? 'block' : 'none';
       }
 
       // Weak Keys Heatmap
       const weakListEl = document.getElementById('goWeakKeysList');
       if (weakListEl) {
-        if (report.weakKeys.length === 0) {
+        if (noActivity) {
+          weakListEl.innerHTML = '<span style="color:var(--muted);font-weight:600;">No keystrokes recorded in this session.</span>';
+        } else if (report.weakKeys.length === 0) {
           weakListEl.innerHTML = '<span style="color:#10b981;font-weight:700;">🔥 God-tier typing! Zero mistyped keys!</span>';
         } else {
           weakListEl.innerHTML = report.weakKeys.slice(0, 5).map(item => `
@@ -2005,7 +2150,9 @@
       // Trouble Words
       const troubleEl = document.getElementById('goTroubleWords');
       if (troubleEl) {
-        if (report.troubleWords.length === 0) {
+        if (noActivity) {
+          troubleEl.innerHTML = '<span style="color:var(--muted);">No typing activity recorded.</span>';
+        } else if (report.troubleWords.length === 0) {
           troubleEl.innerHTML = '<span style="color:#10b981;">No hesitation detected on any word!</span>';
         } else {
           troubleEl.innerHTML = report.troubleWords.slice(0, 4).map(item => `
@@ -2069,6 +2216,14 @@
     engine.restart();
   };
 
+  window.submitGame = function () {
+    engine.submitSession();
+  };
+
+  window.backToGamesHub = function () {
+    engine.quit();
+  };
+
   window.quitGame = function () {
     engine.quit();
   };
@@ -2086,7 +2241,8 @@
     const modal = document.getElementById('gamesLeaderboardModal');
     if (!modal) return;
     modal.style.display = 'flex';
-    window.renderLeaderboard(preferredGame || 'bubble', 'en');
+    const trackKey = (engine.lang === 'ta') ? (engine.layout || 'tamil99') : 'en';
+    window.renderLeaderboard(preferredGame || engine.gameType || 'bubble', trackKey);
   };
 
   window.closeLeaderboardModal = function () {
@@ -2171,6 +2327,20 @@
     const modal = document.getElementById('gamesHistoryModal');
     if (!modal) return;
     modal.style.display = 'flex';
+    await window.renderGameHistory('all');
+  };
+
+  window.renderGameHistory = async function (filterType) {
+    filterType = filterType || 'all';
+
+    const btnAll = document.getElementById('ghFilterAll');
+    const btnBub = document.getElementById('ghFilterBubble');
+    const btnFal = document.getElementById('ghFilterFalling');
+    const btnWt = document.getElementById('ghFilterWordTyping');
+    if (btnAll) btnAll.classList.toggle('active', filterType === 'all');
+    if (btnBub) btnBub.classList.toggle('active', filterType === 'bubble');
+    if (btnFal) btnFal.classList.toggle('active', filterType === 'falling');
+    if (btnWt) btnWt.classList.toggle('active', filterType === 'word_typing');
 
     let history = [];
     try {
@@ -2184,16 +2354,21 @@
       }
     } catch (e) {}
 
-    const container = document.getElementById('historyEntriesList');
+    const container = document.getElementById('ghEntriesList') || document.getElementById('historyEntriesList');
     if (!container) return;
 
-    if (!history || history.length === 0) {
+    const filtered = (filterType === 'all') ? history : history.filter(item => item.gameType === filterType);
+
+    if (!filtered || filtered.length === 0) {
       container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);">No arcade match history yet. Play a game to record your session diagnostics!</div>';
       return;
     }
 
     let html = '';
-    history.forEach(item => {
+    filtered.forEach(item => {
+      const wordsLabel = (item.gameType === 'word_typing')
+        ? `Words: <b>${item.wordsCompleted || 0} Completed</b>`
+        : `Words: <b>${item.wordsCompleted || 0} Cleared</b>`;
       html += `
         <div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:12px 14px;margin-bottom:8px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
@@ -2204,7 +2379,7 @@
             <span>Score: <b style="color:#2563eb;">${item.score}</b></span>
             <span>Accuracy: <b style="color:#10b981;">${item.accuracy}%</b></span>
             <span>Speed: <b style="color:#f59e0b;">${item.wpm} WPM</b></span>
-            <span>Words: <b>${item.wordsCompleted || 0} Cleared</b></span>
+            <span>${wordsLabel}</span>
           </div>
         </div>
       `;

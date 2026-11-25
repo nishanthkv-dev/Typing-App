@@ -135,6 +135,8 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
     align-items: center !important;
     justify-content: space-between !important;
     width: 100% !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
   }
   .games-hub-actions {
     width: 100% !important;
@@ -172,16 +174,49 @@ body:has(#screen-games.active) .app-header,
 body:has(#screen-games.active) .bottom-nav-bar {
   display: none !important;
 }
+.dote-logo-img {
+  object-fit: contain;
+  aspect-ratio: 600 / 650;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 3px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+  display: block;
+}
+.game-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+  background: #eff6ff;
+  border-bottom: 1.5px solid rgba(37, 99, 235, 0.25);
+  flex-shrink: 0;
+  z-index: 30;
+  gap: 10px;
+  box-sizing: border-box;
+}
+.game-top-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.game-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
 .game-top-close-btn {
-  position: absolute;
-  top: calc(10px + env(safe-area-inset-top));
-  right: 12px;
-  width: 30px;
-  height: 30px;
+  position: static;
+  width: 34px;
+  height: 34px;
   background: #2563eb;
   color: #ffffff;
   border: 1.5px solid rgba(255, 255, 255, 0.4);
-  border-radius: 6px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -189,7 +224,7 @@ body:has(#screen-games.active) .bottom-nav-bar {
   font-weight: 800;
   cursor: pointer;
   z-index: 30;
-  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
   transition: transform 0.15s ease, background 0.15s ease;
 }
 .game-top-close-btn:active {
@@ -197,22 +232,20 @@ body:has(#screen-games.active) .bottom-nav-bar {
   background: #1d4ed8;
 }
 .game-top-sound-btn {
-  position: absolute;
-  top: calc(10px + env(safe-area-inset-top));
-  right: 50px;
-  width: 30px;
-  height: 30px;
-  background: rgba(255, 255, 255, 0.95);
+  position: static;
+  width: 34px;
+  height: 34px;
+  background: rgba(255, 255, 255, 0.98);
   color: #1e293b;
-  border: 1.5px solid rgba(0, 0, 0, 0.15);
-  border-radius: 6px;
+  border: 1.5px solid rgba(37, 99, 235, 0.2);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: 16px;
   cursor: pointer;
   z-index: 30;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: transform 0.15s ease, background 0.15s ease;
 }
 .game-top-sound-btn:active {
@@ -282,36 +315,27 @@ body:has(#screen-games.active) .bottom-nav-bar {
   align-items: center;
   gap: 10px;
 }
-.game-btn-next {
-  background: #1d4ed8;
+.game-btn-submit {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #ffffff;
   border: none;
-  border-radius: 6px;
-  padding: 8px 24px;
+  border-radius: 8px;
+  padding: 9px 22px;
+  min-height: 40px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
-  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.3);
+  transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+  box-shadow: 0 3px 10px rgba(29, 78, 216, 0.3);
+  white-space: nowrap;
 }
-.game-btn-next:active {
+.game-btn-submit:active {
   transform: scale(0.95);
   background: #1e40af;
 }
-.game-btn-cancel {
-  background: #ffffff;
-  color: #1d4ed8;
-  border: 1.5px solid #2563eb;
-  border-radius: 6px;
-  padding: 8px 20px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
-}
-.game-btn-cancel:active {
-  transform: scale(0.95);
-  background: #eff6ff;
+.game-btn-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 @media (max-width: 480px) {
   .game-bottom-panel {
@@ -327,13 +351,9 @@ body:has(#screen-games.active) .bottom-nav-bar {
   .game-missed-label {
     font-size: 13.5px;
   }
-  .game-btn-next {
-    padding: 7px 16px;
-    font-size: 13px;
-  }
-  .game-btn-cancel {
-    padding: 7px 14px;
-    font-size: 13px;
+  .game-btn-submit {
+    padding: 8px 18px;
+    font-size: 13.5px;
   }
 }
 .anti-choke-chip {
@@ -2891,7 +2911,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
 
       <!-- DOTE EXAMINATION BRANDING & PURPOSE CARD -->
       <div class="dote-prep-card" style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(245,158,11,0.09));border:1.5px solid rgba(245,158,11,0.38);border-radius:14px;padding:12px 14px;margin-bottom:14px;box-shadow:0 3px 12px rgba(245,158,11,0.08);">
-        <img src="img/dote_emblem.png" alt="DoTE Tamil Nadu Emblem" style="width:48px;height:48px;object-fit:contain;flex-shrink:0;">
+        <img src="img/dote_emblem.png" alt="DoTE Tamil Nadu Emblem" class="dote-logo-img" style="height:52px;width:auto;">
         <div style="min-width:0;">
           <div style="font-size:11px;font-weight:800;color:#d97706;text-transform:uppercase;letter-spacing:0.8px;display:flex;align-items:center;gap:6px;">
             <span>🏛️</span> Tamil Nadu Technical Examinations (DoTE)
@@ -3216,7 +3236,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
     <!-- ---------------- TAB 2: DRILLS (UNTIMED PRACTICE) ---------------- -->
     <div class="tab-content" id="tab-practice">
       <div class="dote-prep-card" style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(245,158,11,0.08));border:1.5px solid rgba(245,158,11,0.35);border-radius:14px;padding:12px 14px;margin-bottom:14px;">
-        <img src="img/dote_emblem.png" alt="DoTE Tamil Nadu Emblem" style="width:44px;height:44px;object-fit:contain;flex-shrink:0;">
+        <img src="img/dote_emblem.png" alt="DoTE Tamil Nadu Emblem" class="dote-logo-img" style="height:48px;width:auto;">
         <div style="min-width:0;">
           <div style="font-size:11px;font-weight:800;color:#d97706;text-transform:uppercase;letter-spacing:0.8px;">DoTE Technical Examination Drills</div>
           <div style="font-size:12px;font-weight:600;color:var(--ink);line-height:1.4;margin-top:2px;">
@@ -3884,7 +3904,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
 
     <!-- DOTE PRACTICE PILL BANNER -->
     <div class="dote-prep-pill" style="display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(245,158,11,0.09));border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:8px 12px;margin-bottom:12px;">
-      <img src="img/dote_emblem.png" alt="DoTE" style="width:28px;height:28px;object-fit:contain;flex-shrink:0;">
+      <img src="img/dote_emblem.png" alt="DoTE" class="dote-logo-img" style="height:34px;width:auto;">
       <div style="font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.35;">
         Specially designed for DoTE Typewriting Examination preparation — practice smarter &amp; score higher grades!
       </div>
@@ -3961,16 +3981,28 @@ body:has(#screen-test.active) .bottom-nav-bar {
        SCREEN 5: GAMES HUB (ARCADE ARENA)
   =================================================================== -->
   <section class="screen" id="screen-games-hub">
-    <div class="games-hub-header" style="margin-bottom:16px;">
+    <div class="games-hub-header" style="margin-bottom:14px;">
       <div class="games-hub-title-row" style="display:flex;align-items:center;gap:10px;">
-        <button class="test-back-btn" onclick="exitGames()" style="white-space:nowrap;flex-shrink:0;">&lt; Back to App</button>
-        <div style="font-weight:800;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:6px;white-space:nowrap;">
-          <span>🎮</span> Typing Arcade Arena
+        <button id="btnGamesBackToDashboard" class="test-back-btn" onclick="exitGames()" style="white-space:nowrap;flex-shrink:0;">&lt; Back to Dashboard</button>
+        <div style="font-weight:800;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:8px;white-space:nowrap;">
+          <img id="gamesHubDoteLogo" src="img/dote_emblem.png" alt="DoTE Tamil Nadu Emblem" class="dote-logo-img" style="height:34px;width:auto;">
+          <span>🎮 Typing Arcade Arena</span>
         </div>
       </div>
       <div class="games-hub-actions">
         <button class="ghostbtn" onclick="openLeaderboardModal()">🏆 Hall of Legends</button>
         <button class="ghostbtn" onclick="openGameHistoryModal()">📜 My History</button>
+      </div>
+    </div>
+
+    <!-- DOTE ARCADE EXAM PREP BANNER -->
+    <div class="dote-prep-card" style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(245,158,11,0.08));border:1.5px solid rgba(245,158,11,0.35);border-radius:14px;padding:10px 14px;margin-bottom:14px;">
+      <img src="img/dote_emblem.png" alt="DoTE Tamil Nadu Emblem" class="dote-logo-img" style="height:44px;width:auto;">
+      <div style="min-width:0;">
+        <div style="font-size:10.5px;font-weight:800;color:#d97706;text-transform:uppercase;letter-spacing:0.8px;">DoTE Typewriting Arcade</div>
+        <div style="font-size:12px;font-weight:600;color:var(--ink);line-height:1.4;margin-top:2px;">
+          Build real Tamil &amp; English typing accuracy and speed for DoTE examinations at a comfortable student pace.
+        </div>
       </div>
     </div>
 
@@ -4087,34 +4119,41 @@ body:has(#screen-test.active) .bottom-nav-bar {
        SCREEN 6: ACTIVE GAME ARENA (FULL-SCREEN 100DVH HUD & CANVAS)
   =================================================================== -->
   <section class="screen" id="screen-games">
+    <!-- TOP GAME HUD BAR (NON-OVERLAPPING DOTE BRANDING & CONTROLS) -->
+    <div class="game-top-bar" id="gameTopBar">
+      <div class="game-top-brand">
+        <img id="gameTopDoteLogo" src="img/dote_emblem.png" alt="DoTE Tamil Nadu Emblem" class="dote-logo-img" style="height:32px;width:auto;">
+        <span id="gameTopTitle" style="font-size:13px;font-weight:800;color:#1e3a8a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">DoTE Typing Arcade</span>
+      </div>
+      <div class="game-top-actions">
+        <button class="game-top-sound-btn" id="gameSoundBtn" onclick="toggleGameSound()" title="Sound Effects">🔊</button>
+        <button class="game-top-close-btn" id="gameTopCloseBtn" onclick="quitGame()" title="Back to Games Module">✕</button>
+      </div>
+    </div>
+
     <!-- MAIN GAMING CANVAS ARENA -->
     <div class="game-arena-wrap" id="gameArenaContainer">
-      <!-- TOP-RIGHT ROYAL BLUE CLOSE BUTTON MATCHING REFERENCE SCREENSHOT -->
-      <button class="game-top-sound-btn" id="gameSoundBtn" onclick="toggleGameSound()" title="Sound Effects">🔊</button>
-      <button class="game-top-close-btn" id="gameTopCloseBtn" onclick="quitGame()" title="Quit Game">✕</button>
-
       <canvas id="gameCanvas"></canvas>
       <input type="text" id="gameKeyInput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text" style="position:absolute;top:-200px;left:-200px;opacity:0;pointer-events:none;" />
     </div>
 
-    <!-- BOTTOM GAME HUD PANEL MATCHING REFERENCE DESIGN -->
+    <!-- BOTTOM GAME HUD PANEL -->
     <div class="game-bottom-panel" id="gameBottomPanel">
       <div class="game-bottom-left">
         <div id="gameScoreDisplay" class="game-score-large">0</div>
-        <div class="game-missed-cluster">
+        <div class="game-missed-cluster" id="gameMissedCluster">
           <span class="game-missed-label">Missed</span>
           <div id="gameHeartsDisplay" class="game-hearts-wrap"></div>
         </div>
         <div class="game-hud-pill" id="gameSpeedPill" style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;font-size:11.5px;font-weight:700;background:rgba(37,99,235,0.1);color:#2563eb;border:1px solid rgba(37,99,235,0.25);border-radius:20px;">
-          <span>⚡</span> Speed <span id="gameSpeedDisplay">1</span>
+          <span>⚡</span> <span id="gameSpeedLabel">Speed</span> <span id="gameSpeedDisplay">1</span>
         </div>
         <span id="gameAccuracyDisplay" style="display:none;">100%</span>
         <span id="gameCorrectStrokes" style="display:none;">0</span>
         <span id="gameWrongStrokes" style="display:none;">0</span>
       </div>
       <div class="game-bottom-right">
-        <button id="btnGameNext" class="game-btn-next" onclick="GamesEngine.skipWord()">Next</button>
-        <button id="btnGameCancel" class="game-btn-cancel" onclick="quitGame()">Cancel</button>
+        <button id="btnGameSubmit" class="game-btn-submit" onclick="submitGame()">✓ Submit</button>
       </div>
     </div>
   </section>
@@ -4380,7 +4419,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
         🎉 NEW PERSONAL BEST RECORD!
       </div>
       <h3 style="font-size:18px;font-weight:800;color:var(--ink);margin:0;" id="goGameTitle">Anti-Choke Diagnostic Report</h3>
-      <div style="font-size:12px;color:var(--muted);margin-top:2px;">5 Misses Reached • Match Analysis Complete</div>
+      <div id="goGameSubtitle" style="font-size:12px;color:var(--muted);margin-top:2px;">Match Analysis Complete</div>
     </div>
 
     <!-- STATS CARDS GRID -->
@@ -4399,8 +4438,8 @@ body:has(#screen-test.active) .bottom-nav-bar {
       </div>
     </div>
 
-    <div style="font-size:12px;color:var(--ink-soft);margin-bottom:12px;text-align:center;">
-      Words: <b id="goWordsCleared">0 Cleared / 5 Missed</b>
+    <div id="goWordsSummaryRow" style="font-size:12px;color:var(--ink-soft);margin-bottom:12px;text-align:center;">
+      <b id="goWordsCleared">0 Cleared / 5 Missed</b>
     </div>
 
     <!-- COMPREHENSIVE PERFORMANCE METRICS (DEDICATED RESULTS SCREEN) -->
@@ -4444,10 +4483,10 @@ body:has(#screen-test.active) .bottom-nav-bar {
     </div>
 
     <!-- ACTIONS -->
-    <div style="display:flex;gap:8px;">
-      <button class="solidbtn" style="flex:1;padding:11px;font-size:13px;font-weight:800;border-radius:10px;" onclick="restartGame()">🔄 Play Again</button>
-      <button class="ghostbtn" style="flex:1;padding:11px;font-size:13px;font-weight:700;border-radius:10px;" onclick="openLeaderboardModal()">🏆 Leaderboard</button>
-      <button class="ghostbtn" style="padding:11px 14px;font-size:13px;font-weight:700;border-radius:10px;" onclick="exitGames()">🏠 Exit</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="solidbtn" style="flex:1;min-width:110px;padding:11px;min-height:44px;font-size:13px;font-weight:800;border-radius:10px;" onclick="restartGame()">🔄 Play Again</button>
+      <button class="ghostbtn" style="flex:1;min-width:110px;padding:11px;min-height:44px;font-size:13px;font-weight:700;border-radius:10px;" onclick="openLeaderboardModal()">🏆 Leaderboard</button>
+      <button id="btnGameResultBack" class="ghostbtn" style="padding:11px 16px;min-height:44px;font-size:13px;font-weight:700;border-radius:10px;" onclick="backToGamesHub()">← Back</button>
     </div>
   </div>
 </div>
@@ -4475,9 +4514,9 @@ body:has(#screen-test.active) .bottom-nav-bar {
 
     <!-- TRACK SWITCHER TABS -->
     <div style="display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;">
-      <button class="ghostbtn active" id="lbTrackEn" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:6px;" onclick="renderLeaderboard(document.getElementById('lbTabBubble').classList.contains('active')?'bubble':'falling', 'en')">English</button>
-      <button class="ghostbtn" id="lbTrackTamil99" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:6px;" onclick="renderLeaderboard(document.getElementById('lbTabBubble').classList.contains('active')?'bubble':'falling', 'tamil99')">Tamil99</button>
-      <button class="ghostbtn" id="lbTrackTypewriter" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:6px;" onclick="renderLeaderboard(document.getElementById('lbTabBubble').classList.contains('active')?'bubble':'falling', 'typewriter')">Tamil Typewriter</button>
+      <button class="ghostbtn active" id="lbTrackEn" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:6px;" onclick="renderLeaderboard(document.getElementById('lbTabBubble').classList.contains('active')?'bubble':(document.getElementById('lbTabWordTyping').classList.contains('active')?'word_typing':'falling'), 'en')">English</button>
+      <button class="ghostbtn" id="lbTrackTamil99" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:6px;" onclick="renderLeaderboard(document.getElementById('lbTabBubble').classList.contains('active')?'bubble':(document.getElementById('lbTabWordTyping').classList.contains('active')?'word_typing':'falling'), 'tamil99')">Tamil99</button>
+      <button class="ghostbtn" id="lbTrackTypewriter" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:6px;" onclick="renderLeaderboard(document.getElementById('lbTabBubble').classList.contains('active')?'bubble':(document.getElementById('lbTabWordTyping').classList.contains('active')?'word_typing':'falling'), 'typewriter')">Tamil Typewriter</button>
     </div>
 
     <!-- ENTRIES LIST -->
@@ -4502,10 +4541,11 @@ body:has(#screen-test.active) .bottom-nav-bar {
     </div>
 
     <!-- FILTER BUTTONS -->
-    <div style="display:flex;gap:6px;margin-bottom:12px;">
-      <button class="ghostbtn active" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="renderGameHistory('all')">All Games</button>
-      <button class="ghostbtn" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="renderGameHistory('bubble')">Bubble Only</button>
-      <button class="ghostbtn" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="renderGameHistory('falling')">Falling Only</button>
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="ghostbtn active" id="ghFilterAll" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="renderGameHistory('all')">All Games</button>
+      <button class="ghostbtn" id="ghFilterBubble" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="renderGameHistory('bubble')">Bubble Only</button>
+      <button class="ghostbtn" id="ghFilterFalling" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="renderGameHistory('falling')">Falling Only</button>
+      <button class="ghostbtn" id="ghFilterWordTyping" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="renderGameHistory('word_typing')">Word Typing</button>
     </div>
 
     <div id="ghEntriesList" style="flex:1 1 auto;overflow-y:auto;max-height:380px;padding-right:4px;">
@@ -8830,11 +8870,16 @@ function registerBackButton() {
       }
     } else if (activeScreen && (activeScreen.id === 'screen-games' || activeScreen.id === 'screen-games-hub')) {
       if (activeScreen.id === 'screen-games') {
-        if (confirm('Do you Want to Exit?')) {
+        const goModal = document.getElementById('gameOverModal');
+        if (goModal && goModal.style.display === 'flex') {
+          if (typeof backToGamesHub === 'function') backToGamesHub();
+          else GamesEngine.quit();
+        } else if (confirm('Do you Want to Exit?')) {
           GamesEngine.quit();
         }
       } else {
-        showScreen('screen-config');
+        if (typeof exitGames === 'function') exitGames();
+        else showScreen('screen-config');
       }
     } else if (activeScreen && activeScreen.id === 'screen-results') {
       showScreen('screen-config');

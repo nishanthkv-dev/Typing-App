@@ -117,22 +117,23 @@ async function run() {
   const toggledOn = ge.toggleSound();
   assert(toggledOn === true && ge.soundEnabled === true, 'toggleSound() toggles on');
 
-  // Verify speed calculation
+  // Verify beginner-friendly falling speed calculation & word length compensation
   ge.gameType = 'falling';
+  ge.adaptiveBaseSpeed = 0.22;
   ge.startTime = Date.now();
   ge.score = 0;
   const initialSpeed = ge.getSpeedForWord();
-  assert(initialSpeed === 0.55, `Initial speed at t=0s is 0.55 px/frame (got ${initialSpeed})`);
+  assert(initialSpeed >= 0.16 && initialSpeed <= 0.28, `Initial beginner speed is genuinely slow and readable (got ${initialSpeed} px/frame)`);
 
-  // At 12.5 seconds
-  ge.startTime = Date.now() - 12500;
-  const midSpeed = ge.getSpeedForWord();
-  assert(midSpeed > 0.55 && midSpeed < 1.15, `Mid speed at t=12.5s is progressive (${midSpeed.toFixed(2)} px/frame)`);
-
-  // At 25 seconds
+  // Speed must NOT jump purely because 25 seconds elapsed on clock
   ge.startTime = Date.now() - 25000;
-  const fullSpeed = ge.getSpeedForWord();
-  assert(Math.abs(fullSpeed - 1.15) < 0.01, `Full speed at t=25s reaches 1.15 px/frame (got ${fullSpeed.toFixed(2)})`);
+  const timedSpeed = ge.getSpeedForWord();
+  assert(timedSpeed === initialSpeed, `Clock elapsed alone does not punish slow typists (${timedSpeed} px/frame)`);
+
+  // Longer words get proportionally slower falling speed (more time)
+  const shortSpeed = ge.getSpeedForWord({ graphemes: ['c', 'a', 't'] });
+  const longSpeed = ge.getSpeedForWord({ graphemes: ['e', 'x', 'a', 'm', 'i', 'n', 'a', 't', 'i', 'o', 'n'] });
+  assert(longSpeed < shortSpeed, `Longer words fall slower (${longSpeed} < ${shortSpeed} px/frame)`);
 
   console.log('\n======================================================================');
   console.log(`   FINAL VERIFICATION RESULTS: ${passed}/${total} PASSED (100%)`);

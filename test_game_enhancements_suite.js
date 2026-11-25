@@ -88,9 +88,9 @@ async function runEnhancementsTestSuite() {
   console.log("  [PASS] Letter hit awards +1 pt and wrong letter triggers mistake feedback");
 
   // =====================================================================
-  // 2. FALLING WORD GAME — ADAPTIVE SPEED & 1:1 WORD ACCURACY
+  // 2. FALLING WORD GAME — BEGINNER SLOW SPEED & SUSTAINED ADAPTATION
   // =====================================================================
-  console.log("\n--- 2. FALLING WORD GAME (ADAPTIVE SPEED & WORD FLOW) ---");
+  console.log("\n--- 2. FALLING WORD GAME (SLOW BEGINNER SPEED & WORD FLOW) ---");
   engine.start('falling', 'en', 'qwerty');
   assert(engine.gameType === 'falling', "Falling game started");
   assert(engine.activeWords.length === 1, "Strictly 1 falling word on screen (zero overlap / bunching)");
@@ -100,31 +100,42 @@ async function runEnhancementsTestSuite() {
   assert(fallingWord !== undefined, "Active falling word exists");
   assert(engine.currentWordIdx === 0, "currentWordIdx is locked to 0 for falling mode");
 
-  // Adaptive speed verification
+  // Beginner-friendly slow baseline speed verification
   const initialSpeed = engine.adaptiveBaseSpeed;
-  assert(initialSpeed >= 0.40 && initialSpeed <= 0.60, `Base speed is comfortable and student-friendly: ${initialSpeed}`);
+  assert(initialSpeed >= 0.16 && initialSpeed <= 0.28, `Base speed is genuinely slow and beginner-friendly: ${initialSpeed}`);
 
-  // Typing cleanly without mistakes increases speed gradually
+  // Single clean word MUST NOT trigger sudden speed increase
   engine.charIndex = 0;
   engine.currentWordHadMistake = false;
   for (const char of fallingWord.graphemes) {
     engine.handleKeystroke(char);
   }
-  const speedAfterClean = engine.adaptiveBaseSpeed;
-  assert(speedAfterClean >= initialSpeed, "Speed increases gradually after clean typing");
-  assert(speedAfterClean - initialSpeed <= 0.05, "Speed increase is minimal and gradual, not sudden");
+  const speedAfter1Word = engine.adaptiveBaseSpeed;
+  assert(speedAfter1Word === initialSpeed, `1 clean word does not cause sudden speedup (${speedAfter1Word} === ${initialSpeed})`);
 
-  // Typing with mistake relaxes speed slightly
-  const nextWord = engine.activeWords[0];
-  engine.handleKeystroke('!'); // intentional mistake
-  const speedAfterMistake = engine.adaptiveBaseSpeed;
-  assert(speedAfterMistake < speedAfterClean, "Speed reduces slightly on mistake to allow comfortable recovery");
+  // Sustained improvement (3 consecutive clean words with comfortable y-margin) increases speed VERY gradually
+  for (let w = 0; w < 2; w++) {
+    const wordObj = engine.activeWords[0];
+    wordObj.y = 80; // comfortably high on screen
+    for (const char of wordObj.graphemes) {
+      engine.handleKeystroke(char);
+    }
+  }
+  const speedAfterSustained = engine.adaptiveBaseSpeed;
+  assert(speedAfterSustained > initialSpeed, `Speed increases gradually after 3 sustained clean words (${initialSpeed} -> ${speedAfterSustained})`);
+  assert(speedAfterSustained - initialSpeed <= 0.025, `Speed increase is minimal and very gradual (${(speedAfterSustained - initialSpeed).toFixed(3)})`);
+
+  // Repeated mistakes slow speed down smoothly to help student recover
+  engine.handleKeystroke('!');
+  engine.handleKeystroke('@');
+  const speedAfterMistakes = engine.adaptiveBaseSpeed;
+  assert(speedAfterMistakes < speedAfterSustained, `Speed eases down on repeated mistakes (${speedAfterSustained} -> ${speedAfterMistakes})`);
 
   // Word length compensation check
   const shortWordSpeed = engine.getSpeedForWord({ graphemes: ['c', 'a', 't'] });
   const longWordSpeed = engine.getSpeedForWord({ graphemes: ['c', 'h', 'a', 'm', 'p', 'i', 'o', 'n', 's'] });
   assert(longWordSpeed < shortWordSpeed, `Long words fall slower to allow sufficient typing time (long: ${longWordSpeed} vs short: ${shortWordSpeed})`);
-  console.log("  [PASS] Adaptive speed adjusts smoothly to typing performance and word length");
+  console.log("  [PASS] Falling Words starts slow, resists single-word spikes, adapts gradually on sustained improvement, and compensates for word length");
 
   // =====================================================================
   // 3. WORD TYPING CHALLENGE (NEW 3RD GAME)
@@ -192,12 +203,25 @@ async function runEnhancementsTestSuite() {
   console.log("  [PASS] Speed Practice module equipped with responsive correct and error sound feedback");
 
   // =====================================================================
-  // 6. DEDICATED RESULTS SCREEN & COMPLETE STATS
+  // 6. DEDICATED RESULTS SCREEN, BACK BUTTON & NO MISSING WORDS IN WORD TYPING
   // =====================================================================
-  console.log("\n--- 6. DEDICATED RESULTS SCREEN & COMPLETE METRICS ---");
+  console.log("\n--- 6. RESULTS SCREEN, BACK NAVIGATION, SUBMIT & WORD TYPING ---");
   engine.start('word_typing', 'en', 'qwerty');
+
+  // Verify Missing Words UI is hidden in Word Typing Challenge
+  const missedCluster = document.getElementById('gameMissedCluster');
+  assert(missedCluster && missedCluster.style.display === 'none', "Missing Words HUD cluster is hidden in Word Typing Challenge");
+
+  // Verify Submit button replaces Next/Cancel
+  const btnSubmit = document.getElementById('btnGameSubmit');
+  assert(btnSubmit !== null, "#btnGameSubmit exists in game HUD");
+  assert(document.getElementById('btnGameNext') === null, "Old #btnGameNext button is removed");
+  assert(document.getElementById('btnGameCancel') === null, "Old #btnGameCancel button is removed");
+
+  // Simulate completing words cleanly and submitting
   engine.wordsCompleted = 32;
-  engine.wordsMissed = 3;
+  engine.wordTypingIndex = 32;
+  engine.wordsMissed = 3; // even if stale, word_typing must ignore/zero missing words
   engine.wordsCorrect = 30;
   engine.wordsIncorrect = 2;
   engine.keystrokeMistakes = 4;
@@ -205,11 +229,12 @@ async function runEnhancementsTestSuite() {
   engine.incorrectChars = 4;
   engine.score = 290;
 
-  // Trigger game over / session complete
-  engine.gameOver(true);
+  window.submitGame();
+  // Calling submitGame a second time must be a safe no-op (duplicate guard)
+  window.submitGame();
 
   const goModal = document.getElementById('gameOverModal');
-  assert(goModal && goModal.style.display === 'flex', "Results modal displayed on session completion");
+  assert(goModal && goModal.style.display === 'flex', "Results modal displayed on Submit");
 
   const titleEl = document.getElementById('goGameTitle');
   assert(titleEl && titleEl.textContent.includes('Word Typing Challenge'), "Results title displays game name");
@@ -218,7 +243,7 @@ async function runEnhancementsTestSuite() {
   assert(scoreEl && scoreEl.textContent === '290', "Score displayed accurately");
 
   const wordsAttEl = document.getElementById('goWordsAttempted');
-  assert(wordsAttEl && wordsAttEl.textContent === '35', `Total words attempted displayed (got ${wordsAttEl.textContent})`);
+  assert(wordsAttEl && wordsAttEl.textContent === '32', `Total words attempted excludes missing words (got ${wordsAttEl.textContent})`);
 
   const wordsCorEl = document.getElementById('goWordsCorrect');
   assert(wordsCorEl && wordsCorEl.textContent === '30', `Correct words displayed (got ${wordsCorEl.textContent})`);
@@ -226,7 +251,38 @@ async function runEnhancementsTestSuite() {
   const mistEl = document.getElementById('goKeystrokeMistakes');
   assert(mistEl && mistEl.textContent === '4', `Total keystroke mistakes displayed (got ${mistEl.textContent})`);
 
-  console.log("  [PASS] Results screen displays total words attempted, correct, mistakes, accuracy, and WPM");
+  const wordsClearedEl = document.getElementById('goWordsCleared');
+  assert(wordsClearedEl && !wordsClearedEl.textContent.includes('Missed'), `Word Typing results contain no 'Missed' label: '${wordsClearedEl.textContent}'`);
+
+  // Verify Exit button removed and replaced by Back button redirecting to Games Hub
+  const btnBack = document.getElementById('btnGameResultBack');
+  assert(btnBack !== null && btnBack.textContent.includes('Back'), "Result screen has Back button");
+  assert(!goModal.textContent.includes('🏠 Exit'), "Old Exit button is removed from Result screen");
+
+  window.backToGamesHub();
+  assert(goModal.style.display === 'none', "Results modal closed on Back");
+  assert(document.getElementById('screen-games-hub').classList.contains('active'), "Back button redirects to Games Module (#screen-games-hub)");
+
+  // Verify Games Hub has Back to Dashboard button
+  const btnBackDash = document.getElementById('btnGamesBackToDashboard');
+  assert(btnBackDash !== null && btnBackDash.textContent.includes('Back to Dashboard'), "Games Hub retains Back to Dashboard button");
+
+  // Verify zero-activity graceful Submit handling
+  engine.start('falling', 'en', 'qwerty');
+  assert(document.getElementById('gameMissedCluster').style.display === 'flex', "Missing Words HUD cluster remains visible in Falling Words");
+  window.submitGame();
+  assert(goModal.style.display === 'flex', "Zero-activity Submit displays graceful summary");
+  assert(document.getElementById('goGameTitle').textContent.includes('No Typing Recorded'), "Graceful message shown for zero-typing session");
+  assert(document.getElementById('goAccValue').textContent === '—', "Does not display misleading 100% accuracy for zero typing");
+  window.backToGamesHub();
+
+  // Verify crisp DoTE logo asset & Games Module visibility
+  const doteStat = fs.statSync(path.join(__dirname, 'www', 'img', 'dote_emblem.png'));
+  assert(doteStat.size > 20000, `DoTE emblem PNG is full high-res asset (${doteStat.size} bytes)`);
+  assert(document.getElementById('gamesHubDoteLogo') !== null, "DoTE emblem rendered in Games Hub");
+  assert(document.getElementById('gameTopDoteLogo') !== null, "DoTE emblem rendered in Game Screen top bar");
+
+  console.log("  [PASS] Submit, Back->Hub->Dashboard flow, Word Typing (no missing words), zero-activity guard, and DoTE logo verified");
 
   // =====================================================================
   // 7. HUB SCREEN CARDS FOR ALL 3 GAMES
