@@ -360,19 +360,33 @@
       if (this.gameType === 'word_typing') {
         return 0; // Static target
       } else if (this.gameType === 'falling') {
-        // Falling Words: Adaptive speed based on student performance + word length compensation
-        const base = this.adaptiveBaseSpeed || 0.48;
-        // Words with more graphemes fall proportionally slower to allow sufficient typing time
-        const len = (wordObj && wordObj.graphemes) ? wordObj.graphemes.length : 5;
-        const lengthFactor = Math.max(0.68, Math.min(1.20, 5.0 / Math.max(3, len)));
-        const scoreBonus = Math.min(0.35, (this.score / 100) * 0.15);
-        const finalSpeed = Math.max(0.38, Math.min(0.85, (base * lengthFactor) + scoreBonus));
+        // 25-second student-friendly progressive ramp from 0.55 to 1.15 px/frame
+        const timeProgress = Math.min(1.0, elapsedSec / 25.0);
+        const smoothProgress = timeProgress * (2 - timeProgress); // quadratic ease-out
+        const rampSpeed = 0.55 + (smoothProgress * 0.60);
+        const scoreBonus = Math.min(0.70, ((this.score || 0) / 100) * 0.35);
+
+        // Adaptive pace delta: 0 baseline at start (adaptiveBaseSpeed 0.48), adjusted by student performance
+        const adaptiveDelta = (this.adaptiveBaseSpeed !== undefined ? (this.adaptiveBaseSpeed - 0.48) : 0);
+
+        // Word length compensation: longer words fall proportionally slower to allow sufficient typing time
+        let lengthFactor = 1.0;
+        if (wordObj && wordObj.graphemes && wordObj.graphemes.length) {
+          const len = wordObj.graphemes.length;
+          if (len > 5) {
+            lengthFactor = Math.max(0.70, 5.0 / len);
+          } else if (len < 5) {
+            lengthFactor = Math.min(1.15, 5.0 / Math.max(3, len));
+          }
+        }
+
+        const finalSpeed = (rampSpeed + scoreBonus + adaptiveDelta) * lengthFactor;
         return Number(finalSpeed.toFixed(2));
       } else {
         // Bubble Challenge: Starts slow at 0.45 px/frame, gentle progression up to 0.70 px/frame
         const timeProgress = Math.min(1.0, elapsedSec / 35.0);
         const rampSpeed = 0.45 + (timeProgress * 0.20);
-        const scoreBonus = Math.min(0.12, (this.score / 150) * 0.12);
+        const scoreBonus = Math.min(0.12, ((this.score || 0) / 150) * 0.12);
         return Number((rampSpeed + scoreBonus).toFixed(2));
       }
     }

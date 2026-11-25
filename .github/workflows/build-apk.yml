@@ -29,7 +29,7 @@ jobs:
           cache: 'npm'
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -60,6 +60,8 @@ jobs:
           node test_new_features.js
           echo "=== 10. Bubble Word Challenge & Bottom Nav Fixes Suite ==="
           node test_bubble_and_bottom_nav_fixes.js
+          echo "=== 11. Game Enhancements Suite ==="
+          node test_game_enhancements_suite.js
 
       - name: Sync Capacitor Android Project
         run: npx cap sync android
