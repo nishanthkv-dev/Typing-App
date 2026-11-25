@@ -9560,6 +9560,13 @@ async function handleGoogleSignInForUpgrade() {
   }
   try {
     if (typeof toast === 'function') toast('Connecting to Google Account...');
+    if (window.StudentPortal && window.location && window.TYPING_API_BASE !== '' && (window.TYPING_API_BASE || localStorage.getItem('tt_api_base') || (window.location.origin.startsWith('http') && !window.location.origin.includes('localhost:80')))) {
+      await window.StudentPortal.handleGoogleAuth();
+      renderUpgradeAuthSection();
+      renderAccountAccessCard();
+      if (typeof populatePassageDropdown === 'function') populatePassageDropdown();
+      return;
+    }
     const res = await window.FirebaseService.signInWithGoogle();
     if (res && res.success) {
       if (typeof toast === 'function') toast(`✅ Welcome, ${res.user.name || 'Student'}!`);
@@ -9569,18 +9576,7 @@ async function handleGoogleSignInForUpgrade() {
     }
   } catch (err) {
     console.warn('[handleGoogleSignInForUpgrade] error:', err);
-    // Provide graceful student authentication simulation in environment without live Google popups
-    const mock = {
-      uid: 'google_user_' + Date.now().toString(36),
-      name: 'Kalaimagal Student',
-      email: 'student@srikalaimagal.in',
-      provider: 'google.com'
-    };
-    await window.FirebaseService.signInWithGoogle(mock);
-    if (typeof toast === 'function') toast('✅ Signed in with Google Account');
-    renderUpgradeAuthSection();
-    renderAccountAccessCard();
-    if (typeof populatePassageDropdown === 'function') populatePassageDropdown();
+    if (typeof toast === 'function') toast('⚠️ ' + (err.message || 'Google Sign-In failed or was cancelled.'));
   }
 }
 
@@ -9919,6 +9915,11 @@ window.handleDeleteAccountConfirmation = handleDeleteAccountConfirmation;
   </div>
 </div>
 
+  <!-- FIREBASE WEB SDK & RUNTIME CONFIG -->
+  <script src="libs/firebase/firebase-app-compat.js"></script>
+  <script src="libs/firebase/firebase-auth-compat.js"></script>
+  <script src="libs/firebase/firebase-firestore-compat.js"></script>
+  <script src="js/firebase_config.js"></script>
   <!-- FIREBASE AUTH & BACKEND ENGINE SCRIPT -->
   <script src="js/firebase_service.js"></script>
   <!-- STUDENT COURSES, AUTH & COUPON PORTAL SCRIPT -->

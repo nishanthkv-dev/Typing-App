@@ -66,6 +66,8 @@ jobs:
           node test_academics_drills_layout.js
           echo "=== 13. Student Auth, Courses, Coupons & Admin Portal E2E Suite ==="
           node test_courses_coupons_admin.js
+          echo "=== 14. Firebase Auth, Firestore Adapter, Migration & Security Suite ==="
+          node test_firebase_integration.js
 
       - name: Sync Capacitor Android Project
         run: npx cap sync android

@@ -127,11 +127,39 @@
         if (rawIntent) this.pendingIntent = JSON.parse(rawIntent);
       } catch (_) {}
 
+      this.loadPublicConfig().catch(() => {});
       this.fetchCourses().catch(() => {});
       if (this.token && getApiBase()) {
         this.syncDashboard({ silent: true }).catch(() => {});
       }
       this.renderInlineCards();
+    },
+
+    setApiBase(url) {
+      const clean = String(url || '').trim().replace(/\/$/, '');
+      global.TYPING_API_BASE = clean;
+      try {
+        if (global.localStorage) {
+          if (clean) global.localStorage.setItem('tt_api_base', clean);
+          else global.localStorage.removeItem('tt_api_base');
+        }
+      } catch (_) {}
+      this.loadPublicConfig().catch(() => {});
+      this.fetchCourses().catch(() => {});
+    },
+
+    async loadPublicConfig() {
+      if (!getApiBase()) return null;
+      try {
+        const cfg = await this.api('/api/public-config', { method: 'GET' });
+        this.publicConfig = cfg;
+        if (cfg && cfg.firebaseWebConfig && global.FirebaseService && typeof global.FirebaseService.configure === 'function') {
+          global.FirebaseService.configure(cfg.firebaseWebConfig);
+        }
+        return cfg;
+      } catch (_) {
+        return null;
+      }
     },
 
     setToken(jwt) {
@@ -329,6 +357,24 @@
       const email = document.getElementById('stuLoginEmail')?.value.trim();
       const password = document.getElementById('stuLoginPassword')?.value;
       try {
+        if (global.FirebaseService && global.FirebaseService.isFirebaseAppReady() && global.firebase && global.firebase.auth) {
+          try {
+            const fbCred = await global.firebase.auth().signInWithEmailAndPassword(email, password);
+            if (fbCred && fbCred.user) {
+              const idToken = await fbCred.user.getIdToken(true);
+              const res = await this.api('/api/auth/firebase', {
+                method: 'POST',
+                body: JSON.stringify({ idToken })
+              });
+              await this.completeAuthAndResume(res);
+              return;
+            }
+          } catch (fbErr) {
+            if (!fbErr || (fbErr.code !== 'auth/user-not-found' && fbErr.code !== 'auth/invalid-credential')) {
+              throw fbErr;
+            }
+          }
+        }
         const res = await this.api('/api/auth/login', {
           method: 'POST',
           body: JSON.stringify({ email, password })
@@ -351,6 +397,25 @@
         institute: document.getElementById('stuRegInstitute')?.value.trim()
       };
       try {
+        if (global.FirebaseService && global.FirebaseService.isFirebaseAppReady() && global.firebase && global.firebase.auth) {
+          const fbCred = await global.firebase.auth().createUserWithEmailAndPassword(payload.email, payload.password);
+          if (fbCred && fbCred.user) {
+            await fbCred.user.updateProfile({ displayName: payload.name }).catch(() => {});
+            const idToken = await fbCred.user.getIdToken(true);
+            const res = await this.api('/api/auth/firebase', {
+              method: 'POST',
+              body: JSON.stringify({
+                idToken,
+                name: payload.name,
+                phone: payload.phone,
+                regNumber: payload.regNumber,
+                institute: payload.institute
+              })
+            });
+            await this.completeAuthAndResume(res);
+            return;
+          }
+        }
         const res = await this.api('/api/auth/register', {
           method: 'POST',
           body: JSON.stringify(payload)
@@ -372,33 +437,26 @@
           await this.completeAuthAndResume(res);
           return res;
         }
-        // Check Capacitor/Firebase native or web popup flow first
-        if (global.FirebaseService && typeof global.FirebaseService.signInWithGoogle === 'function') {
-          const gRes = await global.FirebaseService.signInWithGoogle();
-          if (gRes && gRes.idToken && getApiBase()) {
-            const res = await this.api('/api/auth/google', {
-              method: 'POST',
-              body: JSON.stringify({ idToken: gRes.idToken })
-            });
-            await this.completeAuthAndResume(res);
-            return res;
-          }
-          if (gRes && gRes.success) {
-            this.closeAuthModal();
-            this.renderInlineCards();
-            if (this.pendingIntent && this.pendingIntent.courseId) {
-              const intent = this.pendingIntent;
-              this.setPendingIntent(null);
-              await this.openCheckout(intent.courseId, {
-                couponCode: intent.couponCode || '',
-                attemptType: intent.attemptType || 'initial'
-              });
-            }
-            return gRes;
-          }
+        if (!getApiBase()) {
+          throw new Error('Backend API URL is not configured yet. Connect your deployed backend server first.');
         }
+        await this.loadPublicConfig();
+        if (!global.FirebaseService || typeof global.FirebaseService.signInWithGoogle !== 'function') {
+          throw new Error('Authentication service is not ready.');
+        }
+        const gRes = await global.FirebaseService.signInWithGoogle();
+        if (!gRes || !gRes.idToken) {
+          throw new Error('Verified Google/Firebase ID token was not returned.');
+        }
+        const res = await this.api('/api/auth/firebase', {
+          method: 'POST',
+          body: JSON.stringify({ idToken: gRes.idToken })
+        });
+        await this.completeAuthAndResume(res);
+        return res;
       } catch (err) {
         this.showAuthError(err.message || 'Google Sign-In could not be completed.');
+        throw err;
       }
     },
 
@@ -407,6 +465,15 @@
       this.clearAuthError();
       const email = document.getElementById('stuForgotEmail')?.value.trim();
       try {
+        if (global.FirebaseService && global.FirebaseService.isFirebaseAppReady() && global.firebase && global.firebase.auth) {
+          await global.firebase.auth().sendPasswordResetEmail(email);
+          const msgBox = document.getElementById('stuForgotStatus');
+          if (msgBox) {
+            msgBox.style.display = 'block';
+            msgBox.textContent = 'Password reset email sent via Firebase Authentication. Check your inbox.';
+          }
+          return;
+        }
         const res = await this.api('/api/auth/forgot-password', {
           method: 'POST',
           body: JSON.stringify({ email })

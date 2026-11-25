@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Login — Typing Thalaiva Institute Portal</title>
   <link rel="stylesheet" href="/admin/styles.css" />
+  <script src="/libs/firebase/firebase-app-compat.js"></script>
+  <script src="/libs/firebase/firebase-auth-compat.js"></script>
 </head>
 <body class="auth-page">
   <main class="auth-card">
@@ -17,6 +19,13 @@
     </div>
 
     <div id="loginAlert" class="alert alert-error"></div>
+
+    <div id="adminGoogleWrap" style="display:none;margin-bottom:14px;">
+      <button type="button" id="btnGoogleAdminLogin" class="btn btn-ghost btn-block" onclick="handleAdminGoogleLogin()">
+        🔑 Sign In with Authorized Google Account
+      </button>
+      <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:10px;">or sign in with administrator credentials</div>
+    </div>
 
     <form id="adminLoginForm" autocomplete="on">
       <div class="form-group">
@@ -35,17 +44,62 @@
     </form>
 
     <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:11.5px;color:var(--muted);line-height:1.5;">
-      Restricted to authorized institute administrators. Student accounts cannot access this portal. All admin actions are recorded in the audit log.
+      Restricted to explicitly authorized institute administrators. Student accounts cannot access this portal. All admin actions are recorded in the audit log.
     </div>
   </main>
 
   <script>
+    async function handleAdminGoogleLogin() {
+      const alertBox = document.getElementById('loginAlert');
+      const gBtn = document.getElementById('btnGoogleAdminLogin');
+      alertBox.classList.remove('show');
+      gBtn.disabled = true;
+      gBtn.textContent = 'Verifying Google account...';
+      try {
+        if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+          throw new Error('Firebase Web Auth is not initialized.');
+        }
+        const provider = new window.firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const cred = await window.firebase.auth().signInWithPopup(provider);
+        const idToken = await cred.user.getIdToken(true);
+        const res = await fetch('/api/admin/auth/firebase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ idToken })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          await window.firebase.auth().signOut().catch(() => {});
+          throw new Error(data.error || 'Unauthorized administrator account.');
+        }
+        window.location.replace('/admin/dashboard');
+      } catch (err) {
+        alertBox.textContent = err.message || 'Google authentication failed.';
+        alertBox.classList.add('show');
+        gBtn.disabled = false;
+        gBtn.textContent = '🔑 Sign In with Authorized Google Account';
+      }
+    }
+
     (async function () {
       try {
         const me = await fetch('/api/admin/auth/me', { credentials: 'include' });
         if (me.ok) {
           window.location.replace('/admin/dashboard');
           return;
+        }
+      } catch (_) {}
+
+      try {
+        const cfgRes = await fetch('/api/public-config');
+        const cfg = await cfgRes.json();
+        if (cfg && cfg.firebaseConfigured && cfg.firebaseWebConfig && window.firebase) {
+          if (!window.firebase.apps || !window.firebase.apps.length) {
+            window.firebase.initializeApp(cfg.firebaseWebConfig);
+          }
+          document.getElementById('adminGoogleWrap').style.display = 'block';
         }
       } catch (_) {}
 

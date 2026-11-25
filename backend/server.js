@@ -4,6 +4,9 @@ const path = require('path');
 const { URL } = require('url');
 const { getConfig } = require('./config');
 const { AtomicDatabase } = require('./db');
+const { FirestoreDatabase } = require('./firestoreDb');
+const { createFirebaseAdminManager } = require('./firebaseAdmin');
+const { createRateLimiter, logSafe } = require('./middleware/rateLimiter');
 const {
   generateId,
   normalizeEmail,
@@ -24,7 +27,9 @@ const {
   computeStudentEntitlement,
   enrichEnrollment,
   createCheckoutOrEnroll,
-  verifyStudentPayment
+  verifyStudentPayment,
+  upsertExamAttempt,
+  upsertExamSchedule
 } = require('./services/enrollmentService');
 
 function parseCookies(req) {
@@ -104,19 +109,50 @@ function serveStaticFile(res, filePath, contentType) {
 
 function createServer(options = {}) {
   const config = getConfig(options);
-  const db = options.db || new AtomicDatabase(config.dbPath);
+  const firebaseAdmin = options.firebaseAdmin || createFirebaseAdminManager(config, {
+    firebaseApp: options.firebaseApp,
+    authClient: options.firebaseAuthClient,
+    firestoreClient: options.firestoreInstance
+  });
+  const verifyFirebaseTokenFn = options.verifyFirebaseTokenFn || null;
   const verifyGoogleTokenFn = options.verifyGoogleTokenFn || null;
   const onPasswordResetToken = options.onPasswordResetToken || null;
   const exposeResetTokenForTest = Boolean(options.exposeResetTokenForTest);
+
+  let db = options.db || null;
+  if (!db) {
+    if (config.dbDriver === 'firestore' && firebaseAdmin.getFirestore()) {
+      db = new FirestoreDatabase(firebaseAdmin.getFirestore());
+    } else {
+      db = new AtomicDatabase(config.dbPath);
+    }
+  }
+
+  const authLimiter = createRateLimiter({
+    windowMs: config.rateLimitWindowMs,
+    max: options.rateLimitAuthMax ?? config.rateLimitAuthMax
+  });
+  const checkoutLimiter = createRateLimiter({
+    windowMs: config.rateLimitWindowMs,
+    max: options.rateLimitCheckoutMax ?? config.rateLimitCheckoutMax
+  });
+
   const adminDir = path.resolve(__dirname, '..', 'admin');
+  const firebaseLibsDir = path.resolve(__dirname, '..', 'www', 'libs', 'firebase');
 
   if (config.adminBootstrapEmail && config.adminBootstrapPassword) {
-    // Synchronous-safe queued bootstrap on startup
     db.ensureBootstrapAdmin({
       email: config.adminBootstrapEmail,
       password: config.adminBootstrapPassword,
       name: config.adminBootstrapName
-    }).catch(err => console.error('[BootstrapAdmin]', err.message));
+    }).catch(err => logSafe('error', 'bootstrap_admin_failed', { error: err.message }));
+  }
+
+  async function verifyIncomingFirebaseToken(idToken) {
+    if (verifyFirebaseTokenFn) {
+      return verifyFirebaseTokenFn(idToken);
+    }
+    return firebaseAdmin.verifyFirebaseIdToken(idToken, { checkRevoked: true });
   }
 
   function applySecurityAndCorsHeaders(req, res) {
@@ -128,13 +164,13 @@ function createServer(options = {}) {
     if (origin && (config.allowedOrigins.includes('*') || config.allowedOrigins.includes(origin) || origin.startsWith('http://localhost') || origin.startsWith('https://localhost') || origin.startsWith('capacitor://'))) {
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Idempotency-Key');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Idempotency-Key, X-Device-Session');
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
       res.setHeader('Vary', 'Origin');
     }
   }
 
-  function authenticate(req, { preferredCookie = 'tt_student_token', checkSingleDevice = true } = {}) {
+  async function authenticate(req, { preferredCookie = 'tt_student_token', checkSingleDevice = true } = {}) {
     const authHeader = req.headers.authorization || '';
     let token = '';
     if (authHeader.startsWith('Bearer ')) {
@@ -146,46 +182,76 @@ function createServer(options = {}) {
     if (!token) {
       throw createAppError('Authentication required.', 401, 'UNAUTHORIZED');
     }
-    const claims = verifyJwt(token, config.jwtSecret);
-    if (!claims || !claims.sub) {
-      throw createAppError('Invalid or expired session token.', 401, 'INVALID_TOKEN');
-    }
+
     const state = db.read();
-    const user = state.users.find(u => u.id === claims.sub);
-    if (!user || user.status !== 'active') {
-      throw createAppError('Account not found or inactive.', 401, 'ACCOUNT_INACTIVE');
-    }
-    if (checkSingleDevice && user.role === 'student') {
-      if (!user.activeSessionId || claims.sessionId !== user.activeSessionId) {
-        throw createAppError(
-          'Your account has been logged in on another device. Please sign in again to continue.',
-          401,
-          'SESSION_REVOKED'
-        );
+    const claims = verifyJwt(token, config.jwtSecret);
+    if (claims && claims.sub) {
+      const user = state.users.find(u => u.id === claims.sub);
+      if (!user || user.status !== 'active') {
+        throw createAppError('Account not found or inactive.', 401, 'ACCOUNT_INACTIVE');
       }
+      if (checkSingleDevice && user.role === 'student') {
+        if (!user.activeSessionId || claims.sessionId !== user.activeSessionId) {
+          throw createAppError(
+            'Your account has been logged in on another device. Please sign in again to continue.',
+            401,
+            'SESSION_REVOKED'
+          );
+        }
+      }
+      return { user, claims };
     }
-    return { user, claims };
+
+    // Fallback: verify direct Firebase ID token if Firebase Admin Auth or verifier is active
+    if (verifyFirebaseTokenFn || firebaseAdmin.isConfigured()) {
+      let decoded = null;
+      try {
+        decoded = await verifyIncomingFirebaseToken(token);
+      } catch {
+        throw createAppError('Invalid or expired session token.', 401, 'INVALID_TOKEN');
+      }
+      const email = normalizeEmail(decoded.email);
+      const user = state.users.find(
+        u => u.id === decoded.uid || u.googleUid === decoded.uid || (email && u.email === email)
+      );
+      if (!user || user.status !== 'active') {
+        throw createAppError('Account not registered or inactive.', 401, 'ACCOUNT_INACTIVE');
+      }
+      const reqDeviceSession = req.headers['x-device-session'];
+      if (checkSingleDevice && user.role === 'student' && reqDeviceSession) {
+        if (!user.activeSessionId || reqDeviceSession !== user.activeSessionId) {
+          throw createAppError(
+            'Your account has been logged in on another device. Please sign in again to continue.',
+            401,
+            'SESSION_REVOKED'
+          );
+        }
+      }
+      return { user, claims: decoded };
+    }
+
+    throw createAppError('Invalid or expired session token.', 401, 'INVALID_TOKEN');
   }
 
-  function optionalStudentAuth(req) {
+  async function optionalStudentAuth(req) {
     try {
-      const { user } = authenticate(req, { preferredCookie: 'tt_student_token', checkSingleDevice: true });
+      const { user } = await authenticate(req, { preferredCookie: 'tt_student_token', checkSingleDevice: true });
       return user;
     } catch {
       return null;
     }
   }
 
-  function requireStudent(req) {
-    const { user } = authenticate(req, { preferredCookie: 'tt_student_token', checkSingleDevice: true });
+  async function requireStudent(req) {
+    const { user } = await authenticate(req, { preferredCookie: 'tt_student_token', checkSingleDevice: true });
     if (user.role !== 'student') {
       throw createAppError('Student access required.', 403, 'FORBIDDEN_ROLE');
     }
     return user;
   }
 
-  function requireAdmin(req) {
-    const { user } = authenticate(req, { preferredCookie: 'tt_admin_token', checkSingleDevice: false });
+  async function requireAdmin(req) {
+    const { user } = await authenticate(req, { preferredCookie: 'tt_admin_token', checkSingleDevice: false });
     if (user.role !== 'admin') {
       throw createAppError('Administrator privileges required.', 403, 'ADMIN_REQUIRED');
     }
@@ -260,13 +326,43 @@ function createServer(options = {}) {
     if (method === 'GET' && pathname === '/admin/app.js') {
       return serveStaticFile(res, path.join(adminDir, 'app.js'), 'application/javascript; charset=utf-8');
     }
+    if (method === 'GET' && (pathname === '/libs/firebase/firebase-app-compat.js' || pathname === '/libs/firebase/firebase-auth-compat.js' || pathname === '/libs/firebase/firebase-firestore-compat.js')) {
+      const fname = path.basename(pathname);
+      return serveStaticFile(res, path.join(firebaseLibsDir, fname), 'application/javascript; charset=utf-8');
+    }
 
     try {
       // ---------------------------------------------------------------------
-      // HEALTH & PUBLIC CATALOG
+      // RATE LIMITING FOR SENSITIVE AUTH & CHECKOUT ENDPOINTS
+      // ---------------------------------------------------------------------
+      if (method === 'POST' && (pathname.startsWith('/api/auth/') || pathname.startsWith('/api/admin/auth/'))) {
+        authLimiter.check(`${ipAddress}:${pathname}`);
+      }
+      if (method === 'POST' && (pathname.startsWith('/api/checkout/') || pathname.startsWith('/api/payments/'))) {
+        checkoutLimiter.check(`${ipAddress}:${pathname}`);
+      }
+
+      // ---------------------------------------------------------------------
+      // HEALTH, PUBLIC CONFIG & CATALOG
       // ---------------------------------------------------------------------
       if (method === 'GET' && pathname === '/api/health') {
-        return sendJson(res, 200, { ok: true, service: 'typing-thalaiva-api', timestamp: new Date().toISOString() });
+        return sendJson(res, 200, {
+          ok: true,
+          service: 'typing-thalaiva-api',
+          dbDriver: db instanceof FirestoreDatabase ? 'firestore' : 'json',
+          firebaseConfigured: Boolean(verifyFirebaseTokenFn || firebaseAdmin.isConfigured()),
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      if (method === 'GET' && pathname === '/api/public-config') {
+        const webCfg = config.firebaseWebConfig || {};
+        const clientConfigured = Boolean(webCfg.apiKey && webCfg.projectId);
+        return sendJson(res, 200, {
+          firebaseConfigured: clientConfigured && Boolean(verifyFirebaseTokenFn || firebaseAdmin.isConfigured()),
+          firebaseWebConfig: clientConfigured ? webCfg : null,
+          googleClientId: config.googleClientId || null
+        });
       }
 
       if (method === 'GET' && pathname === '/api/courses') {
@@ -404,54 +500,104 @@ function createServer(options = {}) {
         });
       }
 
-      if (method === 'POST' && pathname === '/api/auth/google') {
+      if (method === 'POST' && (pathname === '/api/auth/google' || pathname === '/api/auth/firebase')) {
         const body = await readJsonBody(req);
-        const googleProfile = await verifyGoogleIdToken(body.idToken, {
-          expectedClientId: config.googleClientId,
-          verifyGoogleTokenFn
-        });
+        let identity = null;
+        let authSource = 'google';
+
+        if (pathname === '/api/auth/firebase' || ((verifyFirebaseTokenFn || firebaseAdmin.isConfigured()) && !verifyGoogleTokenFn)) {
+          const decoded = await verifyIncomingFirebaseToken(body.idToken);
+          if (!decoded || !decoded.uid || !decoded.email) {
+            throw createAppError('Invalid Firebase authentication token.', 401, 'INVALID_FIREBASE_TOKEN');
+          }
+          const signInProvider = decoded.firebase && decoded.firebase.sign_in_provider ? decoded.firebase.sign_in_provider : 'google.com';
+          if (signInProvider === 'google.com' && decoded.email_verified === false) {
+            throw createAppError('Google email address must be verified.', 401, 'EMAIL_NOT_VERIFIED');
+          }
+          const googleIdentitySub = decoded.firebase && decoded.firebase.identities && Array.isArray(decoded.firebase.identities['google.com'])
+            ? decoded.firebase.identities['google.com'][0]
+            : null;
+          identity = {
+            firebaseUid: String(decoded.uid),
+            googleUid: googleIdentitySub ? String(googleIdentitySub) : (signInProvider === 'google.com' ? String(decoded.uid) : null),
+            email: normalizeEmail(decoded.email),
+            emailVerified: Boolean(decoded.email_verified),
+            name: String(body.name || decoded.name || decoded.email.split('@')[0]).trim(),
+            photoURL: decoded.picture ? String(decoded.picture) : null,
+            provider: signInProvider
+          };
+          authSource = 'firebase';
+        } else {
+          const googleProfile = await verifyGoogleIdToken(body.idToken, {
+            expectedClientId: config.googleClientId,
+            verifyGoogleTokenFn
+          });
+          identity = {
+            firebaseUid: null,
+            googleUid: googleProfile.googleUid,
+            email: googleProfile.email,
+            emailVerified: true,
+            name: googleProfile.name,
+            photoURL: googleProfile.picture || null,
+            provider: 'google.com'
+          };
+        }
 
         const result = await db.runTransaction((draft) => {
           const nowIso = new Date().toISOString();
           const sessionId = `sess_${generateId('dev')}`;
 
-          // Match first by verified Google UID, then by verified email (link accounts seamlessly without duplicates)
-          let user = draft.users.find(u => u.googleUid === googleProfile.googleUid);
+          let user = identity.firebaseUid
+            ? draft.users.find(u => u.id === identity.firebaseUid || u.firebaseUid === identity.firebaseUid)
+            : null;
+          if (!user && identity.googleUid) {
+            user = draft.users.find(u => u.googleUid === identity.googleUid);
+          }
           if (!user) {
-            user = draft.users.find(u => u.email === googleProfile.email);
+            user = draft.users.find(u => u.email === identity.email);
           }
 
           if (user && user.role !== 'student') {
-            throw createAppError('Administrator accounts cannot authenticate via student Google login.', 403, 'USE_ADMIN_PORTAL');
+            throw createAppError('Administrator accounts cannot authenticate via student login.', 403, 'USE_ADMIN_PORTAL');
           }
 
           if (user) {
             if (user.status !== 'active') {
               throw createAppError('This account is disabled.', 403, 'ACCOUNT_DISABLED');
             }
-            user.googleUid = googleProfile.googleUid;
-            user.emailVerified = true;
-            if (!user.authProviders.includes('google')) {
+            if (identity.firebaseUid) user.firebaseUid = identity.firebaseUid;
+            if (identity.googleUid) user.googleUid = identity.googleUid;
+            user.emailVerified = Boolean(user.emailVerified || identity.emailVerified);
+            if (!user.authProviders.includes('google') && (identity.provider === 'google.com' || authSource === 'google')) {
               user.authProviders.push('google');
             }
-            if (!user.name && googleProfile.name) {
-              user.name = googleProfile.name;
+            if (!user.authProviders.includes('firebase') && authSource === 'firebase') {
+              user.authProviders.push('firebase');
             }
+            if (!user.name && identity.name) user.name = identity.name;
+            if (identity.photoURL && !user.photoURL) user.photoURL = identity.photoURL;
+            if (body.phone && !user.phone) user.phone = String(body.phone).trim().slice(0, 20);
+            if (body.regNumber && !user.regNumber) user.regNumber = String(body.regNumber).trim().slice(0, 40);
+            if (body.institute && !user.institute) user.institute = String(body.institute).trim().slice(0, 100);
             user.activeSessionId = sessionId;
             user.updatedAt = nowIso;
           } else {
+            const newId = identity.firebaseUid || generateId('stu');
             user = {
-              id: generateId('stu'),
+              id: newId,
+              uid: newId,
+              firebaseUid: identity.firebaseUid,
               role: 'student',
-              name: googleProfile.name,
-              email: googleProfile.email,
-              emailVerified: true,
-              googleUid: googleProfile.googleUid,
+              name: identity.name,
+              email: identity.email,
+              emailVerified: Boolean(identity.emailVerified),
+              googleUid: identity.googleUid,
+              photoURL: identity.photoURL,
               passwordHash: null,
-              authProviders: ['google'],
-              phone: '',
-              regNumber: '',
-              institute: '',
+              authProviders: authSource === 'firebase' ? ['firebase', identity.provider === 'google.com' ? 'google' : 'password'] : ['google'],
+              phone: String(body.phone || '').trim().slice(0, 20),
+              regNumber: String(body.regNumber || '').trim().slice(0, 40),
+              institute: String(body.institute || '').trim().slice(0, 100),
               activeSessionId: sessionId,
               status: 'active',
               createdAt: nowIso,
@@ -462,10 +608,10 @@ function createServer(options = {}) {
 
           addAuditLog(draft, {
             actor: user,
-            action: 'STUDENT_LOGIN_GOOGLE',
+            action: authSource === 'firebase' ? 'STUDENT_LOGIN_FIREBASE' : 'STUDENT_LOGIN_GOOGLE',
             entityType: 'user',
             entityId: user.id,
-            details: { googleUid: googleProfile.googleUid, sessionId },
+            details: { provider: identity.provider, sessionId },
             ipAddress
           });
 
@@ -476,6 +622,11 @@ function createServer(options = {}) {
           };
         });
 
+        // Ensure Firebase custom claim marks student explicitly without overwriting admin claims
+        if (identity.firebaseUid && firebaseAdmin.isConfigured()) {
+          firebaseAdmin.setUserClaims(identity.firebaseUid, { role: 'student', admin: false }).catch(() => {});
+        }
+
         const token = signJwt({
           sub: result.user.id,
           role: 'student',
@@ -485,6 +636,7 @@ function createServer(options = {}) {
         return sendJson(res, 200, {
           token,
           sessionId: result.sessionId,
+          authMode: authSource,
           user: sanitizeUser(result.user),
           entitlement: result.entitlement
         });
@@ -575,7 +727,7 @@ function createServer(options = {}) {
 
       if (method === 'POST' && pathname === '/api/auth/logout') {
         try {
-          const { user } = authenticate(req, { preferredCookie: 'tt_student_token', checkSingleDevice: false });
+          const { user } = await authenticate(req, { preferredCookie: 'tt_student_token', checkSingleDevice: false });
           await db.runTransaction((draft) => {
             const target = draft.users.find(u => u.id === user.id);
             if (target) {
@@ -590,7 +742,7 @@ function createServer(options = {}) {
       }
 
       if (method === 'GET' && pathname === '/api/auth/me') {
-        const { user } = authenticate(req, { preferredCookie: 'tt_student_token', checkSingleDevice: true });
+        const { user } = await authenticate(req, { preferredCookie: 'tt_student_token', checkSingleDevice: true });
         const state = db.read();
         return sendJson(res, 200, {
           user: sanitizeUser(user),
@@ -602,7 +754,7 @@ function createServer(options = {}) {
       // STUDENT PROFILE, QUOTES, CHECKOUT, PAYMENTS, DASHBOARD
       // ---------------------------------------------------------------------
       if (method === 'PUT' && pathname === '/api/student/profile') {
-        const student = requireStudent(req);
+        const student = await requireStudent(req);
         const body = await readJsonBody(req);
         const updated = await db.runTransaction((draft) => {
           const user = draft.users.find(u => u.id === student.id);
@@ -619,7 +771,7 @@ function createServer(options = {}) {
       }
 
       if (method === 'DELETE' && pathname === '/api/student/account') {
-        const student = requireStudent(req);
+        const student = await requireStudent(req);
         await db.runTransaction((draft) => {
           draft.users = draft.users.filter(u => u.id !== student.id);
           draft.notifications = draft.notifications.filter(n => n.userId !== student.id);
@@ -635,7 +787,7 @@ function createServer(options = {}) {
       }
 
       if (method === 'POST' && pathname === '/api/checkout/quote') {
-        const maybeStudent = optionalStudentAuth(req);
+        const maybeStudent = await optionalStudentAuth(req);
         const body = await readJsonBody(req);
         const state = db.read();
         const quote = evaluateCouponQuote({
@@ -658,7 +810,7 @@ function createServer(options = {}) {
       }
 
       if (method === 'POST' && pathname === '/api/checkout/complete') {
-        const student = requireStudent(req);
+        const student = await requireStudent(req);
         const body = await readJsonBody(req);
         const idempotencyKey = req.headers['x-idempotency-key'] || body.idempotencyKey || '';
         const result = await createCheckoutOrEnroll({
@@ -676,7 +828,7 @@ function createServer(options = {}) {
       }
 
       if (method === 'POST' && pathname === '/api/payments/verify') {
-        const student = requireStudent(req);
+        const student = await requireStudent(req);
         const body = await readJsonBody(req);
         const result = await verifyStudentPayment({
           db,
@@ -692,13 +844,13 @@ function createServer(options = {}) {
       }
 
       if (method === 'GET' && pathname === '/api/student/dashboard') {
-        const student = requireStudent(req);
+        const student = await requireStudent(req);
         const state = db.read();
         return sendJson(res, 200, buildStudentDashboard(state, student));
       }
 
       if (method === 'POST' && pathname === '/api/student/notifications/read') {
-        const student = requireStudent(req);
+        const student = await requireStudent(req);
         await db.runTransaction((draft) => {
           for (const n of draft.notifications) {
             if (n.userId === student.id) n.read = true;
@@ -750,6 +902,85 @@ function createServer(options = {}) {
         );
       }
 
+      if (method === 'POST' && pathname === '/api/admin/auth/firebase') {
+        const body = await readJsonBody(req);
+        const decoded = await verifyIncomingFirebaseToken(body.idToken);
+        if (!decoded || !decoded.uid || !decoded.email || decoded.email_verified === false) {
+          throw createAppError('Verified Google/Firebase credentials required.', 401, 'INVALID_FIREBASE_TOKEN');
+        }
+        const email = normalizeEmail(decoded.email);
+
+        const adminUser = await db.runTransaction((draft) => {
+          const existingAdmin = draft.users.find(u => (u.email === email || u.id === decoded.uid) && u.role === 'admin');
+          const hasAdminClaim = decoded.admin === true && decoded.role === 'admin';
+          const isAllowlisted = config.adminAllowedEmails.includes(email);
+
+          if (!existingAdmin && !hasAdminClaim && !isAllowlisted) {
+            throw createAppError('This Google account is not authorized as an institute administrator.', 403, 'ADMIN_UNAUTHORIZED');
+          }
+
+          const nowIso = new Date().toISOString();
+          let target = existingAdmin;
+          if (!target) {
+            // Ensure an existing student email cannot silently double-bind without explicit allowlist/claim
+            const nonAdmin = draft.users.find(u => u.email === email && u.role !== 'admin');
+            if (nonAdmin && !hasAdminClaim) {
+              throw createAppError('Student accounts cannot access the Admin Portal.', 403, 'ADMIN_UNAUTHORIZED');
+            }
+            target = {
+              id: String(decoded.uid),
+              role: 'admin',
+              name: String(decoded.name || email.split('@')[0]).trim(),
+              email,
+              emailVerified: true,
+              googleUid: String(decoded.uid),
+              passwordHash: null,
+              authProviders: ['firebase', 'google'],
+              phone: '',
+              regNumber: '',
+              institute: 'Sri Kalaimagal Typewriting Institute',
+              activeSessionId: null,
+              status: 'active',
+              createdAt: nowIso,
+              updatedAt: nowIso
+            };
+            draft.users.push(target);
+          } else {
+            if (target.status !== 'active') {
+              throw createAppError('Administrator account is disabled.', 403, 'ADMIN_DISABLED');
+            }
+            target.firebaseUid = String(decoded.uid);
+            target.updatedAt = nowIso;
+          }
+
+          addAuditLog(draft, {
+            actor: target,
+            action: 'ADMIN_LOGIN_FIREBASE',
+            entityType: 'user',
+            entityId: target.id,
+            ipAddress
+          });
+          return target;
+        });
+
+        if (firebaseAdmin.isConfigured()) {
+          firebaseAdmin.setUserClaims(String(decoded.uid), { admin: true, role: 'admin' }).catch(() => {});
+        }
+
+        const token = signJwt({
+          sub: adminUser.id,
+          role: 'admin'
+        }, config.jwtSecret, config.tokenTtlSeconds);
+
+        const cookieFlags = `HttpOnly; Path=/; SameSite=Strict; Max-Age=${config.tokenTtlSeconds}${config.nodeEnv === 'production' ? '; Secure' : ''}`;
+        return sendJson(
+          res,
+          200,
+          { token, admin: sanitizeUser(adminUser) },
+          { 'Set-Cookie': `tt_admin_token=${encodeURIComponent(token)}; ${cookieFlags}` }
+        );
+      }
+
       if (method === 'POST' && pathname === '/api/admin/auth/logout') {
         return sendJson(
           res,
@@ -760,7 +991,7 @@ function createServer(options = {}) {
       }
 
       if (method === 'GET' && pathname === '/api/admin/auth/me') {
-        const admin = requireAdmin(req);
+        const admin = await requireAdmin(req);
         return sendJson(res, 200, { admin: sanitizeUser(admin) });
       }
 
@@ -768,7 +999,7 @@ function createServer(options = {}) {
       // ADMIN PORTAL PROTECTED APIs (/api/admin/* — STRICT RBAC: ADMIN ONLY)
       // ---------------------------------------------------------------------
       if (pathname.startsWith('/api/admin/')) {
-        const admin = requireAdmin(req);
+        const admin = await requireAdmin(req);
 
         // OVERVIEW
         if (method === 'GET' && pathname === '/api/admin/overview') {
@@ -1076,6 +1307,7 @@ function createServer(options = {}) {
             if (enr.paymentStatus === 'pending') enr.paymentStatus = 'verified';
             enr.activatedAt = enr.activatedAt || nowIso;
             enr.updatedAt = nowIso;
+            upsertExamAttempt(draft, enr);
             const purchase = draft.purchases.find(p => p.id === enr.purchaseId);
             if (purchase && purchase.paymentStatus === 'pending') {
               purchase.paymentStatus = 'verified';
@@ -1126,6 +1358,8 @@ function createServer(options = {}) {
               enr.status = 'scheduled';
             }
             enr.updatedAt = nowIso;
+            upsertExamSchedule(draft, enr);
+            upsertExamAttempt(draft, enr);
 
             addNotification(draft, {
               userId: enr.userId,
@@ -1164,6 +1398,8 @@ function createServer(options = {}) {
             enr.scoreSummary = body.scoreSummary ? String(body.scoreSummary).trim() : (enr.scoreSummary || 'Completed');
             enr.examRemarks = body.examRemarks ? String(body.examRemarks).trim() : enr.examRemarks;
             enr.updatedAt = nowIso;
+            upsertExamAttempt(draft, enr);
+            if (enr.examDate) upsertExamSchedule(draft, enr);
 
             addNotification(draft, {
               userId: enr.userId,
@@ -1199,6 +1435,7 @@ function createServer(options = {}) {
             enr.status = 'rebooking_eligible';
             enr.rebookingAllowed = true;
             enr.updatedAt = nowIso;
+            upsertExamAttempt(draft, enr);
 
             addNotification(draft, {
               userId: enr.userId,
@@ -1380,12 +1617,16 @@ function createServer(options = {}) {
     } catch (err) {
       const status = err.statusCode || 500;
       if (status >= 500) {
-        console.error('[API Error]', pathname, err);
+        logSafe('error', 'api_internal_error', { path: pathname, method, status, error: err.message });
+      }
+      const extraHeaders = {};
+      if (status === 429 && err.retryAfterSec) {
+        extraHeaders['Retry-After'] = String(err.retryAfterSec);
       }
       return sendJson(res, status, {
         error: err.message || 'Internal server error.',
         code: err.code || 'INTERNAL_ERROR'
-      });
+      }, extraHeaders);
     }
   }
 
@@ -1395,9 +1636,13 @@ function createServer(options = {}) {
     server,
     db,
     config,
-    start(portOverride) {
+    firebaseAdmin,
+    async start(portOverride) {
+      if (typeof db.init === 'function') {
+        await db.init();
+      }
       const listenPort = portOverride !== undefined ? portOverride : config.port;
-      const listenHost = options.host || process.env.HOST || '127.0.0.1';
+      const listenHost = options.host || config.host || '127.0.0.1';
       return new Promise((resolve) => {
         server.listen(listenPort, listenHost, () => {
           const addr = server.address();
@@ -1407,7 +1652,12 @@ function createServer(options = {}) {
       });
     },
     stop() {
-      return new Promise((resolve) => server.close(() => resolve()));
+      return new Promise((resolve) => {
+        server.close(() => resolve());
+        if (typeof server.closeAllConnections === 'function') {
+          server.closeAllConnections();
+        }
+      });
     }
   };
 }

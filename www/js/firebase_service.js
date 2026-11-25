@@ -14,16 +14,11 @@
 (function () {
   'use strict';
 
-  // Default Firebase configuration placeholder
-  // Ready to connect to Google Firebase Project credentials
-  const DEFAULT_FIREBASE_CONFIG = {
-    apiKey: "AIzaSyDummyApiKeyForTypingThalaiva2026",
-    authDomain: "typing-thalaiva-kvn.firebaseapp.com",
-    projectId: "typing-thalaiva-kvn",
-    storageBucket: "typing-thalaiva-kvn.appspot.com",
-    messagingSenderId: "9384510098",
-    appId: "1:9384510098:web:abcdef123456"
-  };
+  // Optional runtime Firebase Web config (provided via window.FIREBASE_CONFIG or /api/public-config).
+  // No placeholder/dummy keys are initialized against live Firebase SDKs.
+  function isValidFirebaseConfig(cfg) {
+    return Boolean(cfg && cfg.apiKey && cfg.projectId && !String(cfg.apiKey).includes('Dummy'));
+  }
 
   const FirebaseService = {
     initialized: false,
@@ -40,6 +35,39 @@
     sessionUnsubscribe: null,
     listeners: [],
 
+    configure(cfg) {
+      if (!isValidFirebaseConfig(cfg)) return false;
+      if (typeof window !== 'undefined') {
+        window.FIREBASE_CONFIG = cfg;
+        if (window.firebase && (!window.firebase.apps || !window.firebase.apps.length)) {
+          try {
+            window.firebase.initializeApp(cfg);
+            return true;
+          } catch (e) {
+            console.warn('[FirebaseService] Live Firebase init note:', e.message);
+          }
+        } else if (window.firebase && window.firebase.apps && window.firebase.apps.length) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    isFirebaseAppReady() {
+      return Boolean(typeof window !== 'undefined' && window.firebase && window.firebase.apps && window.firebase.apps.length > 0);
+    },
+
+    hasNativeCapacitorGoogleAuth() {
+      return Boolean(
+        typeof window !== 'undefined' &&
+        window.Capacitor &&
+        typeof window.Capacitor.isNativePlatform === 'function' &&
+        window.Capacitor.isNativePlatform() &&
+        window.Capacitor.Plugins &&
+        window.Capacitor.Plugins.FirebaseAuthentication
+      );
+    },
+
     /**
      * Initialize the Auth & Backend engine on app startup.
      * Guaranteed: App ALWAYS starts immediately in Guest Mode without forcing login.
@@ -49,13 +77,9 @@
         // 1. Load local session metadata
         this.loadLocalSession();
 
-        // 2. Initialize Firebase SDK if loaded
-        if (typeof window !== 'undefined' && window.firebase && !window.firebase.apps?.length) {
-          try {
-            window.firebase.initializeApp(window.FIREBASE_CONFIG || DEFAULT_FIREBASE_CONFIG);
-          } catch (e) {
-            console.warn('[FirebaseService] Live Firebase init note:', e.message);
-          }
+        // 2. Initialize Firebase Web SDK only if real project config is supplied
+        if (typeof window !== 'undefined' && isValidFirebaseConfig(window.FIREBASE_CONFIG)) {
+          this.configure(window.FIREBASE_CONFIG);
         }
 
         // 3. Restore authenticated session if valid token & session ID exist
@@ -210,57 +234,87 @@
 
     /**
      * Primary Google Sign-In Method
-     * Triggered ONLY when student taps Upgrade / Unlock Full Access
+     * Supports Capacitor Native Google Sign-In (@capacitor-firebase/authentication) on Android
+     * and Firebase Auth GoogleAuthProvider on Web. Never uses mock fallback credentials in UI.
      */
-    async signInWithGoogle(mockGoogleUser = null) {
+    async signInWithGoogle(testOverrideUser = null) {
       try {
-        console.log('[FirebaseService] Initiating Google Sign-In flow...');
-        let authResult = null;
+        let userProfile = null;
+        let idToken = null;
+        let authSource = 'firebase';
 
-        // 1. Live Firebase Google Auth Provider
-        if (!mockGoogleUser && window.firebase && window.firebase.auth) {
+        if (testOverrideUser && typeof testOverrideUser === 'object') {
+          // Explicit automated test injection (test_auth_and_access.js)
+          userProfile = {
+            uid: testOverrideUser.uid || 'test_uid_' + Date.now(),
+            name: testOverrideUser.name || 'Student',
+            email: testOverrideUser.email || '',
+            photoURL: testOverrideUser.photoURL || null,
+            provider: 'google.com'
+          };
+          idToken = testOverrideUser.idToken || null;
+          authSource = 'test_harness';
+        } else if (this.hasNativeCapacitorGoogleAuth()) {
+          // Native Android / iOS Capacitor Google Sign-In via @capacitor-firebase/authentication
+          const plugin = window.Capacitor.Plugins.FirebaseAuthentication;
+          const nativeRes = await plugin.signInWithGoogle();
+          if (!nativeRes || !nativeRes.user) {
+            throw new Error('Google Sign-In was cancelled.');
+          }
+          const tokenRes = await plugin.getIdToken({ forceRefresh: true });
+          idToken = tokenRes && tokenRes.token ? tokenRes.token : null;
+          if (!idToken) {
+            throw new Error('Failed to obtain verified Firebase ID token from Google Sign-In.');
+          }
+          userProfile = {
+            uid: nativeRes.user.uid,
+            name: nativeRes.user.displayName || 'Typing Thalaiva Student',
+            email: nativeRes.user.email || '',
+            photoURL: nativeRes.user.photoUrl || null,
+            provider: 'google.com'
+          };
+          authSource = 'capacitor_firebase';
+        } else if (this.isFirebaseAppReady() && window.firebase && window.firebase.auth) {
+          // Web / PWA Firebase Auth Google Sign-In
           const provider = new window.firebase.auth.GoogleAuthProvider();
           provider.addScope('profile');
           provider.addScope('email');
+          provider.setCustomParameters({ prompt: 'select_account' });
+          let authResult = null;
           try {
             authResult = await window.firebase.auth().signInWithPopup(provider);
           } catch (popupErr) {
-            console.warn('[FirebaseService] Popup blocked/failed, trying redirect or native:', popupErr);
-            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth) {
-              authResult = await window.Capacitor.Plugins.GoogleAuth.signIn();
-            } else {
-              throw popupErr;
+            const code = popupErr && popupErr.code ? String(popupErr.code) : '';
+            if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+              throw new Error('Google Sign-In was cancelled.');
             }
+            if (code === 'auth/popup-blocked') {
+              await window.firebase.auth().signInWithRedirect(provider);
+              throw new Error('Redirecting to Google Sign-In...');
+            }
+            throw popupErr;
           }
-        }
-
-        // 2. Extract or structure user profile
-        let userProfile = null;
-        if (authResult && authResult.user) {
+          if (!authResult || !authResult.user) {
+            throw new Error('Google Sign-In did not return a user.');
+          }
+          idToken = await authResult.user.getIdToken(true);
           userProfile = {
             uid: authResult.user.uid,
             name: authResult.user.displayName || 'Typing Thalaiva Student',
-            email: authResult.user.email,
+            email: authResult.user.email || '',
             photoURL: authResult.user.photoURL || null,
             provider: 'google.com'
           };
-        } else if (mockGoogleUser) {
-          userProfile = {
-            uid: mockGoogleUser.uid || 'google_uid_' + Date.now(),
-            name: mockGoogleUser.name || 'Thalaiva Student',
-            email: mockGoogleUser.email || 'student@gmail.com',
-            photoURL: mockGoogleUser.photoURL || null,
-            provider: 'google.com'
-          };
+          authSource = 'firebase_web';
         } else {
-          throw new Error('Google Authentication was cancelled or failed.');
+          throw new Error('Google Sign-In is not configured yet. Connect Firebase credentials in .env and Android google-services.json.');
         }
 
         // 3. Generate New Single-Device Session ID
         const newSessionId = this.generateSessionId();
         const deviceInfo = this.getDeviceInfo();
 
-        // 4. Update Backend Firestore (Single-device session enforcement)
+        // 4. Update Firestore if SDK client is active
         await this.syncSessionToBackend(userProfile, newSessionId, deviceInfo);
 
         // 5. Update local state
@@ -282,10 +336,8 @@
           window.syncStudentProfileWithAuth(userProfile);
         }
 
-        this.notifyListeners('loginSuccess', { user: this.currentUser, sessionId: this.activeSessionId });
-        console.log('[FirebaseService] Google Sign-In Successful! UID:', userProfile.uid, 'Session:', newSessionId);
-
-        return { success: true, user: this.currentUser };
+        this.notifyListeners('loginSuccess', { user: this.currentUser, sessionId: this.activeSessionId, idToken });
+        return { success: true, user: this.currentUser, idToken, authSource };
       } catch (err) {
         console.error('[FirebaseService] Sign-In error:', err);
         this.notifyListeners('loginError', { error: err.message });
@@ -536,9 +588,18 @@
           }
         }
 
-        // Check language-specific plan coverage
+        // Check language-specific plan coverage (both unlockedLanguages array and legacy plan IDs)
+        const unlockedLangs = Array.isArray(this.entitlement.unlockedLanguages) ? this.entitlement.unlockedLanguages : null;
+        if (unlockedLangs && unlockedLangs.length > 0 && !unlockedLangs.includes(lang)) {
+          return {
+            allowed: false,
+            isFree: false,
+            reason: 'language_restricted',
+            message: `Your enrolled course unlocks ${unlockedLangs.join(' & ').toUpperCase()}. Upgrade for full access.`
+          };
+        }
         const plan = this.entitlement.plan;
-        if (plan === 'tamil_speed' && lang === 'en') {
+        if ((plan === 'tamil_speed' || plan === 'tamil_senior' || plan === 'tamil_junior') && lang === 'en') {
           return {
             allowed: false,
             isFree: false,
@@ -546,7 +607,7 @@
             message: 'Your plan covers Tamil Speed Practice. Upgrade to Combo for English.'
           };
         }
-        if (plan === 'english_speed' && lang === 'ta') {
+        if ((plan === 'english_speed' || plan === 'english_senior' || plan === 'english_junior') && lang === 'ta') {
           return {
             allowed: false,
             isFree: false,
@@ -600,7 +661,10 @@
           } catch(e){}
         }
 
-        if (window.firebase && window.firebase.auth) {
+        if (this.hasNativeCapacitorGoogleAuth()) {
+          await window.Capacitor.Plugins.FirebaseAuthentication.signOut().catch(() => {});
+        }
+        if (this.isFirebaseAppReady() && window.firebase && window.firebase.auth) {
           await window.firebase.auth().signOut().catch(()=>{});
         }
       } catch (err) {

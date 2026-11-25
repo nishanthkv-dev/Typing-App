@@ -435,6 +435,7 @@ async function runSuite() {
   } finally {
     await srv.stop();
     fs.rmSync(tmpDir, { recursive: true, force: true });
+    process.exit(passed === total ? 0 : 1);
   }
 }
 

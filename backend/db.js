@@ -143,6 +143,8 @@ function createEmptyDbState() {
     couponRedemptions: [],
     purchases: [],
     enrollments: [],
+    examSchedules: [],
+    examAttempts: [],
     notifications: [],
     auditLogs: [],
     idempotencyKeys: {}
@@ -176,6 +178,8 @@ class AtomicDatabase {
     return {
       ...defaults,
       ...parsed,
+      examSchedules: Array.isArray(parsed.examSchedules) ? parsed.examSchedules : [],
+      examAttempts: Array.isArray(parsed.examAttempts) ? parsed.examAttempts : [],
       courses: Array.isArray(parsed.courses) && parsed.courses.length > 0 ? parsed.courses : defaults.courses
     };
   }

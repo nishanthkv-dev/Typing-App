@@ -14,6 +14,10 @@ android/.idea/
 .env
 .env.local
 backend/data/
+serviceAccountKey.json
+*-firebase-adminsdk-*.json
+android/app/google-services.json
+GoogleService-Info.plist
 
 # macOS
 .DS_Store

@@ -262,6 +262,7 @@ async function createCheckoutOrEnroll({
 
     draft.purchases.unshift(purchase);
     draft.enrollments.unshift(enrollment);
+    upsertExamAttempt(draft, enrollment);
 
     if (isFree) {
       addNotification(draft, {
@@ -368,6 +369,7 @@ async function verifyStudentPayment({
       enrollment.status = 'exam_date_pending';
       enrollment.activatedAt = nowIso;
       enrollment.updatedAt = nowIso;
+      upsertExamAttempt(draft, enrollment);
     }
 
     const redemption = draft.couponRedemptions.find(r => r.purchaseId === purchase.id);
@@ -401,6 +403,57 @@ async function verifyStudentPayment({
   });
 }
 
+function upsertExamAttempt(draft, enrollment) {
+  if (!draft.examAttempts) draft.examAttempts = [];
+  const attemptId = `att_${enrollment.id}`;
+  const idx = draft.examAttempts.findIndex(a => a.id === attemptId || a.enrollmentId === enrollment.id);
+  const record = {
+    id: attemptId,
+    enrollmentId: enrollment.id,
+    userId: enrollment.userId,
+    studentId: enrollment.userId,
+    courseId: enrollment.courseId,
+    courseTitle: enrollment.courseTitle,
+    attemptNumber: enrollment.attemptNumber || 1,
+    parentEnrollmentId: enrollment.parentEnrollmentId || null,
+    status: enrollment.status,
+    scoreSummary: enrollment.scoreSummary || null,
+    examRemarks: enrollment.examRemarks || null,
+    rebookingAllowed: Boolean(enrollment.rebookingAllowed),
+    completedAt: enrollment.completedAt || null,
+    createdAt: enrollment.createdAt,
+    updatedAt: enrollment.updatedAt || new Date().toISOString()
+  };
+  if (idx >= 0) draft.examAttempts[idx] = record;
+  else draft.examAttempts.unshift(record);
+  return record;
+}
+
+function upsertExamSchedule(draft, enrollment) {
+  if (!draft.examSchedules) draft.examSchedules = [];
+  const scheduleId = `sch_${enrollment.id}`;
+  const idx = draft.examSchedules.findIndex(s => s.id === scheduleId || s.enrollmentId === enrollment.id);
+  const record = {
+    id: scheduleId,
+    enrollmentId: enrollment.id,
+    userId: enrollment.userId,
+    studentId: enrollment.userId,
+    courseId: enrollment.courseId,
+    courseTitle: enrollment.courseTitle,
+    attemptNumber: enrollment.attemptNumber || 1,
+    examDate: enrollment.examDate,
+    examSlot: enrollment.examSlot || '10:00 AM Batch',
+    examCenter: enrollment.examCenter || 'Sri Kalaimagal Typewriting Institute',
+    examRemarks: enrollment.examRemarks || null,
+    status: (enrollment.status === 'completed' || enrollment.status === 'rebooking_eligible') ? 'completed' : 'scheduled',
+    createdAt: idx >= 0 ? draft.examSchedules[idx].createdAt : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  if (idx >= 0) draft.examSchedules[idx] = record;
+  else draft.examSchedules.unshift(record);
+  return record;
+}
+
 module.exports = {
   ACCESS_GRANTED_STATUSES,
   ACTIVE_ATTEMPT_STATUSES,
@@ -411,5 +464,7 @@ module.exports = {
   createCheckoutOrEnroll,
   verifyStudentPayment,
   resolveCourseAlias,
-  computePaymentSignature
+  computePaymentSignature,
+  upsertExamAttempt,
+  upsertExamSchedule
 };
