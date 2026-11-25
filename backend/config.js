@@ -57,10 +57,18 @@ function getConfig(overrides = {}) {
     .map(s => s.trim().toLowerCase())
     .filter(Boolean);
 
+  const isCloudRuntime = Boolean(
+    nodeEnv === 'production' ||
+    process.env.K_SERVICE ||
+    process.env.RENDER ||
+    process.env.RAILWAY_ENVIRONMENT ||
+    process.env.FLY_APP_NAME
+  );
+
   return {
     nodeEnv,
     port: Number(overrides.port ?? process.env.PORT ?? 4000),
-    host: overrides.host ?? process.env.HOST ?? '127.0.0.1',
+    host: overrides.host ?? process.env.HOST ?? (isCloudRuntime ? '0.0.0.0' : '127.0.0.1'),
     jwtSecret,
     tokenTtlSeconds: Number(overrides.tokenTtlSeconds ?? process.env.TOKEN_TTL_SECONDS ?? 60 * 60 * 24 * 7),
     dbDriver,

@@ -93,15 +93,33 @@
       .replace(/'/g, '&#39;');
   }
 
+  function isCapacitorWebViewOrigin(loc) {
+    if (!loc) return false;
+    const isNative = Boolean(
+      global.Capacitor &&
+      typeof global.Capacitor.isNativePlatform === 'function' &&
+      global.Capacitor.isNativePlatform()
+    );
+    if (isNative) return true;
+    const host = String(loc.hostname || '').toLowerCase();
+    const port = String(loc.port || '');
+    // Capacitor serves WebView assets on https://localhost, http://localhost (default ports), or capacitor://localhost
+    if (String(loc.protocol || '').startsWith('capacitor:')) return true;
+    if ((host === 'localhost' || host === '127.0.0.1') && (!port || port === '80' || port === '443')) {
+      return true;
+    }
+    return false;
+  }
+
   function getApiBase() {
-    if (global.TYPING_API_BASE !== undefined) {
-      return String(global.TYPING_API_BASE || '').replace(/\/$/, '');
+    if (global.TYPING_API_BASE) {
+      return String(global.TYPING_API_BASE).trim().replace(/\/$/, '');
     }
     try {
       const saved = global.localStorage && global.localStorage.getItem('tt_api_base');
-      if (saved) return String(saved).replace(/\/$/, '');
+      if (saved) return String(saved).trim().replace(/\/$/, '');
     } catch (_) {}
-    if (global.location && global.location.origin && global.location.origin.startsWith('http') && !global.location.origin.includes('localhost:80')) {
+    if (global.location && global.location.origin && global.location.origin.startsWith('http') && !isCapacitorWebViewOrigin(global.location)) {
       return global.location.origin.replace(/\/$/, '');
     }
     return '';
@@ -135,8 +153,16 @@
       this.renderInlineCards();
     },
 
+    getApiBase() {
+      return getApiBase();
+    },
+
     setApiBase(url) {
       const clean = String(url || '').trim().replace(/\/$/, '');
+      if (clean && !/^https?:\/\/.+/.test(clean)) {
+        this.showAuthError('Backend URL must start with https:// or http:// (do not use localhost on mobile).');
+        return false;
+      }
       global.TYPING_API_BASE = clean;
       try {
         if (global.localStorage) {
@@ -144,8 +170,10 @@
           else global.localStorage.removeItem('tt_api_base');
         }
       } catch (_) {}
+      this.clearAuthError();
       this.loadPublicConfig().catch(() => {});
       this.fetchCourses().catch(() => {});
+      return true;
     },
 
     async loadPublicConfig() {
@@ -196,10 +224,18 @@
       if (this.token) {
         headers.Authorization = `Bearer ${this.token}`;
       }
-      const res = await fetch(`${base}${path}`, {
-        ...opts,
-        headers
-      });
+      let res;
+      try {
+        res = await fetch(`${base}${path}`, {
+          ...opts,
+          headers
+        });
+      } catch (netErr) {
+        const err = new Error(`Cannot reach backend server (${base}). Verify your internet connection or Backend Server URL.`);
+        err.isNetworkError = true;
+        err.cause = netErr;
+        throw err;
+      }
       const data = await res.json().catch(() => ({}));
       if (res.status === 401 && data.code === 'SESSION_REVOKED') {
         this.setToken(null);
@@ -304,6 +340,8 @@
         }
       }
       this.clearAuthError();
+      const apiInput = document.getElementById('stuApiBaseInput');
+      if (apiInput) apiInput.value = getApiBase();
       modal.style.display = 'flex';
     },
 

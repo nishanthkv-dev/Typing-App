@@ -69,6 +69,34 @@ jobs:
           echo "=== 14. Firebase Auth, Firestore Adapter, Migration & Security Suite ==="
           node test_firebase_integration.js
 
+      - name: Configure Mobile Firebase & API Base (Optional Secrets/Vars)
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          TYPING_API_BASE: ${{ vars.TYPING_API_BASE }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const rawGs = (process.env.GOOGLE_SERVICES_JSON || "").trim();
+            if (rawGs) {
+              const decoded = rawGs.startsWith("{") ? rawGs : Buffer.from(rawGs, "base64").toString("utf8");
+              JSON.parse(decoded); // Validate JSON without printing credentials
+              fs.writeFileSync("android/app/google-services.json", decoded, "utf8");
+              console.log("Configured android/app/google-services.json from repository secret.");
+            } else {
+              console.log("GOOGLE_SERVICES_JSON secret not set; building without google-services.json.");
+            }
+            const apiBase = (process.env.TYPING_API_BASE || "").trim().replace(/"/g, "");
+            if (apiBase) {
+              const html = fs.readFileSync("www/index.html", "utf8");
+              fs.writeFileSync(
+                "www/index.html",
+                html.replace("<meta name=\"tt-api-base\" content=\"\">", `<meta name="tt-api-base" content="${apiBase}">`),
+                "utf8"
+              );
+              console.log("Configured tt-api-base meta tag from repository variable.");
+            }
+          '
+
       - name: Sync Capacitor Android Project
         run: npx cap sync android
 

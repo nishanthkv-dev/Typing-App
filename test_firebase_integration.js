@@ -14,6 +14,7 @@ const { JSDOM } = require('jsdom');
 const { createServer } = require('./backend/server');
 const { FirestoreDatabase } = require('./backend/firestoreDb');
 const { runMigration } = require('./backend/migrate_to_firestore');
+const { seed } = require('./backend/seed');
 const { redactObject } = require('./backend/middleware/rateLimiter');
 
 let total = 0;
@@ -354,6 +355,27 @@ async function runSuite() {
       }
     }
     assert(hit429, 'Auth endpoint enforces 429 rate limiting');
+
+    // -----------------------------------------------------------------------
+    // 6. CAPACITOR LOCALHOST API GUARD & IDEMPOTENT FIRESTORE SEED
+    // -----------------------------------------------------------------------
+    console.log('\n--- TEST 6: CAPACITOR LOCALHOST GUARD & IDEMPOTENT FIRESTORE SEED ---');
+    const portalJs = fs.readFileSync(path.join(__dirname, 'www/js/student_portal.js'), 'utf8');
+    const capDom = new JSDOM(html, { url: 'https://localhost/', runScripts: 'dangerously' });
+    capDom.window.scrollTo = () => {};
+    capDom.window.eval(fbJs);
+    capDom.window.eval(portalJs);
+    assert(capDom.window.StudentPortal.getApiBase() === '', 'Capacitor https://localhost origin does not assume local PC backend');
+    capDom.window.StudentPortal.setApiBase('https://api.typingthalaiva.example.com/');
+    assert(capDom.window.StudentPortal.getApiBase() === 'https://api.typingthalaiva.example.com', 'Explicit HTTPS backend URL saved & normalized cleanly');
+
+    const seedFs = createInMemoryFirestore();
+    const seedDb = new FirestoreDatabase(seedFs);
+    await seed({ db: seedDb, adminBootstrapEmail: 'seedadmin@srikalaimagal.in', adminBootstrapPassword: 'SeedPassword#2026' });
+    await seed({ db: seedDb, adminBootstrapEmail: 'seedadmin@srikalaimagal.in', adminBootstrapPassword: 'SeedPassword#2026' });
+    assert(seedFs._dump('admins').length === 1, 'Repeated seed creates only 1 admin record');
+    assert(seedFs._dump('coupons').filter(c => c.code === 'WELCOME100').length === 1, 'Repeated seed creates only 1 WELCOME100 coupon');
+    assert(seedFs._dump('coupons').filter(c => c.code === 'TYPE25').length === 1, 'Repeated seed creates only 1 TYPE25 coupon');
 
     console.log('\n======================================================================');
     console.log(`   FIREBASE INTEGRATION & SECURITY QA: ${passed}/${total} PASSED`);

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
 <title>Typing Thalaiva — Student Academy Edition</title>
 <meta name="theme-color" content="#f8fafc">
+<meta name="tt-api-base" content="">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -9560,7 +9561,7 @@ async function handleGoogleSignInForUpgrade() {
   }
   try {
     if (typeof toast === 'function') toast('Connecting to Google Account...');
-    if (window.StudentPortal && window.location && window.TYPING_API_BASE !== '' && (window.TYPING_API_BASE || localStorage.getItem('tt_api_base') || (window.location.origin.startsWith('http') && !window.location.origin.includes('localhost:80')))) {
+    if (window.StudentPortal && typeof window.StudentPortal.getApiBase === 'function' && window.StudentPortal.getApiBase()) {
       await window.StudentPortal.handleGoogleAuth();
       renderUpgradeAuthSection();
       renderAccountAccessCard();
@@ -9878,6 +9879,16 @@ window.handleDeleteAccountConfirmation = handleDeleteAccountConfirmation;
         </div>
         <button type="button" class="solidbtn" style="width:100%;" onclick="StudentPortal.submitResetPassword()">Update Password</button>
       </div>
+    </div>
+
+    <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--card-border);">
+      <details style="font-size:11.5px;color:var(--muted);">
+        <summary style="cursor:pointer;font-weight:700;">🔌 Backend Server Connection (Testing / Staging)</summary>
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <input id="stuApiBaseInput" type="url" placeholder="https://your-backend-url.example.com" style="flex:1;padding:8px 10px;border:1px solid var(--card-border);border-radius:8px;font-size:11.5px;background:var(--bg-main);color:var(--ink);" />
+          <button type="button" class="ghostbtn" style="padding:8px 12px;font-size:11.5px;font-weight:700;" onclick="if(window.StudentPortal){ StudentPortal.setApiBase(document.getElementById('stuApiBaseInput').value); if(typeof toast==='function') toast('Server URL updated'); }">Save</button>
+        </div>
+      </details>
     </div>
   </div>
 </div>
