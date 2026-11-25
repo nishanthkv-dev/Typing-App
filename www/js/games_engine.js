@@ -3,37 +3,79 @@
  * Powered by K V N Techno Labs | Sri Kalaimagal Technical Institute
  * 
  * Features:
- *  1. Bubble Word Challenge (Rising flotation defense)
- *  2. Falling Words Challenge (Gravity cascade survival)
- *  3. Surgical Letter-by-Letter progression (No advance on errors)
- *  4. 5-Miss Survival Rule (❤️❤️❤️❤️❤️)
- *  5. Scoring: 1 pt / correct letter, +5 bonus / word, no negative points
- *  6. Tri-Language Engine: English QWERTY, Tamil99, Tamil Typewriter
- *  7. Anti-Choke Intelligent Mistake Heatmap & Diagnostic Report
- *  8. Dedicated Student Game History with comparison metrics
- *  9. Fair-Play Personal Best Leaderboard with accuracy tie-breaker
+ *  1. Bubble Letter Challenge (Letters only, falling bubbles defense)
+ *  2. Falling Words Challenge (Adaptive speed, progressive word flow, zero mismatch)
+ *  3. Word Typing Challenge (Target word at top, typing input at bottom, 35 words session)
+ *  4. Surgical Letter-by-Letter progression (No advance on errors)
+ *  5. 6-Miss Survival Rule (❤️❤️❤️❤️❤️❤️)
+ *  6. Scoring: 1 pt / correct letter, +5 bonus / word, no negative points
+ *  7. Tri-Language Engine: English QWERTY, Tamil99, Tamil Typewriter
+ *  8. Synthesized Web Audio keyclick, hit, pop, completion chime, and error tones
+ *  9. Anti-Choke Intelligent Mistake Heatmap & Diagnostic Report
+ * 10. Fair-Play Personal Best Leaderboard with accuracy tie-breaker
  */
 
 (function (window) {
   'use strict';
 
-  // --- CURATED WORD BANKS FOR PRACTICE ---
-  const WORD_BANKS = {
+  // --- CURATED LETTER BANKS FOR BUBBLE CHALLENGE (INDIVIDUAL LETTERS ONLY) ---
+  const LETTER_BANKS = {
     en: [
-      // Fast high-frequency DoTE syllabus words
-      "type", "speed", "focus", "power", "skill", "learn", "rapid", "target", "finger", "rhythm",
-      "office", "letter", "stroke", "master", "result", "future", "button", "system", "engine", "action",
-      "growth", "record", "energy", "screen", "school", "thalaiva", "practice", "accuracy", "keyboard", "victory",
-      "champion", "progress", "director", "technical", "government", "discipline", "excellence", "confidence",
-      "minute", "paper", "exam", "report", "effort", "method", "wisdom", "habit", "smart", "steady",
-      "timing", "senior", "junior", "course", "centre", "honor", "quick", "tempo", "active", "talent"
+      "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+      "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+      "U", "V", "W", "X", "Y", "Z"
     ],
     ta: [
-      // Pure Tamil grapheme vocabulary suitable for syllabus training
-      "தமிழ்", "கல்வி", "அறிவு", "வணக்கம்", "பாடம்", "வெற்றி", "தட்டச்சு", "ஆசிரியர்", "பள்ளி", "நன்மை",
-      "கலை", "உழைப்பு", "திறமை", "வேகம்", "துல்லியம்", "அரசு", "தேர்வு", "மதிப்பெண்", "முயற்சி", "சான்றிதழ்",
-      "பயிற்சி", "கணினி", "ஆவணம்", "அலுவலகம்", "விரல்", "விசை", "காலம்", "கற்போம்", "சாதிப்போம்", "தலைவா",
-      "நாடு", "புகழ்", "வளர்ச்சி", "ஒழுக்கம்", "கடமை", "ஆர்வம்", "அமைதி", "நம்பிக்கை", "உறுதி", "இனிமை"
+      "அ", "ஆ", "இ", "ஈ", "உ", "ஊ", "எ", "ஏ", "ஐ", "ஒ", "ஓ", "ஔ", "ஃ",
+      "க", "ச", "ட", "த", "ப", "ற", "ங", "ஞ", "ண", "ந", "ம", "ன",
+      "ய", "ர", "ல", "வ", "ழ", "ள"
+    ]
+  };
+
+  // --- PROGRESSIVE WORD TIERS FOR WORD TYPING & FALLING CHALLENGES ---
+  const WORD_TIERS = {
+    en: {
+      easy: [
+        "type", "speed", "focus", "power", "skill", "learn", "rapid", "target", "hand", "fast",
+        "mind", "star", "flow", "best", "word", "time", "task", "form", "page", "note"
+      ],
+      medium: [
+        "master", "result", "future", "system", "engine", "action", "growth", "record", "energy", "screen",
+        "school", "effort", "method", "wisdom", "habit", "smart", "steady", "timing", "senior", "junior",
+        "course", "centre", "honor", "quick", "tempo", "active", "talent"
+      ],
+      hard: [
+        "thalaiva", "practice", "accuracy", "keyboard", "victory", "champion", "progress", "director", "technical",
+        "government", "discipline", "excellence", "confidence", "minute", "paper", "efficiency", "milestone"
+      ]
+    },
+    ta: {
+      easy: [
+        "தமிழ்", "கல்வி", "அறிவு", "பாடம்", "பள்ளி", "நன்மை", "கலை", "அரசு", "நாடு", "புகழ்",
+        "விரல்", "விசை", "காலம்", "கடமை", "அமைதி", "உறுதி", "இனிமை", "வளம்", "மலர்", "நடை"
+      ],
+      medium: [
+        "வணக்கம்", "வெற்றி", "திறமை", "வேகம்", "தேர்வு", "முயற்சி", "பயிற்சி", "கணினி", "ஆவணம்", "தலைவா",
+        "வளர்ச்சி", "ஒழுக்கம்", "ஆர்வம்", "நேர்த்தி", "உழைப்பு", "சாதிப்போம்", "சுடர்"
+      ],
+      hard: [
+        "தட்டச்சு", "ஆசிரியர்", "துல்லியம்", "மதிப்பெண்", "சான்றிதழ்", "அலுவலகம்", "நம்பிக்கை", "முன்னேற்றம்",
+        "தன்னம்பிக்கை", "தொழில்நுட்பம்", "சான்றோன்"
+      ]
+    }
+  };
+
+  // Curated flat word banks for general fallback & backward compatibility
+  const WORD_BANKS = {
+    en: [
+      ...WORD_TIERS.en.easy,
+      ...WORD_TIERS.en.medium,
+      ...WORD_TIERS.en.hard
+    ],
+    ta: [
+      ...WORD_TIERS.ta.easy,
+      ...WORD_TIERS.ta.medium,
+      ...WORD_TIERS.ta.hard
     ]
   };
 
@@ -54,7 +96,7 @@
     return Array.from(text);
   }
 
-  // --- SOUND EFFECTS SYNTHESIS ---
+  // --- SOUND EFFECTS SYNTHESIS (Zero latency Web Audio) ---
   let isGameSoundEnabled = true;
   let gameAudioCtx = null;
   let lastErrorSoundTime = 0;
@@ -214,21 +256,60 @@
         { name: "Meena Kumari", score: 200, accuracy: 93.8, date: "05 Nov 2026" },
         { name: "Sathish Kumar", score: 175, accuracy: 92.0, date: "04 Nov 2026" }
       ]
+    },
+    word_typing: {
+      en: [
+        { name: "Suresh Kumar", score: 320, accuracy: 99.4, date: "08 Nov 2026" },
+        { name: "Nandhini Devi", score: 295, accuracy: 98.6, date: "07 Nov 2026" },
+        { name: "Karthik Raja", score: 270, accuracy: 97.5, date: "06 Nov 2026" },
+        { name: "Priya Dharshini", score: 245, accuracy: 96.8, date: "05 Nov 2026" },
+        { name: "Vignesh M.", score: 210, accuracy: 95.2, date: "04 Nov 2026" }
+      ],
+      tamil99: [
+        { name: "Kavitha R.", score: 305, accuracy: 98.8, date: "08 Nov 2026" },
+        { name: "Vasanthakumar", score: 280, accuracy: 97.9, date: "07 Nov 2026" },
+        { name: "Senthamizh Selvi", score: 250, accuracy: 96.5, date: "06 Nov 2026" },
+        { name: "Manikandan P.", score: 225, accuracy: 95.4, date: "05 Nov 2026" },
+        { name: "Murugan T.", score: 195, accuracy: 94.1, date: "04 Nov 2026" }
+      ],
+      typewriter: [
+        { name: "Palanisamy K.", score: 290, accuracy: 98.2, date: "08 Nov 2026" },
+        { name: "Chandrasekar G.", score: 265, accuracy: 97.1, date: "07 Nov 2026" },
+        { name: "Devi Meenakshi", score: 240, accuracy: 96.0, date: "06 Nov 2026" },
+        { name: "Thangaraj P.", score: 210, accuracy: 94.8, date: "05 Nov 2026" },
+        { name: "Subramanian N.", score: 185, accuracy: 93.5, date: "04 Nov 2026" }
+      ]
     }
   };
 
   // --- CORE GAME ENGINE CLASS ---
   class GamesEngine {
     constructor() {
-      this.gameType = 'bubble'; // 'bubble' | 'falling'
+      this.gameType = 'bubble'; // 'bubble' | 'falling' | 'word_typing'
       this.lang = 'en'; // 'en' | 'ta'
       this.layout = 'qwerty'; // 'qwerty' | 'tamil99' | 'typewriter'
       this.score = 0;
-      this.lives = 5; // 5 misses max
+      this.maxLives = 6; // 6 chances matching reference UI
+      this.lives = 6;
+      this.targetWordsCount = 35; // 30-40 words per complete session
       this.wordsCompleted = 0;
       this.wordsMissed = 0;
+      this.wordsAttempted = 0;
+      this.wordsCorrect = 0;
+      this.wordsIncorrect = 0;
       this.correctChars = 0;
       this.incorrectChars = 0;
+      this.keystrokeMistakes = 0;
+      this.currentWordHadMistake = false;
+
+      // Adaptive speed variables
+      this.adaptiveBaseSpeed = 0.48; // px/frame (~29 px/sec, comfortable student baseline)
+      this.recentWordTimes = [];
+
+      // Word typing challenge state
+      this.wordTypingList = [];
+      this.wordTypingIndex = 0;
+
       this.startTime = null;
       this.endTime = null;
       this.active = false;
@@ -247,7 +328,7 @@
 
       this.animFrameId = null;
       this.lastSpawnTime = 0;
-      this.spawnInterval = 3200; // ms
+      this.spawnInterval = 3000; // ms
 
       this.canvas = null;
       this.ctx = null;
@@ -257,6 +338,7 @@
       this.canvasHeight = 600;
       this.pixelRatio = window.devicePixelRatio || 1;
       this.soundEnabled = true;
+      this.playSound = playSound;
     }
 
     toggleSound() {
@@ -273,25 +355,24 @@
       return this.soundEnabled;
     }
 
-    getSpeedForWord() {
+    getSpeedForWord(wordObj) {
       const elapsedSec = Math.max(0, (Date.now() - (this.startTime || Date.now())) / 1000);
-      const isBubble = (this.gameType === 'bubble');
-      if (!isBubble) {
-        // Falling Words: Starts slow & student-friendly at 0.55 px/frame (~33 px/sec)
-        // Over the first 25 seconds, smoothly ramps from 0.55 to 1.15 px/frame
-        const timeProgress = Math.min(1.0, elapsedSec / 25.0);
-        const smoothProgress = timeProgress * (2 - timeProgress); // quadratic ease-out
-        const rampSpeed = 0.55 + (smoothProgress * 0.60);
-        // Score bonus scales smoothly
-        const scoreBonus = Math.min(0.70, (this.score / 100) * 0.35);
-        return Number((rampSpeed + scoreBonus).toFixed(2));
+      if (this.gameType === 'word_typing') {
+        return 0; // Static target
+      } else if (this.gameType === 'falling') {
+        // Falling Words: Adaptive speed based on student performance + word length compensation
+        const base = this.adaptiveBaseSpeed || 0.48;
+        // Words with more graphemes fall proportionally slower to allow sufficient typing time
+        const len = (wordObj && wordObj.graphemes) ? wordObj.graphemes.length : 5;
+        const lengthFactor = Math.max(0.68, Math.min(1.20, 5.0 / Math.max(3, len)));
+        const scoreBonus = Math.min(0.35, (this.score / 100) * 0.15);
+        const finalSpeed = Math.max(0.38, Math.min(0.85, (base * lengthFactor) + scoreBonus));
+        return Number(finalSpeed.toFixed(2));
       } else {
-        // Bubble Words: Starts slow & student-friendly at 0.45 px/frame
-        // Over the first 35 seconds, smoothly ramps from 0.45 to 0.95 px/frame
+        // Bubble Challenge: Starts slow at 0.45 px/frame, gentle progression up to 0.70 px/frame
         const timeProgress = Math.min(1.0, elapsedSec / 35.0);
-        const smoothProgress = timeProgress * (2 - timeProgress);
-        const rampSpeed = 0.45 + (smoothProgress * 0.50);
-        const scoreBonus = Math.min(0.25, (this.score / 150) * 0.25);
+        const rampSpeed = 0.45 + (timeProgress * 0.20);
+        const scoreBonus = Math.min(0.12, (this.score / 150) * 0.12);
         return Number((rampSpeed + scoreBonus).toFixed(2));
       }
     }
@@ -405,10 +486,18 @@
       this.layout = layout || (lang === 'ta' ? 'tamil99' : 'qwerty');
 
       this.score = 0;
-      this.maxLives = 6; // 6 chances matching reference UI
+      this.maxLives = 6;
       this.lives = 6;
+      this.targetWordsCount = 35; // 35 words per session
       this.wordsCompleted = 0;
       this.wordsMissed = 0;
+      this.wordsAttempted = 0;
+      this.wordsCorrect = 0;
+      this.wordsIncorrect = 0;
+      this.keystrokeMistakes = 0;
+      this.currentWordHadMistake = false;
+      this.adaptiveBaseSpeed = 0.48;
+
       this.correctChars = 0;
       this.incorrectChars = 0;
       this.startTime = Date.now();
@@ -428,6 +517,21 @@
       this.lastSpawnTime = 0;
       this.spawnInterval = 3000;
 
+      // Initialize session list for Word Typing Challenge
+      if (this.gameType === 'word_typing') {
+        const tiers = WORD_TIERS[this.lang] || WORD_TIERS.en;
+        const easyP = [...tiers.easy].sort(() => 0.5 - Math.random());
+        const medP = [...tiers.medium].sort(() => 0.5 - Math.random());
+        const hardP = [...tiers.hard].sort(() => 0.5 - Math.random());
+        // Progression: 10 easy, 15 medium, 10 hard words = 35 words total
+        this.wordTypingList = [
+          ...easyP.slice(0, 10),
+          ...medP.slice(0, 15),
+          ...hardP.slice(0, 10)
+        ];
+        this.wordTypingIndex = 0;
+      }
+
       // Show gaming screen FIRST so canvas has active DOM bounding box
       if (typeof window.showScreen === 'function') {
         window.showScreen('screen-games');
@@ -440,7 +544,7 @@
       this.resizeCanvas();
       this.updateHUD();
 
-      // Spawn initial word immediately
+      // Spawn initial element immediately
       this.spawnWord();
 
       // Focus input
@@ -521,99 +625,130 @@
     }
 
     spawnWord() {
-      const bank = WORD_BANKS[this.lang] || WORD_BANKS.en;
-      // Pick random word not currently on screen
-      const currentTexts = new Set(this.activeWords.map(w => w.text));
-      const candidates = bank.filter(w => !currentTexts.has(w));
-      const wordText = candidates.length > 0 ? candidates[Math.floor(Math.random() * candidates.length)] : bank[Math.floor(Math.random() * bank.length)];
-
-      const graphemes = splitGraphemes(wordText, this.lang);
       const isBubble = (this.gameType === 'bubble');
-      const speed = this.getSpeedForWord();
+      const isWordTyping = (this.gameType === 'word_typing');
 
       const BUBBLE_PALETTES = [
-        { main: '#e11d48', dark: '#9f1239', light: '#fda4af' }, // Vivid ruby red/pink
-        { main: '#65a30d', dark: '#3f6212', light: '#bef264' }, // Apple/lime green
-        { main: '#4f46e5', dark: '#3730a3', light: '#a5b4fc' }, // Periwinkle/royal blue
-        { main: '#7c3aed', dark: '#5b21b6', light: '#c4b5fd' }, // Purple/violet
-        { main: '#ea580c', dark: '#9a3412', light: '#fdba74' }, // Vibrant amber/orange
+        { main: '#e11d48', dark: '#9f1239', light: '#fda4af' }, // Vivid ruby red
+        { main: '#65a30d', dark: '#3f6212', light: '#bef264' }, // Apple green
+        { main: '#4f46e5', dark: '#3730a3', light: '#a5b4fc' }, // Periwinkle blue
+        { main: '#7c3aed', dark: '#5b21b6', light: '#c4b5fd' }, // Violet
+        { main: '#ea580c', dark: '#9a3412', light: '#fdba74' }, // Amber
         { main: '#0284c7', dark: '#075985', light: '#7dd3fc' }, // Sky cyan
       ];
 
       if (isBubble) {
-        // --- BUBBLE WORD CHALLENGE: INDEPENDENT SINGLE BUBBLE SPAWNING ---
-        // Pick intelligent non-overlapping lane across canvas width
+        // --- 1. BUBBLE WORD CHALLENGE: INDIVIDUAL LETTERS ONLY ---
+        const letterBank = LETTER_BANKS[this.lang] || LETTER_BANKS.en;
+        const activeLetters = new Set(this.activeWords.map(w => w.text));
+        const available = letterBank.filter(l => !activeLetters.has(l));
+        const letter = available.length > 0 ? available[Math.floor(Math.random() * available.length)] : letterBank[Math.floor(Math.random() * letterBank.length)];
+        const graphemes = [letter];
+
+        // 4 distinct vertical lanes across canvas
         const numLanes = 4;
         const padding = Math.max(45, this.canvasWidth * 0.10);
         const availableWidth = this.canvasWidth - padding * 2;
         const laneWidth = availableWidth / numLanes;
 
-        // Check lane occupancy near the top
+        if (this.activeWords.length >= 4) return;
+
         const occupiedLanes = new Set();
         this.activeWords.forEach(w => {
-          if (w.lane !== undefined && w.y < 220) {
-            occupiedLanes.add(w.lane);
-          }
+          if (w.lane !== undefined) occupiedLanes.add(w.lane);
         });
 
-        // Pick an unoccupied lane
         const freeLanes = [];
         for (let l = 0; l < numLanes; l++) {
           if (!occupiedLanes.has(l)) freeLanes.push(l);
         }
-        const chosenLane = (freeLanes.length > 0)
-          ? freeLanes[Math.floor(Math.random() * freeLanes.length)]
-          : Math.floor(Math.random() * numLanes);
+        if (freeLanes.length === 0) return;
+        const chosenLane = freeLanes[Math.floor(Math.random() * freeLanes.length)];
 
         const bx = padding + (chosenLane + 0.5) * laneWidth;
         const palette = BUBBLE_PALETTES[Math.floor(Math.random() * BUBBLE_PALETTES.length)];
-        const isTamil = (this.lang === 'ta');
-        const textLen = graphemes.length;
-        const bubbleHeight = 52;
-        const bubbleWidth = Math.max(68, textLen * (isTamil ? 22 : 18) + 34);
-        const bubbleRadius = Math.round(bubbleHeight / 2);
+        const bubbleRadius = 28;
+        const isFirst = (this.activeWords.length === 0);
+        const startY = isFirst ? 45 : -35;
 
-        // When spawning the initial bubble on game start, place it immediately visible
-        const isFirstWord = (this.activeWords.length === 0);
-        const startY = isFirstWord ? (bubbleRadius + 18) : (-bubbleRadius - 8);
-
-        // Word bubble entity
-        const wordObj = {
-          text: wordText,
+        const bubbleObj = {
+          text: letter,
           graphemes: graphemes,
           lane: chosenLane,
           x: bx,
           baseX: bx,
           y: startY,
-          width: bubbleWidth,
-          height: bubbleHeight,
+          width: 56,
+          height: 56,
           radius: bubbleRadius,
-          speed: speed,
+          speed: this.getSpeedForWord(),
           color: palette,
           phase: Math.random() * Math.PI * 2,
-          wobbleSpeed: 0.018 + Math.random() * 0.01,
-          wobbleAmp: 4 + Math.random() * 3,
+          wobbleSpeed: 0.02 + Math.random() * 0.012,
+          wobbleAmp: 4,
           shakeOffset: 0,
           shakeFrames: 0,
-          spawnTime: Date.now()
+          spawnTime: Date.now(),
+          popped: false
         };
 
-        // For backward compatibility with tests inspecting bubbles
-        wordObj.bubbles = [{
-          char: wordText,
+        // For backward compatibility with tests
+        bubbleObj.bubbles = [{
+          char: letter,
           x: bx,
-          y: wordObj.y,
+          y: bubbleObj.y,
           radius: bubbleRadius,
           popped: false,
           color: palette
         }];
 
-        this.activeWords.push(wordObj);
+        this.activeWords.push(bubbleObj);
+        if (this.activeWords.length === 1) {
+          this.currentWordIdx = 0;
+          this.charIndex = 0;
+          this.composer = { raw: '', outLen: 0 };
+        }
+      } else if (isWordTyping) {
+        // --- 2. WORD TYPING CHALLENGE: PROMINENT TARGET WORD AT TOP ---
+        if (this.wordTypingIndex >= this.targetWordsCount) {
+          this.gameOver(true);
+          return;
+        }
+        const wordText = this.wordTypingList[this.wordTypingIndex] || 'focus';
+        const graphemes = splitGraphemes(wordText, this.lang);
+        const wordObj = {
+          text: wordText,
+          graphemes: graphemes,
+          x: this.canvasWidth / 2,
+          y: 110,
+          baseX: this.canvasWidth / 2,
+          width: Math.min(this.canvasWidth * 0.88, 340),
+          height: 84,
+          speed: 0,
+          shakeOffset: 0,
+          shakeFrames: 0,
+          spawnTime: Date.now()
+        };
+        this.activeWords = [wordObj];
+        this.currentWordIdx = 0;
+        this.charIndex = 0;
+        this.currentWordHadMistake = false;
+        this.composer = { raw: '', outLen: 0 };
       } else {
-        // --- FALLING WORDS CHALLENGE ---
+        // --- 3. FALLING WORDS CHALLENGE: EXACTLY 1 WORD FALLING AT A TIME ---
+        this.activeWords = []; // Strictly ensure only 1 word falls at any time
+
+        const tiers = WORD_TIERS[this.lang] || WORD_TIERS.en;
+        const progress = this.wordsCompleted + this.wordsMissed;
+        let pool = tiers.easy;
+        if (progress >= 25) pool = tiers.hard;
+        else if (progress >= 10) pool = tiers.medium;
+
+        const wordText = pool[Math.floor(Math.random() * pool.length)];
+        const graphemes = splitGraphemes(wordText, this.lang);
         const initialX = this.canvasWidth / 2;
         const initialY = 40;
-        const boxWidth = Math.max(80, graphemes.length * 50);
+        const boxWidth = Math.min(this.canvasWidth * 0.86, Math.max(140, graphemes.length * 32 + 60));
 
         const wordObj = {
           text: wordText,
@@ -623,22 +758,19 @@
           baseX: initialX,
           width: boxWidth,
           height: 48,
-          speed: speed,
           phase: Math.random() * Math.PI * 2,
-          wobbleSpeed: 0.03 + Math.random() * 0.02,
-          wobbleAmp: 4,
+          wobbleSpeed: 0.025,
+          wobbleAmp: 3,
           shakeOffset: 0,
           shakeFrames: 0,
           spawnTime: Date.now()
         };
+        wordObj.speed = this.getSpeedForWord(wordObj);
 
-        this.activeWords.push(wordObj);
-      }
-
-      // If no active word target set, lock onto this one
-      if (this.activeWords.length === 1) {
+        this.activeWords = [wordObj];
         this.currentWordIdx = 0;
         this.charIndex = 0;
+        this.currentWordHadMistake = false;
         this.composer = { raw: '', outLen: 0 };
       }
     }
@@ -650,7 +782,7 @@
           char: wordObj.text,
           x: wordObj.x,
           y: wordObj.y,
-          radius: wordObj.radius || 26,
+          radius: wordObj.radius || 28,
           popped: false,
           color: wordObj.color
         }];
@@ -661,18 +793,15 @@
     handleKeystroke(char) {
       if (!this.active || this.paused || this.activeWords.length === 0) return;
 
-      // Typing key sound feedback on every keystroke by default
+      // Mechanical key click sound feedback on every keystroke by default
       playSound('type');
 
-      let targetWord = this.activeWords[this.currentWordIdx];
+      let targetWord = this.activeWords[this.currentWordIdx] || this.activeWords[0];
       if (!targetWord) return;
-
-      let targetGrapheme = targetWord.graphemes[this.charIndex];
-      if (!targetGrapheme) return;
 
       let typedChar = char;
 
-      // Handle Tamil transliteration if Tamil track is active
+      // Handle Tamil transliteration if Tamil layout is active
       if (this.lang === 'ta' && (this.layout === 'tamil99' || this.layout === 'typewriter')) {
         const keymap = (window.KEYMAPS && window.KEYMAPS[this.layout]) || (typeof KEYMAPS !== 'undefined' ? KEYMAPS[this.layout] : null) || {};
         const prefixes = (window.KEYMAP_PREFIXES && window.KEYMAP_PREFIXES[this.layout]) || (typeof KEYMAP_PREFIXES !== 'undefined' ? KEYMAP_PREFIXES[this.layout] : null) || new Set();
@@ -680,16 +809,13 @@
         const newBuf = this.composer.raw + char;
 
         if (Object.prototype.hasOwnProperty.call(keymap, newBuf)) {
-          // Output resolved!
           typedChar = keymap[newBuf];
           this.composer.raw = newBuf;
           this.composer.outLen = typedChar.length;
         } else if (prefixes.has(newBuf)) {
-          // Incomplete composition prefix (e.g. ';' in typewriter or dead key)
           this.composer.raw = newBuf;
           return; // Wait for resolving keystroke
         } else {
-          // Try single character direct mapping
           if (Object.prototype.hasOwnProperty.call(keymap, char)) {
             typedChar = keymap[char];
             this.composer.raw = char;
@@ -701,7 +827,6 @@
         }
       }
 
-      // Compare typed character with expected target grapheme
       const checkLetterMatch = (tChar, expected) => {
         if (!expected) return false;
         return (this.lang === 'en')
@@ -709,88 +834,187 @@
           : (tChar === expected || (expected.startsWith(tChar) && tChar.length < expected.length));
       };
 
-      let isMatch = checkLetterMatch(typedChar, targetGrapheme);
+      if (this.gameType === 'bubble') {
+        // --- BUBBLE CHALLENGE: SUPPORTS INDIVIDUAL LETTERS (NATURAL) & PROGRESSIVE WORDS ---
+        let matchedIndex = -1;
+        let targetBubble = this.activeWords[this.currentWordIdx] || this.activeWords[0];
 
-      // In bubble mode, if current target didn't match and student hasn't partially typed it,
-      // allow locking onto any other visible bubble whose first letter matches!
-      if (!isMatch && this.gameType === 'bubble' && this.charIndex === 0) {
-        for (let idx = 0; idx < this.activeWords.length; idx++) {
-          if (idx !== this.currentWordIdx) {
-            const altWord = this.activeWords[idx];
-            if (altWord && altWord.graphemes && checkLetterMatch(typedChar, altWord.graphemes[0])) {
+        // Check current focused bubble at charIndex
+        if (targetBubble && targetBubble.graphemes) {
+          const expected = targetBubble.graphemes[this.charIndex];
+          if (checkLetterMatch(typedChar, expected)) {
+            matchedIndex = this.currentWordIdx;
+          }
+        }
+
+        // If not matched on current and student has not started typing it (charIndex === 0), search other active bubbles
+        if (matchedIndex === -1 && this.charIndex === 0) {
+          for (let idx = 0; idx < this.activeWords.length; idx++) {
+            const b = this.activeWords[idx];
+            if (b && !b.popped && b.graphemes && checkLetterMatch(typedChar, b.graphemes[0])) {
+              matchedIndex = idx;
               this.currentWordIdx = idx;
-              targetWord = altWord;
-              targetGrapheme = altWord.graphemes[0];
-              isMatch = true;
+              targetBubble = b;
               break;
             }
           }
         }
+
+        if (matchedIndex !== -1 && targetBubble) {
+          const expected = targetBubble.graphemes[this.charIndex];
+          if (this.lang === 'ta' && typedChar !== expected && expected.startsWith(typedChar)) {
+            return; // Wait for resolving Tamil keystroke
+          }
+
+          this.correctChars++;
+          this.score += 1;
+          this.charIndex++;
+          this.composer = { raw: '', outLen: 0 };
+
+          playSound('hit');
+          playSound('pop');
+          this.spawnBubblePopBurst(targetBubble.x, targetBubble.y);
+          this.addFloatingTip(targetBubble.x, targetBubble.y - 18, '+1', '#fbbf24');
+
+          // Check if bubble is fully completed
+          if (this.charIndex >= targetBubble.graphemes.length) {
+            if (targetBubble.graphemes.length > 1) {
+              this.score += 5; // +5 bonus for multi-letter words
+              this.addFloatingTip(targetBubble.x, targetBubble.y - 24, '+5 WORD BONUS! 🔥', '#fbbf24');
+            }
+            this.wordsCompleted++;
+            this.wordsCorrect++;
+            targetBubble.popped = true;
+            if (targetBubble.bubbles) {
+              targetBubble.bubbles.forEach(b => { b.popped = true; });
+            }
+
+            this.activeWords.splice(matchedIndex, 1);
+            this.currentWordIdx = 0;
+            this.charIndex = 0;
+            this.updateHUD();
+
+            if (this.activeWords.length === 0) {
+              this.spawnWord();
+            }
+          } else {
+            this.updateHUD();
+          }
+        } else {
+          // Mistake in bubble mode
+          this.incorrectChars++;
+          this.keystrokeMistakes++;
+          this.composer = { raw: '', outLen: 0 };
+
+          const b = this.activeWords[this.currentWordIdx] || this.activeWords[0];
+          const expected = (b && b.graphemes) ? b.graphemes[this.charIndex || 0] : '';
+          const mistakeEntry = {
+            expected: expected,
+            actual: typedChar,
+            word: b ? b.text : '',
+            time: Date.now()
+          };
+          this.mistakesLog.push(mistakeEntry);
+          if (expected) {
+            this.weakKeysMap[expected] = (this.weakKeysMap[expected] || 0) + 1;
+          }
+          if (b && b.text) {
+            this.wordMistakesMap[b.text] = (this.wordMistakesMap[b.text] || 0) + 1;
+          }
+
+          playSound('error');
+          triggerHaptic('error');
+
+          if (b) {
+            b.shakeFrames = 14;
+            this.addFloatingTip(b.x, b.y + 24, `Oops! Typed '${typedChar}'`, '#ef4444');
+          }
+          this.updateHUD();
+        }
+        return;
       }
 
+      // --- FALLING WORDS OR WORD TYPING CHALLENGE ---
+      let targetGrapheme = targetWord.graphemes[this.charIndex];
+      if (!targetGrapheme) return;
+
+      const isMatch = checkLetterMatch(typedChar, targetGrapheme);
+
       if (isMatch) {
-        // If it's a partial prefix in Tamil, wait for next key to complete full grapheme
+        // If it's a partial prefix in Tamil, wait for resolving key
         if (this.lang === 'ta' && typedChar !== targetGrapheme && targetGrapheme.startsWith(typedChar)) {
           return;
         }
 
-        // --- SUCCESS STRIKE ---
         this.correctChars++;
-        this.score += 1; // 1 point per correct letter
-
-        let strikeX = targetWord.x;
-        let strikeY = targetWord.y;
-
-        if (this.gameType === 'bubble') {
-          strikeX = targetWord.x;
-          strikeY = targetWord.y;
-          this.spawnBubblePopBurst(strikeX, strikeY);
-          this.addFloatingTip(strikeX, strikeY - 20, '+1', '#fbbf24');
-        }
-
+        this.score += 1;
         this.charIndex++;
         this.composer = { raw: '', outLen: 0 };
 
         playSound('hit');
-        playSound('pop');
-        this.spawnSparks(strikeX, strikeY, '#10b981');
+        this.spawnSparks(targetWord.x, targetWord.y, '#10b981');
         this.updateHUD();
 
         // Check if word completed
         if (this.charIndex >= targetWord.graphemes.length) {
-          // --- WORD BONUS COMPLETION ---
-          this.score += 5; // 5 bonus points for completing a word
+          // Word Complete Bonus (+5 points)
+          this.score += 5;
           this.wordsCompleted++;
-          targetWord.popped = true;
-          if (targetWord.bubbles) {
-            targetWord.bubbles.forEach(b => { b.popped = true; });
+          if (!this.currentWordHadMistake) {
+            this.wordsCorrect++;
+          } else {
+            this.wordsIncorrect++;
           }
+
           playSound('bonus');
-          this.spawnWordExplosion(strikeX, strikeY);
-          this.addFloatingTip(strikeX, strikeY - 24, '+5 WORD BONUS! 🔥', '#fbbf24');
+          this.spawnWordExplosion(targetWord.x, targetWord.y);
+          this.addFloatingTip(targetWord.x, targetWord.y - 20, '+5 WORD BONUS! 🔥', '#fbbf24');
 
-          // Remove completed word
-          this.activeWords.splice(this.currentWordIdx, 1);
-          this.charIndex = 0;
-          this.currentWordIdx = 0;
-          this.updateHUD();
+          if (this.gameType === 'falling') {
+            // Adaptive speed: slightly increase speed if typed without mistakes
+            if (!this.currentWordHadMistake) {
+              this.adaptiveBaseSpeed = Math.min(0.85, this.adaptiveBaseSpeed + 0.035);
+            } else {
+              this.adaptiveBaseSpeed = Math.max(0.40, this.adaptiveBaseSpeed - 0.02);
+            }
+            this.activeWords = [];
+            this.charIndex = 0;
+            this.currentWordIdx = 0;
+            this.updateHUD();
 
-          // Spawn next word if empty
-          if (this.activeWords.length === 0) {
-            this.spawnWord();
+            // Check if 35 words session reached
+            if (this.wordsCompleted + this.wordsMissed >= this.targetWordsCount) {
+              this.gameOver(true); // Session Victory!
+            } else {
+              this.spawnWord();
+            }
+          } else if (this.gameType === 'word_typing') {
+            this.wordTypingIndex++;
+            this.activeWords = [];
+            this.charIndex = 0;
+            this.currentWordIdx = 0;
+            this.updateHUD();
+
+            // Check if 35 words session reached
+            if (this.wordTypingIndex >= this.targetWordsCount) {
+              this.gameOver(true); // Session Victory!
+            } else {
+              this.spawnWord();
+            }
           }
         }
       } else {
-        // --- MISTAKE RECORDED (NO ADVANCEMENT) ---
+        // --- MISTAKE RECORDED (NO ADVANCE) ---
         this.incorrectChars++;
+        this.keystrokeMistakes++;
+        this.currentWordHadMistake = true;
         this.composer = { raw: '', outLen: 0 };
 
-        if (this.gameType === 'bubble') {
-          targetWord.shakeFrames = 14;
-          this.addFloatingTip(targetWord.x, targetWord.y + 26, `Oops! Typed '${typedChar}' not '${targetGrapheme}'`, '#ef4444');
+        // Adaptive speed: reduce speed slightly on mistake for student comfort
+        if (this.gameType === 'falling') {
+          this.adaptiveBaseSpeed = Math.max(0.38, this.adaptiveBaseSpeed - 0.035);
         }
 
-        // Log exact mistake for anti-choke diagnostic
         const mistakeEntry = {
           expected: targetGrapheme,
           actual: typedChar,
@@ -801,12 +1025,9 @@
         this.weakKeysMap[targetGrapheme] = (this.weakKeysMap[targetGrapheme] || 0) + 1;
         this.wordMistakesMap[targetWord.text] = (this.wordMistakesMap[targetWord.text] || 0) + 1;
 
-        // Visual error shake & warning
         targetWord.shakeFrames = 12;
         targetWord.shakeOffset = 10;
-        if (this.gameType !== 'bubble') {
-          this.addFloatingTip(targetWord.x, targetWord.y + 24, `Oops! Typed '${typedChar}' not '${targetGrapheme}'`, '#ef4444');
-        }
+        this.addFloatingTip(targetWord.x, targetWord.y + 24, `Oops! Typed '${typedChar}' not '${targetGrapheme}'`, '#ef4444');
 
         playSound('error');
         triggerHaptic('error');
@@ -891,9 +1112,10 @@
 
     update(timestamp) {
       const isBubble = (this.gameType === 'bubble');
+      const isWordTyping = (this.gameType === 'word_typing');
       const now = Date.now();
 
-      // Update ambient dust motes
+      // Ambient dust in bubble mode
       if (this.ambientDust && isBubble) {
         for (let i = 0; i < this.ambientDust.length; i++) {
           const d = this.ambientDust[i];
@@ -905,29 +1127,34 @@
         }
       }
 
-      // Spawn periodic words if below max concurrent words
-      // In Bubble mode, allow up to 4 independent bubbles in separate lanes.
-      // In Falling Words, exactly 1 word block falls at a time to prevent any overlaps, bunching, or target mismatch!
-      const maxConcurrent = isBubble ? 4 : 1;
-      const effectiveInterval = isBubble ? 2600 : this.spawnInterval;
-      if (now - this.lastSpawnTime > effectiveInterval && this.activeWords.length < maxConcurrent) {
-        this.spawnWord();
-        this.lastSpawnTime = now;
+      // Spawning periodic elements
+      if (isBubble) {
+        if (now - this.lastSpawnTime > 2200 && this.activeWords.length < 4) {
+          this.spawnWord();
+          this.lastSpawnTime = now;
+        }
+      } else if (!isWordTyping) {
+        // Falling mode: only 1 word at a time
+        if (this.activeWords.length === 0) {
+          this.spawnWord();
+        }
       }
 
-      // Smooth progressive speed update (no sudden jumps, 25s ramp + score bonus)
-      const dynamicSpeed = this.getSpeedForWord();
+      // Dynamic speed update
       for (let s = 0; s < this.activeWords.length; s++) {
-        this.activeWords[s].speed = dynamicSpeed;
+        const w = this.activeWords[s];
+        w.speed = this.getSpeedForWord(w);
       }
 
-      // Update active words
+      // Update positions
       for (let i = this.activeWords.length - 1; i >= 0; i--) {
         const w = this.activeWords[i];
 
-        // Wobble physics for base word
-        w.phase += w.wobbleSpeed;
-        w.x = w.baseX + Math.sin(w.phase) * w.wobbleAmp;
+        // Wobble physics
+        if (w.wobbleSpeed) {
+          w.phase = (w.phase || 0) + w.wobbleSpeed;
+          w.x = w.baseX + Math.sin(w.phase) * (w.wobbleAmp || 3);
+        }
 
         // Shake physics on error
         if (w.shakeFrames > 0) {
@@ -937,30 +1164,23 @@
           w.shakeOffset = 0;
         }
 
-        // Movement
         if (isBubble) {
-          // Bubble moves smoothly downward from sky toward floor baseline
+          // Bubble moves downward
           w.y += w.speed;
-
-          // Keep bubbles in sync for backward compatibility with tests
           if (w.bubbles && w.bubbles.length > 0) {
-            for (let bIdx = 0; bIdx < w.bubbles.length; bIdx++) {
-              const b = w.bubbles[bIdx];
-              b.x = w.x;
-              b.y = w.y;
-              b.shakeOffset = w.shakeOffset;
-              b.shakeFrames = w.shakeFrames;
-            }
+            w.bubbles[0].x = w.x;
+            w.bubbles[0].y = w.y;
+            w.bubbles[0].shakeOffset = w.shakeOffset;
+            w.bubbles[0].shakeFrames = w.shakeFrames;
           }
 
           const floorBoundary = this.canvasHeight - 65;
           if (w.y >= floorBoundary) {
             this.handleWordMiss(i);
           }
-        } else {
-          // Falling downward
+        } else if (!isWordTyping) {
+          // Falling words move downward
           w.y += w.speed;
-          // Floor boundary collision: word reached bottom dock incomplete!
           if (w.y >= this.canvasHeight - 110) {
             this.handleWordMiss(i);
           }
@@ -998,26 +1218,21 @@
       this.spawnSparks(missX, missY, '#ef4444');
       this.addFloatingTip(missX, missY, 'BOUNDARY MISSED! 💔', '#ef4444');
 
-      // Record in word mistakes
       if (missedWord) {
         this.wordMistakesMap[missedWord.text] = (this.wordMistakesMap[missedWord.text] || 0) + 1;
       }
 
-      // Remove missed word
       this.activeWords.splice(wordIndex, 1);
-
-      // Reset target if the active word was missed
-      if (this.currentWordIdx === wordIndex || this.currentWordIdx >= this.activeWords.length) {
-        this.currentWordIdx = 0;
-        this.charIndex = 0;
-        this.composer = { raw: '', outLen: 0 };
-      }
-
+      this.currentWordIdx = 0;
+      this.charIndex = 0;
+      this.composer = { raw: '', outLen: 0 };
       this.updateHUD();
 
-      // Check if Game Over condition reached (6 chances exhausted)
+      // Check Game Over
       if (this.lives <= 0) {
-        this.gameOver();
+        this.gameOver(false);
+      } else if (this.gameType === 'falling' && (this.wordsCompleted + this.wordsMissed >= this.targetWordsCount)) {
+        this.gameOver(true); // Completed session
       } else if (this.activeWords.length === 0) {
         this.spawnWord();
       }
@@ -1026,57 +1241,70 @@
     skipWord() {
       if (!this.active || this.paused || this.activeWords.length === 0) return;
       this.wordsMissed++;
-      this.lives--;
       playSound('miss');
       triggerHaptic('miss');
-      this.activeWords.splice(this.currentWordIdx, 1);
-      this.currentWordIdx = 0;
-      this.charIndex = 0;
-      this.composer = { raw: '', outLen: 0 };
-      this.updateHUD();
-      if (this.lives <= 0) {
-        this.gameOver();
-      } else if (this.activeWords.length === 0) {
-        this.spawnWord();
+
+      if (this.gameType === 'word_typing') {
+        this.wordTypingIndex++;
+        this.activeWords = [];
+        this.charIndex = 0;
+        this.composer = { raw: '', outLen: 0 };
+        this.updateHUD();
+        if (this.wordTypingIndex >= this.targetWordsCount) {
+          this.gameOver(true);
+        } else {
+          this.spawnWord();
+        }
+      } else {
+        this.lives--;
+        this.activeWords.splice(this.currentWordIdx, 1);
+        this.currentWordIdx = 0;
+        this.charIndex = 0;
+        this.composer = { raw: '', outLen: 0 };
+        this.updateHUD();
+        if (this.lives <= 0) {
+          this.gameOver(false);
+        } else if (this.gameType === 'falling' && (this.wordsCompleted + this.wordsMissed >= this.targetWordsCount)) {
+          this.gameOver(true);
+        } else if (this.activeWords.length === 0) {
+          this.spawnWord();
+        }
       }
     }
 
     updateHUD() {
-      // Score
       const scoreEl = document.getElementById('gameScoreDisplay');
       if (scoreEl) scoreEl.textContent = this.score;
 
-      // Accuracy
       const totalStrokes = this.correctChars + this.incorrectChars;
       const acc = totalStrokes > 0 ? Math.round((this.correctChars / totalStrokes) * 100) : 100;
       const accEl = document.getElementById('gameAccuracyDisplay');
       if (accEl) accEl.textContent = `${acc}%`;
 
-      // Speed Pill (1..5)
       const speedEl = document.getElementById('gameSpeedDisplay');
       if (speedEl) {
-        const speedTier = 1 + Math.min(Math.floor(this.score / 25), 4);
-        speedEl.textContent = speedTier;
+        if (this.gameType === 'word_typing') {
+          speedEl.textContent = `${this.wordTypingIndex + 1}/${this.targetWordsCount}`;
+        } else {
+          const speedTier = 1 + Math.min(Math.floor(this.score / 25), 4);
+          speedEl.textContent = speedTier;
+        }
       }
 
-      // Misses Tracker (6 slots matching reference UI: Missed Ø Ø Ø Ø Ø Ø)
       const heartsContainer = document.getElementById('gameHeartsDisplay');
       if (heartsContainer) {
         let heartsHtml = '';
         const totalSlots = this.maxLives || 6;
         for (let i = 0; i < totalSlots; i++) {
           if (i < this.wordsMissed) {
-            // Missed slot: Red circle with slash Ø
             heartsHtml += `<span class="game-miss-slot missed" title="Missed" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:2px solid #ef4444;background:rgba(239,68,68,0.18);color:#ef4444;font-size:13px;font-weight:900;line-height:1;margin:0 1px;">Ø</span>`;
           } else {
-            // Open life slot: Blue outline circle with slash Ø matching reference
             heartsHtml += `<span class="game-miss-slot open" title="Life available" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:2px solid #3b82f6;background:transparent;color:#3b82f6;font-size:13px;font-weight:700;line-height:1;margin:0 1px;">Ø</span>`;
           }
         }
         heartsContainer.innerHTML = heartsHtml;
       }
 
-      // Correct / Wrong
       const corEl = document.getElementById('gameCorrectStrokes');
       if (corEl) corEl.textContent = this.correctChars;
       const wrgEl = document.getElementById('gameWrongStrokes');
@@ -1089,13 +1317,12 @@
       const w = this.canvasWidth;
       const h = this.canvasHeight;
       const isBubble = (this.gameType === 'bubble');
+      const isWordTyping = (this.gameType === 'word_typing');
 
-      // Clear frame
       ctx.clearRect(0, 0, w, h);
 
-      // Render Arena Ambience Background
       if (isBubble) {
-        // Soft pastel lavender/periwinkle background matching media_1795477409140_b427bece.png
+        // --- BUBBLE MODE BACKGROUND ---
         const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
         skyGrad.addColorStop(0.0, '#b8c6fa');
         skyGrad.addColorStop(0.5, '#a8b6fc');
@@ -1103,7 +1330,6 @@
         ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, w, h);
 
-        // Center Sri Kalaimagal Institute Watermark (subtle soft blend)
         if (this.watermarkImg && this.watermarkImg.complete && this.watermarkImg.naturalWidth > 0) {
           ctx.save();
           ctx.globalAlpha = 0.12;
@@ -1116,7 +1342,6 @@
           ctx.restore();
         }
 
-        // Ambient white sparkle dust motes drifting gently (matching reference)
         if (this.ambientDust) {
           ctx.save();
           for (let i = 0; i < this.ambientDust.length; i++) {
@@ -1129,26 +1354,156 @@
           ctx.restore();
         }
 
-        // Baseline defense boundary line at bottom of canvas
+        // Baseline defense boundary
         ctx.strokeStyle = '#2563eb';
         ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.moveTo(0, h - 1);
         ctx.lineTo(w, h - 1);
         ctx.stroke();
+
+        // Render letter bubbles
+        this.activeWords.forEach((bubbleObj, idx) => {
+          this.renderBubble(ctx, bubbleObj, true);
+        });
+
+      } else if (isWordTyping) {
+        // --- NEW GAME: WORD TYPING CHALLENGE ARENA ---
+        ctx.fillStyle = '#f1f5f9';
+        ctx.fillRect(0, 0, w, h);
+
+        const trackWidth = Math.min(w * 0.90, 360);
+        const trackX = (w - trackWidth) / 2;
+
+        // 1. Header Banner
+        ctx.save();
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 15px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText('⌨️ WORD TYPING CHALLENGE', w / 2, 16);
+
+        // Progress pill
+        const progStr = `Word ${this.wordTypingIndex + 1} of ${this.targetWordsCount}`;
+        ctx.fillStyle = '#2563eb';
+        ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.fillText(progStr, w / 2, 40);
+
+        // Progress bar background & fill
+        const pbarW = trackWidth * 0.85;
+        const pbarH = 6;
+        const pbarX = (w - pbarW) / 2;
+        const pbarY = 58;
+        ctx.fillStyle = '#e2e8f0';
+        this.drawRoundRect(ctx, pbarX, pbarY, pbarW, pbarH, 3);
+        ctx.fill();
+
+        const pct = Math.min(1.0, (this.wordTypingIndex + 1) / this.targetWordsCount);
+        ctx.fillStyle = '#2563eb';
+        this.drawRoundRect(ctx, pbarX, pbarY, pbarW * pct, pbarH, 3);
+        ctx.fill();
+        ctx.restore();
+
+        // 2. Central Prominent Target Word Card
+        const targetWord = this.activeWords[0];
+        if (targetWord) {
+          const cardW = trackWidth;
+          const cardH = 92;
+          const cardX = trackX + (targetWord.shakeOffset || 0);
+          const cardY = 76;
+
+          ctx.save();
+          ctx.shadowColor = 'rgba(15, 23, 42, 0.08)';
+          ctx.shadowBlur = 14;
+          ctx.shadowOffsetY = 4;
+          ctx.fillStyle = '#ffffff';
+          this.drawRoundRect(ctx, cardX, cardY, cardW, cardH, 16);
+          ctx.fill();
+          ctx.restore();
+
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 1.5;
+          this.drawRoundRect(ctx, cardX, cardY, cardW, cardH, 16);
+          ctx.stroke();
+
+          // Render target word letters with high legibility
+          ctx.save();
+          const isTamil = (this.lang === 'ta');
+          const fontSize = isTamil ? 25 : 28;
+          ctx.font = `bold ${fontSize}px Georgia, "Times New Roman", "Mukta Malar", system-ui, serif`;
+          ctx.textBaseline = 'middle';
+          ctx.textAlign = 'left';
+
+          const targetGraphemes = targetWord.graphemes || [];
+          const gWidths = targetGraphemes.map(g => ctx.measureText(g).width);
+          const totalW = gWidths.reduce((a, b) => a + b, 0);
+          let curX = cardX + (cardW - totalW) / 2;
+          const textY = cardY + cardH / 2;
+
+          for (let g = 0; g < targetGraphemes.length; g++) {
+            const char = targetGraphemes[g];
+            const cw = gWidths[g];
+            if (g < this.charIndex) {
+              // Typed letter: emerald green
+              ctx.fillStyle = '#16a34a';
+              ctx.fillText(char, curX, textY);
+            } else if (g === this.charIndex) {
+              // Current target letter: vivid blue with underline
+              ctx.fillStyle = '#2563eb';
+              ctx.fillText(char, curX, textY);
+              ctx.save();
+              ctx.fillStyle = '#2563eb';
+              ctx.fillRect(curX, textY + fontSize * 0.45, cw, 2.5);
+              ctx.restore();
+            } else {
+              // Upcoming letter: slate
+              ctx.fillStyle = '#64748b';
+              ctx.fillText(char, curX, textY);
+            }
+            curX += cw;
+          }
+          ctx.restore();
+
+          // 3. Bottom Typing Input Slot (Clean & accessible above soft keyboard)
+          const dockW = trackWidth;
+          const dockH = 54;
+          const dockX = trackX;
+          const dockY = cardY + cardH + 20;
+
+          ctx.save();
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = 'rgba(37, 99, 235, 0.12)';
+          ctx.shadowBlur = 10;
+          this.drawRoundRect(ctx, dockX, dockY, dockW, dockH, 12);
+          ctx.fill();
+          ctx.strokeStyle = '#93c5fd';
+          ctx.lineWidth = 1.5;
+          this.drawRoundRect(ctx, dockX, dockY, dockW, dockH, 12);
+          ctx.stroke();
+
+          // Typed text preview inside slot
+          ctx.font = `bold ${isTamil ? 20 : 22}px Georgia, "Times New Roman", "Mukta Malar", system-ui, serif`;
+          ctx.textBaseline = 'middle';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#1e293b';
+
+          const typedSubstr = targetWord.text.slice(0, this.charIndex);
+          const cursorBlink = Math.floor(Date.now() / 450) % 2 === 0 ? '|' : '';
+          ctx.fillText((typedSubstr || 'Type here...') + (typedSubstr ? cursorBlink : ''), w / 2, dockY + dockH / 2);
+          ctx.restore();
+        }
+
       } else {
-        // Falling mode: Clean vertical chute with bottom container matching media_1795477576059_bea0a671.png
+        // --- FALLING WORDS CHALLENGE ---
         ctx.fillStyle = '#eef2f9';
         ctx.fillRect(0, 0, w, h);
 
-        // Vertical Play Chute / Track
         const trackWidth = Math.min(w * 0.84, 340);
         const trackX = (w - trackWidth) / 2;
         const trackY = 12;
         const trackHeight = h - 24;
 
         ctx.save();
-        // Track background: Crisp white card with soft shadow
         ctx.shadowColor = 'rgba(15, 23, 42, 0.08)';
         ctx.shadowBlur = 12;
         ctx.shadowOffsetY = 4;
@@ -1157,13 +1512,12 @@
         ctx.fill();
         ctx.restore();
 
-        // Track border
         ctx.strokeStyle = '#d5defc';
         ctx.lineWidth = 1.5;
         this.drawRoundRect(ctx, trackX, trackY, trackWidth, trackHeight, 10);
         ctx.stroke();
 
-        // Bottom U-shaped container / dock matching reference
+        // Bottom U-shaped container / dock
         const dockWidth = trackWidth * 0.94;
         const dockHeight = 110;
         const dockX = trackX + (trackWidth - dockWidth) / 2;
@@ -1171,7 +1525,6 @@
         const wallThickness = 14;
 
         ctx.save();
-        // Draw U-dock outer shape
         ctx.fillStyle = '#9cb0f8';
         ctx.shadowColor = 'rgba(99, 102, 241, 0.25)';
         ctx.shadowBlur = 10;
@@ -1180,18 +1533,16 @@
         ctx.fill();
         ctx.restore();
 
-        // Inner cut-out for U-dock cavity
         ctx.fillStyle = '#f8faff';
         this.drawRoundRect(ctx, dockX + wallThickness, dockY, dockWidth - (wallThickness * 2), dockHeight - wallThickness, 6);
         ctx.fill();
 
-        // Dock rim outline
         ctx.strokeStyle = '#7c8fe6';
         ctx.lineWidth = 1.5;
         this.drawRoundRect(ctx, dockX, dockY, dockWidth, dockHeight, 12);
         ctx.stroke();
 
-        // Dock base bar / landing slot matching reference (showing dinosaur-style target)
+        // Landing slot
         const baseBarWidth = dockWidth - (wallThickness * 2) - 10;
         const baseBarHeight = 36;
         const baseBarX = dockX + wallThickness + 5;
@@ -1208,8 +1559,8 @@
         this.drawRoundRect(ctx, baseBarX, baseBarY, baseBarWidth, baseBarHeight, 6);
         ctx.stroke();
 
-        // Target word text inside landing slot - guaranteed synchronized with falling word!
-        const curTarget = this.activeWords[this.currentWordIdx] || this.activeWords[0];
+        // Target word text inside landing slot - guaranteed 100% synchronized with active falling word!
+        const curTarget = this.activeWords[0];
         if (curTarget) {
           ctx.save();
           const targetGraphemes = curTarget.graphemes || [];
@@ -1228,11 +1579,9 @@
             const char = targetGraphemes[g];
             const cw = gWidths[g];
             if (g < this.charIndex) {
-              // Typed letter: emerald green
               ctx.fillStyle = '#16a34a';
               ctx.fillText(char, startX, slotTextY);
             } else if (g === this.charIndex) {
-              // Current target letter: vivid blue with underline
               ctx.fillStyle = '#2563eb';
               ctx.fillText(char, startX, slotTextY);
               ctx.save();
@@ -1240,7 +1589,6 @@
               ctx.fillRect(startX, slotTextY + 9, cw, 2);
               ctx.restore();
             } else {
-              // Untyped letter: slate grey
               ctx.fillStyle = '#64748b';
               ctx.fillText(char, startX, slotTextY);
             }
@@ -1248,19 +1596,11 @@
           }
           ctx.restore();
         }
-      }
 
-      // Render Words / Bubbles
-      if (isBubble) {
-        this.activeWords.forEach((wordObj, idx) => {
-          const isActiveWord = (idx === this.currentWordIdx);
-          this.renderBubble(ctx, wordObj, isActiveWord);
-        });
-      } else {
-        this.activeWords.forEach((wordObj, idx) => {
-          const isActiveTarget = (idx === this.currentWordIdx);
-          this.renderFallingWordEntity(wordObj, isActiveTarget);
-        });
+        // Render Falling Word block
+        if (this.activeWords.length > 0) {
+          this.renderFallingWordEntity(this.activeWords[0], true);
+        }
       }
 
       // Render Particles
@@ -1294,131 +1634,63 @@
       const bx = b.x + (b.shakeOffset || 0);
       const by = b.y;
       const palette = b.color || { main: '#4f46e5', dark: '#3730a3', light: '#a5b4fc' };
-      const graphemes = b.graphemes || [b.char || b.text || ''];
       const textToDisplay = b.text || b.char || '';
-      const isSingleChar = (graphemes.length <= 1);
       const isTamil = (this.lang === 'ta');
-      const fontSize = isTamil ? 17 : 19;
+      const fontSize = isTamil ? 20 : 22;
+      const r = b.radius || 28;
 
       ctx.save();
-      ctx.font = `bold ${fontSize}px Georgia, "Times New Roman", "Mukta Malar", system-ui, serif`;
-      const textMetricsW = ctx.measureText(textToDisplay).width;
-      const bubbleHeight = 50;
-      const bubbleWidth = isSingleChar ? 56 : Math.max(72, textMetricsW + 36);
-      const r = bubbleHeight / 2;
 
       // Outer glow / shadow
-      if (isCurrentTarget) {
-        ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
-        ctx.shadowBlur = 18;
-      } else {
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetY = 3;
-      }
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetY = 3;
 
-      // 3D Spherical/Capsule Gradient
-      const grad = ctx.createLinearGradient(
-        bx - bubbleWidth / 2, by - r,
-        bx - bubbleWidth / 2, by + r
+      // 3D Spherical Circular Gradient
+      const grad = ctx.createRadialGradient(
+        bx - r * 0.3, by - r * 0.3, r * 0.1,
+        bx, by, r
       );
       grad.addColorStop(0.0, palette.light);
-      grad.addColorStop(0.35, palette.main);
+      grad.addColorStop(0.5, palette.main);
       grad.addColorStop(1.0, palette.dark);
 
       ctx.fillStyle = grad;
-      this.drawRoundRect(ctx, bx - bubbleWidth / 2, by - r, bubbleWidth, bubbleHeight, r);
+      ctx.beginPath();
+      ctx.arc(bx, by, r, 0, Math.PI * 2);
       ctx.fill();
 
-      // Outer delicate rim stroke
-      ctx.strokeStyle = isCurrentTarget ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.35)';
-      ctx.lineWidth = isCurrentTarget ? 2.5 : 1.2;
-      this.drawRoundRect(ctx, bx - bubbleWidth / 2, by - r, bubbleWidth, bubbleHeight, r);
+      // Delicate rim stroke
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+      ctx.lineWidth = 1.8;
       ctx.stroke();
 
       // Specular Glossy Highlight
       ctx.save();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      const glossW = isSingleChar ? (r * 0.5) : (bubbleWidth * 0.55);
-      const glossH = isSingleChar ? (r * 0.35) : 14;
-      this.drawRoundRect(ctx, bx - glossW / 2, by - r + 4, glossW, glossH, glossH / 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+      ctx.beginPath();
+      ctx.ellipse(bx - r * 0.25, by - r * 0.4, r * 0.35, r * 0.18, -Math.PI / 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Active Target Pulsating Aura
-      if (isCurrentTarget) {
-        ctx.save();
-        const pulse = (Math.sin(Date.now() * 0.008) + 1) * 0.5;
-        ctx.strokeStyle = `rgba(255, 255, 255, ${0.5 + pulse * 0.5})`;
-        ctx.lineWidth = 2.2;
-        ctx.setLineDash([4, 4]);
-        this.drawRoundRect(ctx, bx - bubbleWidth / 2 - 4 - pulse * 3, by - r - 4 - pulse * 3, bubbleWidth + 8 + pulse * 6, bubbleHeight + 8 + pulse * 6, r + 4);
-        ctx.stroke();
-        ctx.restore();
-      }
-
       ctx.restore(); // Restore shadow
 
-      // Render centered text with character-by-character color highlighting
+      // Render centered letter
       ctx.save();
       ctx.font = `bold ${fontSize}px Georgia, "Times New Roman", "Mukta Malar", system-ui, serif`;
-      ctx.textAlign = 'left';
+      ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-
-      const gWidths = graphemes.map(g => ctx.measureText(g).width);
-      const totalW = gWidths.reduce((acc, val) => acc + val, 0);
-      let curX = bx - totalW / 2;
-
-      for (let g = 0; g < graphemes.length; g++) {
-        const char = graphemes[g];
-        const cw = gWidths[g];
-        if (isCurrentTarget && g < this.charIndex) {
-          // Typed letter in active target: Glowing light green
-          ctx.fillStyle = '#86efac';
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-          ctx.shadowBlur = 4;
-          ctx.fillText(char, curX, by + 1);
-        } else if (isCurrentTarget && g === this.charIndex) {
-          // Current target letter: Bright yellow with underline
-          ctx.fillStyle = '#fef08a';
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-          ctx.shadowBlur = 5;
-          ctx.fillText(char, curX, by + 1);
-          ctx.fillRect(curX, by + fontSize * 0.52, cw, 2.5);
-        } else {
-          // Untyped letter: Crisp, pure white with contrast drop shadow
-          ctx.fillStyle = '#ffffff';
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-          ctx.shadowBlur = 3;
-          ctx.shadowOffsetY = 1.5;
-          ctx.fillText(char, curX, by + 1);
-        }
-        curX += cw;
-      }
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetY = 1.5;
+      ctx.fillText(textToDisplay, bx, by + 1);
       ctx.restore();
-    }
-
-    renderWordEntity(wordObj, isActiveTarget) {
-      if (this.gameType === 'bubble') {
-        const bubbles = this.getWordBubbles(wordObj);
-        bubbles.forEach((b, bIdx) => {
-          if (b.popped) return;
-          const isCurrentTarget = isActiveTarget && (bIdx === this.charIndex);
-          this.renderBubble(this.ctx, b, isCurrentTarget);
-        });
-      } else {
-        this.renderFallingWordEntity(wordObj, isActiveTarget);
-      }
     }
 
     renderFallingWordEntity(wordObj, isActiveTarget) {
       const ctx = this.ctx;
       const w = this.canvasWidth;
-      const isBubble = (this.gameType === 'bubble');
-
-      if (isBubble) return;
-
-      // Vertical chute geometry matching reference
       const trackWidth = Math.min(w * 0.84, 340);
       const trackX = (w - trackWidth) / 2;
       const blockWidth = trackWidth * 0.88;
@@ -1428,57 +1700,33 @@
 
       ctx.save();
 
-      // Block shadow
-      if (isActiveTarget) {
-        ctx.shadowColor = 'rgba(101, 163, 13, 0.45)';
-        ctx.shadowBlur = 14;
-        ctx.shadowOffsetY = 4;
-      } else {
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
-        ctx.shadowBlur = 6;
-        ctx.shadowOffsetY = 2;
-      }
+      ctx.shadowColor = 'rgba(101, 163, 13, 0.45)';
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetY = 4;
 
-      // Vivid lime green block matching media_1795477576059_bea0a671.png
       const blockGrad = ctx.createLinearGradient(bx, by, bx, by + blockHeight);
-      blockGrad.addColorStop(0.0, '#7cb305'); // Bright vibrant top bevel
-      blockGrad.addColorStop(0.4, '#65a30d'); // Rich core apple green
-      blockGrad.addColorStop(1.0, '#4d7c0f'); // Solid bottom edge shade
+      blockGrad.addColorStop(0.0, '#7cb305');
+      blockGrad.addColorStop(0.4, '#65a30d');
+      blockGrad.addColorStop(1.0, '#4d7c0f');
 
       ctx.fillStyle = blockGrad;
       this.drawRoundRect(ctx, bx, by, blockWidth, blockHeight, 6);
       ctx.fill();
 
-      // Crisp outer stroke
-      ctx.strokeStyle = isActiveTarget ? '#3f6212' : '#4d7c0f';
+      ctx.strokeStyle = '#3f6212';
       ctx.lineWidth = 1.5;
       this.drawRoundRect(ctx, bx, by, blockWidth, blockHeight, 6);
       ctx.stroke();
 
-      // Top subtle bevel highlight line
-      ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(bx + 6, by + 1.5);
-      ctx.lineTo(bx + blockWidth - 6, by + 1.5);
-      ctx.stroke();
-      ctx.restore();
-
       ctx.restore(); // Restore shadow
 
-      // Render Word inside the block: perfectly centered, crisp bold white letters
+      // Render Word inside the block
       ctx.save();
       const isTamil = (this.lang === 'ta');
       const fontSize = isTamil ? 20 : 21;
       ctx.font = `bold ${fontSize}px Georgia, "Times New Roman", "Mukta Malar", system-ui, serif`;
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'left';
-
-      // Drop shadow for text readability
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-      ctx.shadowBlur = 2;
-      ctx.shadowOffsetY = 1;
 
       const graphemes = wordObj.graphemes;
       const graphemeWidths = graphemes.map(g => ctx.measureText(g).width);
@@ -1491,31 +1739,21 @@
         const char = graphemes[i];
         const charW = graphemeWidths[i];
 
-        if (isActiveTarget) {
-          if (i < this.charIndex) {
-            // Already typed: Bright lime/gold checkmark highlight
-            ctx.fillStyle = '#fef08a';
-            ctx.shadowColor = 'rgba(254, 240, 138, 0.8)';
-            ctx.shadowBlur = 6;
-          } else if (i === this.charIndex) {
-            // Current target letter: Bright glowing white with underline
-            ctx.fillStyle = '#ffffff';
-            ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
-            ctx.shadowBlur = 10;
-
-            // Target underline indicator
-            ctx.save();
-            ctx.fillStyle = '#fef08a';
-            ctx.fillRect(curX, textY + 11, charW, 2.5);
-            ctx.restore();
-          } else {
-            // Upcoming letter: Crisp bold white
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
-            ctx.shadowBlur = 2;
-          }
+        if (i < this.charIndex) {
+          ctx.fillStyle = '#fef08a';
+          ctx.shadowColor = 'rgba(254, 240, 138, 0.8)';
+          ctx.shadowBlur = 6;
+        } else if (i === this.charIndex) {
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
+          ctx.shadowBlur = 10;
+          ctx.save();
+          ctx.fillStyle = '#fef08a';
+          ctx.fillRect(curX, textY + 11, charW, 2.5);
+          ctx.restore();
         } else {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-          ctx.shadowBlur = 0;
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+          ctx.shadowBlur = 2;
         }
 
         ctx.fillText(char, curX, textY);
@@ -1539,30 +1777,42 @@
       ctx.closePath();
     }
 
-    gameOver() {
+    gameOver(isSessionVictory) {
       this.active = false;
-      this.endTime = Date.now();
+      this.paused = false;
       if (this.animFrameId) cancelAnimationFrame(this.animFrameId);
 
-      const durationSec = Math.max(1, Math.round((this.endTime - this.startTime) / 1000));
+      this.endTime = Date.now();
+      const durationSec = Math.max(1, Math.round((this.endTime - (this.startTime || this.endTime)) / 1000));
       const totalStrokes = this.correctChars + this.incorrectChars;
-      const accuracy = totalStrokes > 0 ? Math.round((this.correctChars / totalStrokes) * 1000) / 10 : 100;
-      const wpm = Math.round((this.correctChars / 5) / (durationSec / 60));
+      const accuracy = totalStrokes > 0 ? Number(((this.correctChars / totalStrokes) * 100).toFixed(1)) : 100;
+      const wpm = Number(((this.correctChars / 5) / (durationSec / 60)).toFixed(1));
+
+      let title = 'Bubble Letter Challenge';
+      if (this.gameType === 'falling') title = 'Falling Words Challenge';
+      else if (this.gameType === 'word_typing') title = 'Word Typing Challenge';
+
+      const wordsAttempted = Math.max(this.wordsCompleted + this.wordsMissed, (this.gameType === 'word_typing' ? this.wordTypingIndex : 0));
 
       const report = {
         id: `game_${Date.now()}`,
         gameType: this.gameType,
-        gameTitle: this.gameType === 'bubble' ? 'Bubble Word Challenge' : 'Falling Words Challenge',
+        gameTitle: title,
         lang: this.lang,
         layout: this.layout,
         score: this.score,
         accuracy: accuracy,
         wpm: wpm,
         durationSec: durationSec,
+        wordsAttempted: wordsAttempted,
         wordsCompleted: this.wordsCompleted,
+        wordsCorrect: this.wordsCorrect,
+        wordsIncorrect: this.wordsIncorrect,
         wordsMissed: this.wordsMissed,
+        keystrokeMistakes: this.keystrokeMistakes || this.incorrectChars,
         correctChars: this.correctChars,
         incorrectChars: this.incorrectChars,
+        isVictory: !!isSessionVictory,
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         weakKeys: Object.entries(this.weakKeysMap).map(([k, c]) => ({ key: k, count: c })).sort((a, b) => b.count - a.count),
         troubleWords: Object.entries(this.wordMistakesMap).map(([w, c]) => ({ word: w, count: c })).sort((a, b) => b.count - a.count)
@@ -1571,13 +1821,12 @@
       // Persist to history and leaderboard
       this.saveGameSession(report);
 
-      // Render Anti-Choke Game Over Report Modal
+      // Render Modal
       this.renderGameOverModal(report);
     }
 
     async saveGameSession(report) {
       try {
-        // 1. Save to Games History (Keep up to 100 records)
         let history = [];
         if (window.storage) {
           const res = await window.storage.get('games_history', false);
@@ -1597,7 +1846,6 @@
           localStorage.setItem('games_history', JSON.stringify(history));
         }
 
-        // 2. Check and Update Student Leaderboard Personal Best
         await this.updateLeaderboardRecord(report);
       } catch (err) {
         console.error('Error saving game session:', err);
@@ -1617,7 +1865,7 @@
         }
 
         const studentName = (window.STUDENT_PROFILE && window.STUDENT_PROFILE.name && window.STUDENT_PROFILE.name.trim()) || 'You';
-        const gameKey = report.gameType; // 'bubble' | 'falling'
+        const gameKey = report.gameType; // 'bubble' | 'falling' | 'word_typing'
         const trackKey = (report.lang === 'ta') ? report.layout : 'en';
 
         if (!board[gameKey]) board[gameKey] = {};
@@ -1630,7 +1878,6 @@
 
         if (existingIdx !== -1) {
           const existing = list[existingIdx];
-          // Update ONLY if new score is higher, or if score matches and accuracy is higher
           if (report.score > existing.score || (report.score === existing.score && report.accuracy > existing.accuracy)) {
             list[existingIdx] = {
               name: studentName,
@@ -1652,13 +1899,11 @@
           isNewPB = true;
         }
 
-        // Sort descending: Score first, then Accuracy as tiebreaker
         list.sort((a, b) => {
           if (b.score !== a.score) return b.score - a.score;
           return b.accuracy - a.accuracy;
         });
 
-        // Persist
         if (window.storage) {
           await window.storage.set('games_leaderboard', JSON.stringify(board), false);
         } else {
@@ -1667,8 +1912,7 @@
 
         report.isNewPB = isNewPB;
         if (isNewPB && window.NotificationService) {
-          const gameTitle = this.gameType === 'bubble' ? 'Bubble Word Challenge' : 'Falling Words Challenge';
-          NotificationService.notifyGamePB(gameTitle, report.score, report.accuracy);
+          NotificationService.notifyGamePB(report.gameTitle, report.score, report.accuracy);
         }
       } catch (err) {
         console.error('Error updating leaderboard:', err);
@@ -1679,9 +1923,14 @@
       const modal = document.getElementById('gameOverModal');
       if (!modal) return;
 
-      // Populate Report fields
       const titleEl = document.getElementById('goGameTitle');
-      if (titleEl) titleEl.textContent = `${report.gameTitle} (${report.lang === 'ta' ? (report.layout === 'tamil99' ? 'Tamil99' : 'Tamil Typewriter') : 'English QWERTY'})`;
+      if (titleEl) {
+        if (report.isVictory) {
+          titleEl.textContent = `🎉 ${report.gameTitle} Completed!`;
+        } else {
+          titleEl.textContent = `${report.gameTitle} (${report.lang === 'ta' ? (report.layout === 'tamil99' ? 'Tamil99' : 'Tamil Typewriter') : 'English QWERTY'})`;
+        }
+      }
 
       const scoreEl = document.getElementById('goScoreValue');
       if (scoreEl) scoreEl.textContent = report.score;
@@ -1693,7 +1942,31 @@
       if (wpmEl) wpmEl.textContent = `${report.wpm} WPM`;
 
       const wordsEl = document.getElementById('goWordsCleared');
-      if (wordsEl) wordsEl.textContent = `${report.wordsCompleted} Cleared / ${report.wordsMissed} Missed`;
+      if (wordsEl) {
+        if (report.isVictory) {
+          wordsEl.textContent = `Session Complete: ${report.wordsCompleted} Cleared / ${report.wordsMissed} Missed`;
+        } else {
+          wordsEl.textContent = `${report.wordsCompleted} Cleared / ${report.wordsMissed} Missed`;
+        }
+      }
+
+      // Populate dedicated results metrics if present in modal DOM
+      const timeEl = document.getElementById('goTimeValue');
+      if (timeEl) {
+        const mins = Math.floor(report.durationSec / 60);
+        const secs = report.durationSec % 60;
+        timeEl.textContent = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+      }
+      const wordsAttEl = document.getElementById('goWordsAttempted');
+      if (wordsAttEl) wordsAttEl.textContent = report.wordsAttempted;
+      const wordsCorEl = document.getElementById('goWordsCorrect');
+      if (wordsCorEl) wordsCorEl.textContent = report.wordsCorrect;
+      const wordsIncorEl = document.getElementById('goWordsIncorrect');
+      if (wordsIncorEl) wordsIncorEl.textContent = report.wordsIncorrect;
+      const wordsMisEl = document.getElementById('goWordsMissed');
+      if (wordsMisEl) wordsMisEl.textContent = report.wordsMissed;
+      const mistEl = document.getElementById('goKeystrokeMistakes');
+      if (mistEl) mistEl.textContent = report.keystrokeMistakes;
 
       // New PB Banner
       const pbBanner = document.getElementById('goPbBanner');
@@ -1735,6 +2008,7 @@
 
   // Instantiate singleton
   const engine = new GamesEngine();
+  engine.playSound = playSound;
   window.GamesEngine = engine;
 
   // Global helper functions
@@ -1742,7 +2016,6 @@
     const selLang = document.getElementById('gameSetupLang') ? document.getElementById('gameSetupLang').value : 'en';
     const selLayout = document.getElementById('gameSetupLayout') ? document.getElementById('gameSetupLayout').value : (selLang === 'ta' ? 'tamil99' : 'qwerty');
     
-    // Close modal if open
     const setupModal = document.getElementById('gameSetupModal');
     if (setupModal) setupModal.style.display = 'none';
 
@@ -1754,7 +2027,9 @@
     if (!modal) return;
     const titleEl = document.getElementById('gameSetupTitle');
     if (titleEl) {
-      titleEl.textContent = (gameType === 'bubble') ? '🫧 Bubble Word Challenge' : '☄️ Falling Words Challenge';
+      if (gameType === 'bubble') titleEl.textContent = '🫧 Bubble Letter Challenge';
+      else if (gameType === 'word_typing') titleEl.textContent = '🎯 Word Typing Challenge';
+      else titleEl.textContent = '☄️ Falling Words Challenge';
     }
     const startBtn = document.getElementById('gameSetupStartBtn');
     if (startBtn) {
@@ -1788,6 +2063,10 @@
     engine.exitToApp();
   };
 
+  window.toggleGameSound = function () {
+    return engine.toggleSound();
+  };
+
   // --- LEADERBOARD & HISTORY MODALS ---
   window.openLeaderboardModal = async function (preferredGame) {
     const modal = document.getElementById('gamesLeaderboardModal');
@@ -1805,11 +2084,12 @@
     gameType = gameType || 'bubble';
     trackKey = trackKey || 'en';
 
-    // Highlight active tabs
     const btnBubble = document.getElementById('lbTabBubble');
     const btnFalling = document.getElementById('lbTabFalling');
+    const btnWordTyping = document.getElementById('lbTabWordTyping');
     if (btnBubble) btnBubble.classList.toggle('active', gameType === 'bubble');
     if (btnFalling) btnFalling.classList.toggle('active', gameType === 'falling');
+    if (btnWordTyping) btnWordTyping.classList.toggle('active', gameType === 'word_typing');
 
     const btnEn = document.getElementById('lbTrackEn');
     const btnTa99 = document.getElementById('lbTrackTamil99');
@@ -1855,27 +2135,21 @@
         rowStyle = 'background:linear-gradient(135deg,rgba(217,119,6,0.15),rgba(245,158,11,0.05));border:1.5px solid #d97706;';
       }
 
-      if (item.isCurrentStudent) {
-        rowStyle += 'box-shadow:0 0 10px rgba(59,130,246,0.3);border-color:#3b82f6;';
-      }
-
       html += `
-        <div class="lb-entry-card" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:12px;margin-bottom:8px;border:1px solid var(--card-border);${rowStyle}">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:12px;margin-bottom:6px;${rowStyle}">
           <div style="display:flex;align-items:center;gap:12px;">
-            <div style="font-size:18px;font-weight:800;width:28px;text-align:center;">${badge}</div>
+            <span style="font-size:16px;font-weight:900;min-width:24px;text-align:center;">${badge}</span>
             <div>
-              <div style="font-size:14px;font-weight:800;color:var(--ink);">${item.name} ${item.isCurrentStudent ? '<span style="font-size:11px;color:#2563eb;font-weight:700;">(You)</span>' : ''}</div>
-              <div style="font-size:11px;color:var(--muted);">${item.date || 'Recent Run'}</div>
+              <div style="font-weight:800;font-size:13.5px;color:var(--ink);">${item.name} ${item.isCurrentStudent ? '⭐ (You)' : ''}</div>
+              <div style="font-size:11px;color:var(--muted);">${item.date || ''} • Accuracy: ${item.accuracy}%</div>
             </div>
           </div>
           <div style="text-align:right;">
-            <div style="font-size:16px;font-weight:800;color:#2563eb;">${item.score} pts</div>
-            <div style="font-size:11px;font-weight:700;color:#10b981;">🎯 ${item.accuracy}% acc</div>
+            <div style="font-size:16px;font-weight:900;color:#2563eb;">${item.score} <span style="font-size:10px;font-weight:700;">PTS</span></div>
           </div>
         </div>
       `;
     });
-
     listContainer.innerHTML = html;
   };
 
@@ -1883,15 +2157,7 @@
     const modal = document.getElementById('gamesHistoryModal');
     if (!modal) return;
     modal.style.display = 'flex';
-    window.renderGameHistory('all');
-  };
 
-  window.closeGameHistoryModal = function () {
-    const modal = document.getElementById('gamesHistoryModal');
-    if (modal) modal.style.display = 'none';
-  };
-
-  window.renderGameHistory = async function (filterType) {
     let history = [];
     try {
       if (window.storage) {
@@ -1904,58 +2170,40 @@
       }
     } catch (e) {}
 
-    const container = document.getElementById('ghEntriesList');
+    const container = document.getElementById('historyEntriesList');
     if (!container) return;
 
-    if (filterType && filterType !== 'all') {
-      history = history.filter(h => h.gameType === filterType);
-    }
-
-    if (history.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);">No game runs completed yet. Play a match to track your accuracy!</div>';
+    if (!history || history.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);">No arcade match history yet. Play a game to record your session diagnostics!</div>';
       return;
     }
 
     let html = '';
     history.forEach(item => {
-      const isBubble = item.gameType === 'bubble';
-      const icon = isBubble ? '🫧' : '☄️';
-      const layoutLabel = item.lang === 'ta' ? (item.layout === 'tamil99' ? 'Tamil99' : 'Typewriter') : 'English';
-
       html += `
-        <div class="glass-card" style="margin-bottom:10px;padding:14px;border-radius:12px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <div style="font-size:14px;font-weight:800;color:var(--ink);">
-              ${icon} ${item.gameTitle}
-            </div>
-            <div style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--primary-glow);color:var(--primary);">
-              ${layoutLabel}
-            </div>
+        <div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:12px 14px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-weight:800;font-size:13.5px;color:var(--ink);">${item.gameTitle || 'Typing Game'}</span>
+            <span style="font-size:11px;color:var(--muted);">${item.date || ''}</span>
           </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--ink-soft);margin-bottom:6px;">
-            <span>Score: <b style="color:#2563eb;font-size:14px;">${item.score}</b></span>
-            <span>Accuracy: <b style="color:#10b981;font-size:14px;">${item.accuracy}%</b></span>
-            <span>Speed: <b>${item.wpm} WPM</b></span>
-          </div>
-          <div style="font-size:11px;color:var(--muted);display:flex;justify-content:space-between;">
-            <span>${item.date}</span>
-            <span>Cleared: ${item.wordsCompleted} | Missed: ${item.wordsMissed}</span>
+          <div style="display:flex;gap:12px;font-size:12px;color:var(--ink-soft);flex-wrap:wrap;">
+            <span>Score: <b style="color:#2563eb;">${item.score}</b></span>
+            <span>Accuracy: <b style="color:#10b981;">${item.accuracy}%</b></span>
+            <span>Speed: <b style="color:#f59e0b;">${item.wpm} WPM</b></span>
+            <span>Words: <b>${item.wordsCompleted || 0} Cleared</b></span>
           </div>
         </div>
       `;
     });
-
     container.innerHTML = html;
   };
 
-  engine.playSound = playSound;
-  window.GamesEngine = engine;
-
-  window.toggleGameSound = function () {
-    return engine.toggleSound();
+  window.closeGameHistoryModal = function () {
+    const modal = document.getElementById('gamesHistoryModal');
+    if (modal) modal.style.display = 'none';
   };
 
-  // Auto initialize on DOM ready
+  // Auto-init on DOMContentLoaded or immediate if document already ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => engine.init());
   } else {
