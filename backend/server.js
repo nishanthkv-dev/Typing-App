@@ -24,6 +24,11 @@ const {
 const { evaluateCouponQuote, createAppError, resolveCourseAlias } = require('./services/couponService');
 const { sendPasswordResetEmail } = require('./services/emailService');
 const {
+  verifyPhonePeWebhookSignature,
+  initiatePhonePePayment,
+  checkPhonePeOrderStatus
+} = require('./services/phonepeService');
+const {
   addAuditLog,
   addNotification,
   computeStudentEntitlement,
@@ -794,6 +799,11 @@ function createServer(options = {}) {
             user.name = String(body.name).trim().slice(0, 60);
           }
           if (body.phone !== undefined) user.phone = String(body.phone).trim().slice(0, 20);
+          if (body.city !== undefined) {
+            const c = String(body.city).trim();
+            if (c.length > 60) throw createAppError('City must be 60 characters or fewer.', 400, 'INVALID_CITY');
+            user.city = c;
+          }
           if (body.regNumber !== undefined) user.regNumber = String(body.regNumber).trim().slice(0, 40);
           if (body.institute !== undefined) user.institute = String(body.institute).trim().slice(0, 100);
           user.updatedAt = new Date().toISOString();
@@ -875,6 +885,155 @@ function createServer(options = {}) {
         return sendJson(res, 200, result);
       }
 
+      if (method === 'GET' && pathname === '/api/exams/upcoming') {
+        const state = db.read();
+        const nowStr = new Date().toISOString().slice(0, 10);
+        const upcoming = (state.exams || [])
+          .filter(ex => !ex.archived && ex.status !== 'archived' && String(ex.date || '') >= nowStr)
+          .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+        return sendJson(res, 200, {
+          nextExam: upcoming[0] || null,
+          exams: upcoming
+        });
+      }
+
+      if (method === 'POST' && pathname === '/api/payments/phonepe/initiate') {
+        const student = await requireStudent(req);
+        const body = await readJsonBody(req);
+        const idempotencyKey = body.idempotencyKey || req.headers['x-idempotency-key'] || generateId('pp_idem');
+        const checkout = await createCheckoutOrEnroll({
+          db,
+          user: student,
+          courseId: body.courseId,
+          couponCode: body.couponCode || '',
+          attemptType: body.attemptType || 'initial',
+          paymentMethod: 'phonepe',
+          idempotencyKey: String(idempotencyKey),
+          ipAddress,
+          config
+        });
+        if (checkout.freeEnrollment) {
+          return sendJson(res, 201, checkout);
+        }
+        const merchantOrderId = checkout.purchase.orderId || checkout.purchase.gatewayOrderId || `PP_${checkout.purchase.id}`;
+        const initRes = await initiatePhonePePayment({
+          config,
+          merchantOrderId,
+          amountPaise: roundInr(checkout.purchase.finalAmount) * 100,
+          studentId: student.id,
+          studentPhone: student.phone || '',
+          redirectUrl: body.redirectUrl,
+          callbackUrl: body.callbackUrl,
+          fetchImpl: options.phonepeFetch || global.fetch
+        });
+        return sendJson(res, initRes.blocked ? 503 : 201, {
+          ...checkout,
+          merchantOrderId,
+          phonepe: initRes
+        });
+      }
+
+      if (method === 'POST' && pathname === '/api/payments/phonepe/webhook') {
+        const body = await readJsonBody(req);
+        const rawB64 = String(body.response || '');
+        const xVerify = req.headers['x-verify'] || req.headers['X-VERIFY'] || '';
+        if (!verifyPhonePeWebhookSignature(rawB64, xVerify, config.phonepeSaltKey, config.phonepeSaltIndex || '1')) {
+          throw createAppError('Invalid PhonePe webhook signature.', 401, 'INVALID_PHONEPE_SIGNATURE');
+        }
+        const decoded = JSON.parse(Buffer.from(rawB64, 'base64').toString('utf8'));
+        const merchantOrderId = decoded && decoded.data && decoded.data.merchantTransactionId;
+        const code = String((decoded && decoded.code) || '').toUpperCase();
+        const txnId = decoded && decoded.data && decoded.data.transactionId;
+        const state = db.read();
+        const purchase = state.purchases.find(p => p.orderId === merchantOrderId || p.gatewayOrderId === merchantOrderId || p.id === merchantOrderId);
+        if (!purchase) {
+          return sendJson(res, 404, { error: 'Purchase not found for merchantOrderId' });
+        }
+        if (code === 'PAYMENT_SUCCESS') {
+          const user = state.users.find(u => u.id === purchase.userId);
+          if (user && purchase.paymentStatus !== 'verified') {
+            const ppTxnId = txnId || `PP_TXN_${purchase.id}`;
+            const sig = require('./security').computePaymentSignature({
+              orderId: purchase.orderId,
+              paymentId: ppTxnId,
+              amount: purchase.finalAmount,
+              secret: config.paymentWebhookSecret
+            });
+            await verifyStudentPayment({
+              db,
+              user,
+              purchaseId: purchase.id,
+              orderId: purchase.orderId,
+              paymentId: txnId || `PP_TXN_${purchase.id}`,
+              signature: sig,
+              ipAddress,
+              config
+            });
+          }
+          return sendJson(res, 200, { ok: true, status: 'PAID' });
+        }
+        await db.runTransaction((draft) => {
+          const p = draft.purchases.find(x => x.id === purchase.id);
+          if (p && p.paymentStatus !== 'verified') {
+            p.paymentStatus = (code === 'PAYMENT_PENDING') ? 'pending' : 'failed';
+            p.status = p.paymentStatus;
+            p.updatedAt = new Date().toISOString();
+          }
+        });
+        return sendJson(res, 200, { ok: true, status: code || 'FAILED' });
+      }
+
+      const ppStatusMatch = pathname.match(/^\/api\/payments\/phonepe\/status\/([^/]+)$/);
+      if (method === 'GET' && ppStatusMatch) {
+        const student = await requireStudent(req);
+        const merchantOrderId = decodeURIComponent(ppStatusMatch[1]);
+        const state = db.read();
+        const purchase = state.purchases.find(p => (p.orderId === merchantOrderId || p.gatewayOrderId === merchantOrderId || p.id === merchantOrderId) && p.userId === student.id);
+        if (!purchase) throw createAppError('Order not found.', 404, 'ORDER_NOT_FOUND');
+        if (purchase.paymentStatus === 'verified') {
+          return sendJson(res, 200, { status: 'PAID', purchase });
+        }
+        const stRes = await checkPhonePeOrderStatus({
+          config,
+          merchantOrderId: purchase.orderId || purchase.gatewayOrderId || merchantOrderId,
+          fetchImpl: options.phonepeFetch || global.fetch
+        });
+        if (stRes.blocked) {
+          return sendJson(res, 503, { status: purchase.paymentStatus, blocked: true, code: stRes.code });
+        }
+        if (stRes.status === 'PAID') {
+          const ppTxnId = stRes.gatewayTxnId || `PP_TXN_${purchase.id}`;
+          const sig = require('./security').computePaymentSignature({
+            orderId: purchase.orderId,
+            paymentId: ppTxnId,
+            amount: purchase.finalAmount,
+            secret: config.paymentWebhookSecret
+          });
+          const verified = await verifyStudentPayment({
+            db,
+            user: student,
+            purchaseId: purchase.id,
+            orderId: purchase.orderId,
+            paymentId: stRes.gatewayTxnId || `PP_TXN_${purchase.id}`,
+            signature: sig,
+            ipAddress,
+            config
+          });
+          return sendJson(res, 200, { status: 'PAID', ...verified });
+        }
+        if (stRes.status === 'FAILED') {
+          await db.runTransaction((draft) => {
+            const p = draft.purchases.find(x => x.id === purchase.id);
+            if (p && p.paymentStatus !== 'verified') {
+              p.paymentStatus = 'failed';
+              p.status = 'failed';
+              p.updatedAt = new Date().toISOString();
+            }
+          });
+        }
+        return sendJson(res, 200, { status: stRes.status, purchase });
+      }
+
       if (method === 'GET' && pathname === '/api/student/dashboard') {
         const student = await requireStudent(req);
         const state = db.read();
@@ -891,56 +1050,12 @@ function createServer(options = {}) {
         return sendJson(res, 200, { ok: true });
       }
 
-      if (method === 'GET' && pathname === '/api/student/progress') {
-        const student = await requireStudent(req);
-        const state = db.read();
-        const history = (state.practiceHistory || [])
-          .filter(h => h.userId === student.id)
-          .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-          .slice(0, 100);
-        return sendJson(res, 200, { history });
-      }
-
-      if (method === 'POST' && pathname === '/api/student/progress') {
-        const student = await requireStudent(req);
-        const body = await readJsonBody(req);
-        const rawEntries = Array.isArray(body.entries) ? body.entries : (body.entry ? [body.entry] : [body]);
-        const saved = await db.runTransaction((draft) => {
-          if (!draft.practiceHistory) draft.practiceHistory = [];
-          const added = [];
-          for (const item of rawEntries.slice(0, 50)) {
-            if (!item || typeof item !== 'object') continue;
-            const ts = Number(item.timestamp || Date.now());
-            const existing = draft.practiceHistory.find(
-              h => h.userId === student.id && h.timestamp === ts && h.passage === item.passage
-            );
-            if (existing) continue;
-            const record = {
-              id: generateId('prc'),
-              userId: student.id,
-              lang: String(item.lang || 'en').slice(0, 10),
-              layout: String(item.layout || '').slice(0, 24),
-              passage: String(item.passage || '').slice(0, 140),
-              grossWpm: Number(item.grossWpm || 0),
-              netWpm: Number(item.netWpm || 0),
-              marks: item.marks !== undefined ? Number(item.marks) : null,
-              accuracy: Number(item.accuracy || 0),
-              passed: Boolean(item.passed),
-              errors: Number(item.errors || 0),
-              elapsed: Number(item.elapsed || 0),
-              backspaces: Number(item.backspaces || 0),
-              mode: String(item.mode || 'parallel').slice(0, 30),
-              weakKeys: (item.weakKeys && typeof item.weakKeys === 'object') ? item.weakKeys : {},
-              timestamp: ts,
-              isoDate: String(item.isoDate || new Date(ts).toISOString()),
-              createdAt: new Date().toISOString()
-            };
-            draft.practiceHistory.unshift(record);
-            added.push(record);
-          }
-          return added;
+      if ((method === 'GET' || method === 'POST') && pathname === '/api/student/progress') {
+        await requireStudent(req);
+        return sendJson(res, 410, {
+          error: 'Typing reports and practice history are stored locally on the student device only.',
+          code: 'LOCAL_ONLY_REPORTS'
         });
-        return sendJson(res, 201, { savedCount: saved.length });
       }
 
       // ---------------------------------------------------------------------
@@ -1095,23 +1210,49 @@ function createServer(options = {}) {
           const totalDiscountInr = state.purchases
             .filter(p => p.paymentStatus === 'verified' || p.paymentStatus === 'free_enrollment')
             .reduce((sum, p) => sum + roundInr(p.discountAmount), 0);
+          const nowMs = Date.now();
+          const istToday = new Date(nowMs + 19800000).toISOString().slice(0, 10);
+          const weekAgoMs = nowMs - 7 * 86400000;
+          const monthAgoMs = nowMs - 30 * 86400000;
+          const verifiedPurchases = state.purchases.filter(p => p.paymentStatus === 'verified');
+          const todayRevenueInr = verifiedPurchases
+            .filter(p => new Date(new Date(p.createdAt || 0).getTime() + 19800000).toISOString().slice(0, 10) === istToday)
+            .reduce((s, p) => s + roundInr(p.finalAmount), 0);
+          const expiredEnrollments = state.enrollments.filter(e => e.expiresAt && new Date(e.expiresAt).getTime() < nowMs).length;
+          const expiringSoonEnrollments = state.enrollments.filter(e => {
+            if (!e.expiresAt) return false;
+            const t = new Date(e.expiresAt).getTime();
+            return t >= nowMs && t <= nowMs + 7 * 86400000;
+          }).length;
 
           return sendJson(res, 200, {
             metrics: {
               totalStudents: students.length,
+              joinedToday: students.filter(s => s.createdAt && new Date(new Date(s.createdAt).getTime() + 19800000).toISOString().slice(0, 10) === istToday).length,
+              joinedThisWeek: students.filter(s => s.createdAt && new Date(s.createdAt).getTime() >= weekAgoMs).length,
+              joinedThisMonth: students.filter(s => s.createdAt && new Date(s.createdAt).getTime() >= monthAgoMs).length,
               totalCourses: state.courses.length,
               activeCourses: state.courses.filter(c => c.active).length,
               totalEnrollments: state.enrollments.length,
               activeEnrollments: state.enrollments.filter(e =>
                 ['free_enrollment', 'payment_verified', 'active', 'exam_date_pending', 'scheduled'].includes(e.status)
               ).length,
+              expiredEnrollments,
+              expiringSoonEnrollments,
               awaitingExamDate: state.enrollments.filter(e => e.status === 'exam_date_pending').length,
               scheduledExams: state.enrollments.filter(e => e.status === 'scheduled').length,
               completedExams: state.enrollments.filter(e => e.status === 'completed' || e.status === 'rebooking_eligible').length,
               pendingPayments: state.purchases.filter(p => p.paymentStatus === 'pending').length,
+              failedPayments: state.purchases.filter(p => p.paymentStatus === 'failed').length,
+              cancelledPayments: state.purchases.filter(p => p.paymentStatus === 'cancelled').length,
+              verifiedPaymentsCount: verifiedPurchases.length,
+              avgPaymentInr: verifiedPurchases.length ? Math.round(totalRevenueInr / verifiedPurchases.length) : 0,
+              todayRevenueInr,
               freeCouponEnrollments: state.purchases.filter(p => p.paymentStatus === 'free_enrollment').length,
+              totalCoupons: state.coupons.length,
               activeCoupons: state.coupons.filter(c => c.active).length,
               couponRedemptionsCount: state.couponRedemptions.filter(r => r.status !== 'released').length,
+              upcomingCentralExams: (state.exams || []).filter(ex => !ex.archived && String(ex.date || '') >= istToday).length,
               totalRevenueInr,
               totalDiscountInr
             },
@@ -1150,6 +1291,7 @@ function createServer(options = {}) {
               s.name.toLowerCase().includes(q) ||
               s.email.toLowerCase().includes(q) ||
               (s.phone || '').toLowerCase().includes(q) ||
+              (s.city || '').toLowerCase().includes(q) ||
               (s.regNumber || '').toLowerCase().includes(q)
             );
           }
@@ -1542,6 +1684,91 @@ function createServer(options = {}) {
             return enrichEnrollment(enr, purchase);
           });
           return sendJson(res, 200, { enrollment: result });
+        }
+
+        // ENROLLMENT EXPIRY MANAGEMENT (IST day boundaries + audit log)
+        const expiryMatch = pathname.match(/^\/api\/admin\/enrollments\/([^/]+)\/expiry$/);
+        if (method === 'PUT' && expiryMatch) {
+          const enrollmentId = decodeURIComponent(expiryMatch[1]);
+          const body = await readJsonBody(req);
+          const newExpiryDate = String(body.expiresAt || '').trim();
+          const reason = String(body.reason || '').trim();
+          if (!newExpiryDate) throw createAppError('expiresAt date is required.', 400, 'MISSING_EXPIRY');
+          const parsedIso = /^\d{4}-\d{2}-\d{2}$/.test(newExpiryDate)
+            ? new Date(`${newExpiryDate}T23:59:59+05:30`).toISOString()
+            : new Date(newExpiryDate).toISOString();
+          const updated = await db.runTransaction((draft) => {
+            const enr = draft.enrollments.find(e => e.id === enrollmentId);
+            if (!enr) throw createAppError('Enrollment not found.', 404, 'ENROLLMENT_NOT_FOUND');
+            const prevExpiry = enr.expiresAt || null;
+            enr.expiresAt = parsedIso;
+            enr.updatedAt = new Date().toISOString();
+            addAuditLog(draft, {
+              actor: admin,
+              action: 'ADMIN_ENROLLMENT_EXPIRY_UPDATED',
+              entityType: 'enrollment',
+              entityId: enr.id,
+              details: { previousExpiry: prevExpiry, newExpiry: parsedIso, reason },
+              ipAddress
+            });
+            return enr;
+          });
+          return sendJson(res, 200, { enrollment: updated });
+        }
+
+        // CENTRAL EXAMS CRUD
+        if (method === 'GET' && pathname === '/api/admin/exams') {
+          const state = db.read();
+          return sendJson(res, 200, { exams: state.exams || [] });
+        }
+        if (method === 'POST' && pathname === '/api/admin/exams') {
+          const body = await readJsonBody(req);
+          const name = String(body.name || '').trim();
+          const date = String(body.date || '').trim();
+          if (!name || !date) throw createAppError('Exam name and date are required.', 400, 'INVALID_EXAM');
+          const created = await db.runTransaction((draft) => {
+            if (!draft.exams) draft.exams = [];
+            const ex = {
+              id: generateId('exm'),
+              name,
+              date,
+              registrationDeadline: String(body.registrationDeadline || '').trim(),
+              type: String(body.type || 'DoTE Typewriting').trim(),
+              status: String(body.status || 'upcoming').trim(),
+              archived: Boolean(body.archived),
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            draft.exams.push(ex);
+            addAuditLog(draft, { actor: admin, action: 'ADMIN_EXAM_CREATED', entityType: 'exam', entityId: ex.id, details: ex, ipAddress });
+            return ex;
+          });
+          return sendJson(res, 201, { exam: created });
+        }
+        const examMatch = pathname.match(/^\/api\/admin\/exams\/([^/]+)$/);
+        if (examMatch && (method === 'PUT' || method === 'DELETE')) {
+          const examId = decodeURIComponent(examMatch[1]);
+          const body = method === 'PUT' ? await readJsonBody(req) : {};
+          const updated = await db.runTransaction((draft) => {
+            if (!draft.exams) draft.exams = [];
+            const ex = draft.exams.find(x => x.id === examId);
+            if (!ex) throw createAppError('Exam not found.', 404, 'EXAM_NOT_FOUND');
+            if (method === 'DELETE') {
+              ex.archived = true;
+              ex.status = 'archived';
+            } else {
+              if (body.name !== undefined) ex.name = String(body.name).trim();
+              if (body.date !== undefined) ex.date = String(body.date).trim();
+              if (body.registrationDeadline !== undefined) ex.registrationDeadline = String(body.registrationDeadline).trim();
+              if (body.type !== undefined) ex.type = String(body.type).trim();
+              if (body.status !== undefined) ex.status = String(body.status).trim();
+              if (body.archived !== undefined) ex.archived = Boolean(body.archived);
+            }
+            ex.updatedAt = new Date().toISOString();
+            addAuditLog(draft, { actor: admin, action: method === 'DELETE' ? 'ADMIN_EXAM_ARCHIVED' : 'ADMIN_EXAM_UPDATED', entityType: 'exam', entityId: ex.id, details: ex, ipAddress });
+            return ex;
+          });
+          return sendJson(res, 200, { exam: updated });
         }
 
         // COUPONS MANAGEMENT

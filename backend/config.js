@@ -91,6 +91,11 @@ function getConfig(overrides = {}) {
       .map(s => s.trim())
       .filter(Boolean),
     paymentWebhookSecret,
+    phonepeEnv: overrides.phonepeEnv ?? process.env.PHONEPE_ENV ?? 'sandbox',
+    phonepeMerchantId: overrides.phonepeMerchantId ?? process.env.PHONEPE_MERCHANT_ID ?? '',
+    phonepeSaltKey: overrides.phonepeSaltKey ?? process.env.PHONEPE_SALT_KEY ?? '',
+    phonepeSaltIndex: overrides.phonepeSaltIndex ?? process.env.PHONEPE_SALT_INDEX ?? '1',
+    phonepeBaseUrl: overrides.phonepeBaseUrl ?? process.env.PHONEPE_BASE_URL ?? '',
     resendApiKey: overrides.resendApiKey ?? process.env.RESEND_API_KEY ?? '',
     emailFrom: overrides.emailFrom ?? process.env.EMAIL_FROM ?? 'no-reply@srikalaimagal.in',
     appPublicUrl: overrides.appPublicUrl ?? process.env.APP_PUBLIC_URL ?? '',

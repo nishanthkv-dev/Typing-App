@@ -181,6 +181,12 @@
       try {
         const cfg = await this.api('/api/public-config', { method: 'GET' });
         this.publicConfig = cfg;
+        this.api('/api/exams/upcoming', { method: 'GET' }).then(exData => {
+          const el = document.getElementById('premiumExamLabel');
+          if (el && exData && exData.nextExam && exData.nextExam.name) {
+            el.textContent = `/ ${exData.nextExam.name}`;
+          }
+        }).catch(() => {});
         if (cfg && cfg.firebaseWebConfig && global.FirebaseService && typeof global.FirebaseService.configure === 'function') {
           global.FirebaseService.configure(cfg.firebaseWebConfig);
         }
@@ -316,46 +322,14 @@
       }
     },
 
-    async syncProgressResult(entry) {
-      if (!this.token || !getApiBase() || !entry) return false;
-      try {
-        await this.api('/api/student/progress', {
-          method: 'POST',
-          body: JSON.stringify({ entry })
-        });
-        return true;
-      } catch (_) {
-        return false;
-      }
+    async syncProgressResult() {
+      // Typing reports and practice history are strictly local-only (Decision 1).
+      return false;
     },
 
     async syncCloudProgress() {
-      if (!this.token || !getApiBase()) return null;
-      try {
-        const res = await this.api('/api/student/progress', { method: 'GET' });
-        const remote = Array.isArray(res.history) ? res.history : [];
-        if (remote.length && global.storage && typeof global.storage.get === 'function') {
-          const curRes = await global.storage.get('recent-results', false).catch(() => null);
-          const curVal = (curRes && typeof curRes === 'object' && curRes.value !== undefined) ? curRes.value : curRes;
-          const localList = curVal ? (typeof curVal === 'string' ? JSON.parse(curVal) : curVal) : [];
-          const seen = new Set(localList.map(r => `${r.timestamp || ''}|${r.passage || ''}`));
-          let merged = [...localList];
-          for (const item of remote) {
-            const key = `${item.timestamp || ''}|${item.passage || ''}`;
-            if (!seen.has(key)) {
-              seen.add(key);
-              merged.push(item);
-            }
-          }
-          merged.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-          merged = merged.slice(0, 100);
-          await global.storage.set('recent-results', JSON.stringify(merged), false).catch(() => {});
-          if (typeof global.loadRecentResults === 'function') global.loadRecentResults();
-        }
-        return remote;
-      } catch (_) {
-        return null;
-      }
+      // Typing reports and practice history are strictly local-only (Decision 1).
+      return null;
     },
 
     isAuthenticated() {
@@ -1028,6 +1002,58 @@
           <button type="button" class="ghostbtn" style="flex:1;min-width:130px;font-size:12px;" onclick="StudentPortal.openCoursesHub('catalog')">🎟️ Buy / Apply Coupon</button>
         </div>
       `;
+      this.renderProfilePaymentHistory();
+    },
+
+    renderProfilePaymentHistory() {
+      const bodyEl = document.getElementById('studentPaymentHistoryBody');
+      const countEl = document.getElementById('lblPayHistCount');
+      if (!bodyEl) return;
+      const d = this.dashboard;
+      if (!this.isAuthenticated() || !d) {
+        if (countEl) countEl.textContent = '0 payments';
+        bodyEl.innerHTML = '<div style="font-size:12px;color:var(--muted);">Sign in to view your verified course &amp; pass payments.</div>';
+        return;
+      }
+      const list = Array.isArray(d.purchases) ? d.purchases : [];
+      if (countEl) countEl.textContent = `${list.length} payment${list.length === 1 ? '' : 's'}`;
+      if (!list.length) {
+        bodyEl.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0;">No payments recorded yet.</div>';
+        return;
+      }
+      const badgeFor = (st) => {
+        const s = String(st || '').toLowerCase();
+        if (s === 'paid' || s === 'payment_verified' || s === 'free_enrollment' || s === 'success') {
+          return { lbl: 'Paid', bg: 'rgba(16,185,129,0.14)', fg: '#047857' };
+        }
+        if (s === 'pending' || s === 'payment_pending') {
+          return { lbl: 'Pending', bg: 'rgba(245,158,11,0.16)', fg: '#b45309' };
+        }
+        if (s === 'cancelled' || s === 'canceled') {
+          return { lbl: 'Cancelled', bg: 'rgba(100,116,139,0.15)', fg: '#475569' };
+        }
+        return { lbl: 'Failed', bg: 'rgba(239,68,68,0.14)', fg: '#b91c1c' };
+      };
+      bodyEl.innerHTML = list.map(p => {
+        const b = badgeFor(p.status);
+        const ref = p.gatewayPaymentId || p.gatewayOrderId || p.id || '';
+        const maskedRef = ref ? ('••••' + String(ref).slice(-6)) : '—';
+        const dt = p.createdAt ? new Date(p.createdAt).toLocaleDateString() : '—';
+        const amt = (p.finalAmount !== undefined ? p.finalAmount : p.amount) || 0;
+        const gw = String(p.paymentMethod || 'gateway').toUpperCase();
+        return `
+          <div style="border:1px solid var(--card-border);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--bg-main);">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;">
+              <b style="font-size:12.5px;color:var(--ink);">${esc(p.courseTitle || p.courseId || 'Course Pass')}</b>
+              <span style="padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:800;background:${b.bg};color:${b.fg};">${b.lbl}</span>
+            </div>
+            <div style="font-size:11.5px;color:var(--muted);line-height:1.5;">
+              Amount: <b style="color:var(--ink);">₹${amt}</b> · ${esc(gw)} · Ref: <code>${esc(maskedRef)}</code> · ${esc(dt)}
+              ${p.couponCode ? ` · Coupon: <b>${esc(p.couponCode)}</b>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
     }
   };
 

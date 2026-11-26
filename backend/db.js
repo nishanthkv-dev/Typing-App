@@ -143,6 +143,7 @@ function createEmptyDbState() {
     couponRedemptions: [],
     purchases: [],
     enrollments: [],
+    exams: [],
     examSchedules: [],
     examAttempts: [],
     practiceHistory: [],
@@ -179,6 +180,7 @@ class AtomicDatabase {
     return {
       ...defaults,
       ...parsed,
+      exams: Array.isArray(parsed.exams) ? parsed.exams : [],
       examSchedules: Array.isArray(parsed.examSchedules) ? parsed.examSchedules : [],
       examAttempts: Array.isArray(parsed.examAttempts) ? parsed.examAttempts : [],
       practiceHistory: Array.isArray(parsed.practiceHistory) ? parsed.practiceHistory : [],

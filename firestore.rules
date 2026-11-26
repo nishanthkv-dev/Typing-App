@@ -44,9 +44,7 @@ service cloud.firestore {
       allow delete: if false; // Account deletion goes through verified backend API
 
       match /practice_history/{recordId} {
-        allow read: if isOwner(userId) || isAdmin();
-        allow create: if isOwner(userId);
-        allow update, delete: if false;
+        allow read, write: if false; // Reports are strictly local-only on device
       }
 
       match /sessions/{sessionId} {
@@ -84,6 +82,21 @@ service cloud.firestore {
 
     match /examAttempts/{attemptId} {
       allow read: if (isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.studentId == request.auth.uid)) || isAdmin();
+      allow write: if false;
+    }
+
+    match /exams/{examId} {
+      allow read: if resource.data.archived != true || isAdmin();
+      allow write: if false;
+    }
+
+    match /coupons/{couponId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /couponRedemptions/{redemptionId} {
+      allow read: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
       allow write: if false;
     }
 

@@ -106,12 +106,12 @@ async function loadOverview() {
     const data = await apiFetch('/api/admin/overview');
     const m = data.metrics;
     const cards = [
-      ['Total Students', m.totalStudents, 'Registered accounts'],
-      ['Active Enrollments', m.activeEnrollments, `${m.awaitingExamDate} awaiting exam date`],
-      ['Scheduled Exams', m.scheduledExams, `${m.completedExams} completed attempts`],
-      ['Pending Payments', m.pendingPayments, `${m.freeCouponEnrollments} ₹0 free enrollments`],
-      ['Total Revenue', `₹${m.totalRevenueInr}`, `₹${m.totalDiscountInr} total coupon discounts`],
-      ['Active Coupons', m.activeCoupons, `${m.couponRedemptionsCount} total redemptions`]
+      ['Total Students', m.totalStudents, `Today: ${m.joinedToday || 0} · Week: ${m.joinedThisWeek || 0}`],
+      ['Active Enrollments', m.activeEnrollments, `${m.expiredEnrollments || 0} expired · ${m.expiringSoonEnrollments || 0} expiring ≤7d`],
+      ['Scheduled Exams', m.scheduledExams, `${m.upcomingCentralExams || 0} upcoming central exams`],
+      ['Payments Summary', `₹${m.totalRevenueInr}`, `Today: ₹${m.todayRevenueInr || 0} · Avg: ₹${m.avgPaymentInr || 0}`],
+      ['Payment States', `${m.verifiedPaymentsCount || 0} Paid`, `Pending: ${m.pendingPayments} · Failed: ${m.failedPayments || 0} · Cancelled: ${m.cancelledPayments || 0}`],
+      ['Coupons & Discounts', m.activeCoupons, `${m.couponRedemptionsCount} redeemed · ₹${m.totalDiscountInr} off`]
     ];
     document.getElementById('overviewKpis').innerHTML = cards.map(([label, val, sub]) => `
       <div class="kpi-card">
@@ -158,6 +158,7 @@ async function ensureCoursesLoaded() {
 
 async function loadEnrollments() {
   try {
+    loadCentralExams();
     await ensureCoursesLoaded();
     const q = encodeURIComponent(document.getElementById('enrSearch').value.trim());
     const status = encodeURIComponent(document.getElementById('enrStatusFilter').value);
@@ -503,18 +504,63 @@ async function verifyPurchase(id, status) {
   }
 }
 
+async function loadCentralExams() {
+  try {
+    const data = await apiFetch('/api/admin/exams');
+    const tbody = document.getElementById('centralExamsTableBody');
+    if (!tbody) return;
+    const list = data.exams || [];
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center;">No central exams configured yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(ex => `
+      <tr>
+        <td><b>${esc(ex.name)}</b></td>
+        <td>${esc(ex.date)}</td>
+        <td>${esc(ex.registrationDeadline || '—')}</td>
+        <td>${ex.archived ? '<span class="pill pill-muted">Archived</span>' : '<span class="pill pill-success">Active</span>'}</td>
+        <td>${ex.archived ? '—' : `<button class="btn btn-ghost btn-sm" onclick="archiveCentralExam('${esc(ex.id)}')">🗄️ Archive</button>`}</td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    showGlobalAlert(err.message, 'error');
+  }
+}
+
+async function createCentralExam() {
+  const name = (document.getElementById('newExamName')?.value || '').trim();
+  const date = (document.getElementById('newExamDate')?.value || '').trim();
+  const registrationDeadline = (document.getElementById('newExamDeadline')?.value || '').trim();
+  if (!name || !date) return showGlobalAlert('Exam name and date are required.', 'error');
+  try {
+    await apiFetch('/api/admin/exams', { method: 'POST', body: JSON.stringify({ name, date, registrationDeadline }) });
+    document.getElementById('newExamName').value = '';
+    loadCentralExams();
+  } catch (err) { showGlobalAlert(err.message, 'error'); }
+}
+
+async function archiveCentralExam(id) {
+  if (!confirm('Archive this exam?')) return;
+  try {
+    await apiFetch(`/api/admin/exams/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    loadCentralExams();
+  } catch (err) { showGlobalAlert(err.message, 'error'); }
+}
+
 async function loadStudents() {
   try {
     const q = encodeURIComponent(document.getElementById('stuSearch').value.trim());
     const data = await apiFetch(`/api/admin/students?q=${q}`);
     const tbody = document.getElementById('studentsTableBody');
     if (!data.students.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center;">No students registered yet.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;">No students registered yet.</td></tr>';
       return;
     }
     tbody.innerHTML = data.students.map(s => `
       <tr>
         <td><b>${esc(s.name)}</b><br><span style="font-size:11px;color:var(--muted);">${esc(s.email)} ${s.phone ? '• ' + esc(s.phone) : ''}</span></td>
+        <td>${esc(s.city || '—')}</td>
         <td>${(s.authProviders || []).map(pr => `<span class="pill pill-primary">${esc(pr)}</span>`).join(' ')}</td>
         <td>
           ${s.enrollments.length

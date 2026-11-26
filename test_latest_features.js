@@ -63,9 +63,10 @@ async function run() {
   const timeRadios = document.querySelectorAll('input[name="tl"]');
   const values = Array.from(timeRadios).map(r => r.value);
   assert(!values.includes('900'), '15m (900s) Marathon radio pill is removed');
-  assert(values.includes('30') && values.includes('60') && values.includes('120') && values.includes('300') && values.includes('600'),
-    'Standard durations 30s, 1m, 2m, 5m, 10m preserved');
-  assert(values.length === 5, `Exactly 5 timer options remain (found: ${values.length})`);
+  assert(!values.includes('300'), '5m (300s) radio pill is removed per T6');
+  assert(values.includes('30') && values.includes('60') && values.includes('120') && values.includes('600'),
+    'Standard durations 30s, 1m, 2m, 10m preserved');
+  assert(values.length === 4, `Exactly 4 timer options remain (found: ${values.length})`);
 
   console.log('\n--- TEST 5: APPEARANCE & THEME - GOLD MODE ---');
   const btnGold = document.getElementById('btnThemeGold');

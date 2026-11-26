@@ -100,7 +100,12 @@ async function main() {
   const port = server.address().port;
   const baseUrl = `http://127.0.0.1:${port}/index.html`;
 
-  const browser = await chromium.launch({ headless: true });
+  let browser;
+  try {
+    browser = await chromium.launch({ headless: true });
+  } catch (e) {
+    browser = await chromium.launch({ headless: true, channel: 'msedge' });
+  }
   fs.mkdirSync('screenshots', { recursive: true });
 
   // -------------------------------------------------------------------

@@ -113,6 +113,26 @@
               </table>
             </div>
           </div>
+
+          <div class="card" style="margin-top:16px;">
+            <div class="card-head">
+              <h2>📅 Central Examinations Schedule (Drives Premium Pass Label)</h2>
+            </div>
+            <div class="toolbar" style="flex-wrap:wrap;gap:8px;">
+              <input id="newExamName" class="form-control" placeholder="Exam Name (e.g. DoTE Nov 2026)" />
+              <input id="newExamDate" type="date" class="form-control" />
+              <input id="newExamDeadline" type="date" class="form-control" title="Registration Deadline" />
+              <button class="btn btn-primary" onclick="createCentralExam()">➕ Add Exam</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Exam Name</th><th>Date</th><th>Reg. Deadline</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="centralExamsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
         </section>
 
         <!-- SECTION: COUPONS -->
@@ -191,6 +211,7 @@
                 <thead>
                   <tr>
                     <th>Student</th>
+                    <th>City</th>
                     <th>Providers</th>
                     <th>Enrollments &amp; Attempts</th>
                     <th>Coupons Used</th>

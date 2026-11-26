@@ -83,7 +83,10 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
 #screen-practice.reverse-minimal-mode .drill-stats-row,
 #screen-practice.reverse-minimal-mode #btnPracKeyMap,
 #screen-practice.reverse-minimal-mode #otgDrillBadge,
-#screen-practice.reverse-minimal-mode #btnPracReset {
+#screen-practice.reverse-minimal-mode #btnPracReset,
+#screen-practice.reverse-minimal-mode #pracLessonTitle,
+#screen-practice.reverse-minimal-mode #pracProgressPct,
+#screen-practice.reverse-minimal-mode #pracSub {
   display: none !important;
 }
 #screen-practice.reverse-minimal-mode .practice-split-container {
@@ -3215,7 +3218,10 @@ body:has(#screen-test.active) .bottom-nav-bar {
       <div class="glass-card">
         <div class="card-header-bar">
           <h2>⌨️ Language &amp; Keyboard</h2>
-          <span class="card-badge" id="lblActiveLayoutBadge">QWERTY</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button type="button" id="btnHomeKeymapHelp" class="ghostbtn" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:8px;" onclick="openKeyMapModal()">🗺️ Keymap Help</button>
+            <span class="card-badge" id="lblActiveLayoutBadge">QWERTY</span>
+          </div>
         </div>
         
         <input type="text" id="studentName" style="display:none;" value="Student">
@@ -3313,17 +3319,10 @@ body:has(#screen-test.active) .bottom-nav-bar {
             </div>
           </label>
           <label class="time-pill">
-            <input type="radio" name="tl" value="120">
+            <input type="radio" name="tl" value="120" checked>
             <div class="time-pill-content">
               <b>2m</b>
               <span>Quick</span>
-            </div>
-          </label>
-          <label class="time-pill">
-            <input type="radio" name="tl" value="300" checked>
-            <div class="time-pill-content">
-              <b>5m</b>
-              <span>Standard</span>
             </div>
           </label>
           <label class="time-pill">
@@ -3488,6 +3487,25 @@ body:has(#screen-test.active) .bottom-nav-bar {
         <button class="solidbtn" style="width:100%;" onclick="openPractice()">
           <span>📖</span> Open Practice Drill Studio
         </button>
+      </div>
+
+      <!-- 8-STAGE SKILL PROGRESSION PATH -->
+      <div class="glass-card" id="drillProgressionCard" style="margin-bottom:14px;padding:14px 16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+          <div style="font-size:14px;font-weight:800;color:var(--ink);">🎯 8-Stage Typing Progression</div>
+          <span class="card-badge" style="font-size:11px;">Accuracy Before Speed</span>
+        </div>
+        <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px;line-height:1.45;">Follow each stage in order: 1. Key Familiarization → 2. Home Row → 3. Top Row → 4. Bottom Row → 5. Mixed Row → 6. Words &amp; Patterns → 7. Sentences → 8. Timed Speed &amp; Accuracy.</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;font-size:11px;font-weight:700;">
+          <div style="padding:6px 8px;border-radius:8px;background:rgba(16,185,129,0.1);color:#047857;">1. Key Familiarization</div>
+          <div style="padding:6px 8px;border-radius:8px;background:rgba(37,99,235,0.08);color:var(--primary);">2. Home Row</div>
+          <div style="padding:6px 8px;border-radius:8px;background:rgba(245,158,11,0.1);color:#b45309;">3. Top Row</div>
+          <div style="padding:6px 8px;border-radius:8px;background:rgba(239,68,68,0.09);color:#b91c1c;">4. Bottom Row</div>
+          <div style="padding:6px 8px;border-radius:8px;background:rgba(37,99,235,0.08);color:var(--primary);">5. Mixed Row</div>
+          <div style="padding:6px 8px;border-radius:8px;background:rgba(124,58,237,0.1);color:#6d28d9;">6. Words &amp; Patterns</div>
+          <div style="padding:6px 8px;border-radius:8px;background:rgba(16,185,129,0.1);color:#047857;">7. Sentences</div>
+          <div style="padding:6px 8px;border-radius:8px;background:rgba(37,99,235,0.12);color:var(--primary);">8. Speed &amp; Accuracy</div>
+        </div>
       </div>
 
       <!-- TRACK SELECTOR & SPECIALTY DRILLS + KEYBOARD ROW PRACTICE -->
@@ -3679,7 +3697,17 @@ body:has(#screen-test.active) .bottom-nav-bar {
           <h2>📜 Test History &amp; Scorecards</h2>
           <span class="card-badge" id="historyCountBadge">0 tests</span>
         </div>
-        <p style="font-size:12px;color:var(--muted);margin:0 0 12px 0;">All recorded typing attempts. Tap any test to view its official scorecard and export PDF.</p>
+        <p style="font-size:12px;color:var(--muted);margin:0 0 12px 0;">All recorded typing attempts are stored locally on this device. Tap any test to view its official scorecard and export PDF.</p>
+        <div id="localBackupBar" style="background:rgba(37,99,235,0.06);border:1px solid var(--card-border);border-radius:12px;padding:10px 12px;margin-bottom:12px;">
+          <div style="font-size:11.5px;font-weight:700;color:var(--ink);margin-bottom:6px;">📁 Local-Only Reports Backup &amp; Restore</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+            <button type="button" class="ghostbtn" style="padding:6px 10px;font-size:11.5px;" onclick="LocalReportsStore && LocalReportsStore.exportAllJSON()">⬇️ Backup JSON</button>
+            <button type="button" class="ghostbtn" style="padding:6px 10px;font-size:11.5px;" onclick="LocalReportsStore && LocalReportsStore.exportAllCSV()">📊 Export CSV</button>
+            <button type="button" class="ghostbtn" style="padding:6px 10px;font-size:11.5px;" onclick="document.getElementById('localReportsRestoreInput').click()">📂 Restore Reports</button>
+            <input type="file" id="localReportsRestoreInput" accept=".json,application/json" multiple style="display:none;" onchange="LocalReportsStore && LocalReportsStore.restoreFromFiles(this.files); this.value='';">
+          </div>
+          <div style="font-size:10.5px;color:var(--muted);line-height:1.4;">Reports never upload to cloud servers. Note: On Android, folder access is reset if you uninstall — re-select your "Typing Reports" backup file after reinstalling to restore.</div>
+        </div>
         <div id="historyListContainer">
           <div class="rr-list" id="rrList">No tests recorded yet. Complete a test in Studio to generate your scorecard!</div>
         </div>
@@ -3985,16 +4013,21 @@ body:has(#screen-test.active) .bottom-nav-bar {
           <div style="position:relative;width:96px;height:96px;margin:0 auto 10px;border-radius:50%;border:3px solid var(--primary);overflow:hidden;box-shadow:var(--card-shadow);background:var(--card-bg);">
             <img id="profileAvatarImg" alt="Profile" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232563eb'/%3E%3Cpath d='M14 54C14 46 22 42 32 42C42 42 50 46 50 54' fill='%2360a5fa' stroke='%23fff' stroke-width='2'/%3E%3Ccircle cx='32' cy='28' r='14' fill='%23fed7aa'/%3E%3C/svg%3E" style="width:100%;height:100%;object-fit:cover;">
           </div>
-          <button class="ghostbtn" type="button" style="width:100%;max-width:240px;" onclick="openAvatarPicker()">📷 Update Profile Photo</button>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;width:100%;">
+            <button class="ghostbtn" type="button" style="padding:8px 12px;font-size:12px;" onclick="openAvatarPicker()">🖼️ Gallery</button>
+            <button class="ghostbtn" type="button" style="padding:8px 12px;font-size:12px;" onclick="openAvatarCameraPicker()">📷 Camera</button>
+            <button class="ghostbtn" type="button" style="padding:8px 12px;font-size:12px;color:#dc2626;" onclick="removeStudentAvatar()">🗑️ Remove</button>
+          </div>
           <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
-          <div style="font-size:11.5px;color:var(--muted);margin-top:6px;">Select any photo from your phone or camera</div>
+          <input type="file" id="avatarCameraInput" accept="image/*" capture="user" style="display:none;">
+          <div style="font-size:11.5px;color:var(--muted);margin-top:6px;">Stored locally on this device only (never uploaded)</div>
         </div>
 
         <div class="form-field">
           <div class="form-label">Full Student Name:</div>
           <input type="text" id="profName" class="custom-select-wrap select" style="width:100%;border:1.5px solid var(--card-border);border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;outline:none;" placeholder="Enter student name" maxlength="40">
         </div>
-        <div class="form-field">
+        <div class="form-field" style="display:none;">
           <div class="form-label">Exam Registration Number:</div>
           <input type="text" id="profAddress" class="custom-select-wrap select" style="width:100%;border:1.5px solid var(--card-border);border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;outline:none;" placeholder="e.g. 2026-DoTE-4920" maxlength="120">
         </div>
@@ -4003,11 +4036,24 @@ body:has(#screen-test.active) .bottom-nav-bar {
           <input type="text" id="profMobile" class="custom-select-wrap select" style="width:100%;border:1.5px solid var(--card-border);border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;outline:none;" placeholder="Mobile number" maxlength="15" inputmode="tel">
         </div>
         <div class="form-field">
+          <div class="form-label">City:</div>
+          <input type="text" id="profCity" class="custom-select-wrap select" style="width:100%;border:1.5px solid var(--card-border);border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;outline:none;" placeholder="Enter your city (e.g. Chennai)" maxlength="60">
+        </div>
+        <div class="form-field" style="display:none;">
           <div class="form-label">Training Institute Name:</div>
           <input type="text" id="profInstitute" class="custom-select-wrap select" style="width:100%;border:1.5px solid var(--card-border);border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;outline:none;" placeholder="Sri Kalaimagal Typewriting Institute" maxlength="80">
         </div>
 
         <button class="solidbtn" style="width:100%;margin-top:10px;" onclick="saveProfile()">💾 Save Student Details</button>
+      </div>
+
+      <!-- STUDENT PAYMENT HISTORY CARD (T9) -->
+      <div class="glass-card" id="studentPaymentHistoryCard" style="margin-top:14px;">
+        <div class="card-header-bar">
+          <h2>💳 Payment History</h2>
+          <span class="card-badge" id="lblPayHistCount">0 payments</span>
+        </div>
+        <div id="studentPaymentHistoryBody" style="font-size:12.5px;color:var(--muted);">Sign in to view your verified course &amp; pass payments.</div>
       </div>
       
       <footer class="app-footer powered-by-banner">Typing Thalaiva is powered by <b>K V N Techno Labs</b></footer>
@@ -4289,7 +4335,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
       </div>
     </div>
 
-    <div class="dash-metrics-grid drill-stats-row" style="display:flex !important;flex-direction:row !important;align-items:stretch !important;justify-content:space-between !important;gap:8px !important;width:100% !important;box-sizing:border-box !important;margin-bottom:10px !important;">
+    <div class="dash-metrics-grid drill-stats-row" style="display:flex;flex-direction:row !important;align-items:stretch !important;justify-content:space-between !important;gap:8px !important;width:100% !important;box-sizing:border-box !important;margin-bottom:10px !important;">
       <div class="metric-card drill-stat-card" style="flex:1 1 0 !important;min-width:0 !important;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:8px 6px;text-align:center;box-shadow:var(--card-shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;">
         <div class="metric-label drill-stat-label" style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:2px;white-space:nowrap;">Accuracy</div>
         <div class="metric-val drill-stat-val" id="pracAcc" style="font-size:18px;font-weight:800;color:var(--ink);line-height:1.2;">—</div>
@@ -4326,6 +4372,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
           </div>
         </div>
         <textarea id="practiceInput" placeholder="Type here..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text"></textarea>
+        <div id="revTamilTapPad" style="display:none;flex-wrap:wrap;gap:6px;margin-top:8px;padding:8px;border-top:1px solid var(--card-border);"></div>
       </div>
     </div>
 
@@ -5021,7 +5068,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
       <div style="background:linear-gradient(145deg,rgba(37,99,235,0.08),rgba(99,102,241,0.04));border:1.5px solid var(--primary);border-radius:12px;padding:12px;position:relative;">
         <span style="position:absolute;top:-8px;right:10px;background:var(--primary);color:#fff;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:9999px;">MOST POPULAR</span>
         <div style="font-size:11px;font-weight:800;color:var(--primary);text-transform:uppercase;">Full Premium Pass</div>
-        <div style="font-size:16px;font-weight:900;color:var(--primary);margin:2px 0 6px;">₹299 <span style="font-size:11px;font-weight:600;color:var(--muted);">/ year</span></div>
+        <div style="font-size:16px;font-weight:900;color:var(--primary);margin:2px 0 6px;">₹299 <span id="premiumExamLabel" style="font-size:11px;font-weight:600;color:var(--muted);">/ Upcoming Exam</span></div>
         <ul style="margin:0;padding-left:16px;font-size:11px;color:var(--ink);line-height:1.6;font-weight:600;">
           <li>50+ Tamil Model Exam Papers</li>
           <li>50+ English Model Exam Papers</li>
@@ -5143,7 +5190,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
 
 <!-- KEYBOARD LAYOUT KEY MAP REFERENCE MODAL -->
 <div class="modalbg" id="modalKeyMap" style="display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);z-index:10006;overflow-y:auto;padding:12px;">
-  <div class="modalcard" style="max-width:540px;width:100%;max-height:90vh;display:flex;flex-direction:column;padding:18px;border:1.5px solid var(--primary-glow);box-sizing:border-box;">
+  <div class="modalcard" style="max-width:min(760px, 96vw);width:100%;max-height:88dvh;display:flex;flex-direction:column;padding:18px;border:1.5px solid var(--primary-glow);box-sizing:border-box;">
     
     <!-- HEADER -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-shrink:0;">
@@ -5606,7 +5653,7 @@ window.MODE_LABEL = MODE_LABEL;
 let mode = 'parallel';
 let passageText = '';
 let started = false, submitted = false;
-let startTs = null, secsElapsed = 0, timeLimitSecs = 300;
+let startTs = null, secsElapsed = 0, timeLimitSecs = 120;
 let timerInt = null;
 let backspaceCount = 0;
 let bsKeyPending = false;   // a keydown Backspace was already counted; its input event must not count again
@@ -5630,10 +5677,28 @@ function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/
    PROFILE PHOTO UPLOAD — student picks a photo from their device; it's
    mirrored into both the header avatar and the home-tab profile avatar.
 ===================================================================== */
+const DEFAULT_AVATAR_SVG = "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232563eb'/%3E%3Cpath d='M14 54C14 46 22 42 32 42C42 42 50 46 50 54' fill='%2360a5fa' stroke='%23fff' stroke-width='2'/%3E%3Ccircle cx='32' cy='28' r='14' fill='%23fed7aa'/%3E%3C/svg%3E";
 function openAvatarPicker(){
   const fi = $('avatarFileInput');
   if(fi) fi.click();
 }
+function openAvatarCameraPicker(){
+  const ci = $('avatarCameraInput');
+  if(ci) ci.click();
+  else openAvatarPicker();
+}
+function removeStudentAvatar(){
+  const hdrImg = $('hdrAvatarImg');
+  const profImg = $('profileAvatarImg');
+  if(hdrImg) hdrImg.src = DEFAULT_AVATAR_SVG;
+  if(profImg) profImg.src = DEFAULT_AVATAR_SVG;
+  if(window.storage){
+    try { window.storage.delete('student_avatar', false); } catch(e){}
+  }
+  toast('🗑️ Local profile photo removed');
+}
+window.openAvatarCameraPicker = openAvatarCameraPicker;
+window.removeStudentAvatar = removeStudentAvatar;
 
 function setStudentAvatar(dataUrl, persist = true){
   if(!dataUrl) return;
@@ -5648,45 +5713,42 @@ function setStudentAvatar(dataUrl, persist = true){
   }
 }
 
+function handleAvatarFileSelection(file){
+  if(!file) return;
+  if(!file.type || !file.type.startsWith('image/')){ toast('⚠️ Please select an image file'); return; }
+  const reader = new FileReader();
+  reader.onerror = () => { toast('⚠️ Could not read selected image'); };
+  reader.onload = ev => {
+    const img = new Image();
+    img.onerror = () => { toast('⚠️ Invalid or corrupted image file'); };
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const size = Math.min(512, Math.max(160, Math.min(img.width, img.height)));
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const minDim = Math.min(img.width, img.height);
+        const sx = (img.width - minDim) / 2;
+        const sy = (img.height - minDim) / 2;
+        ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+        const compressed = canvas.toDataURL('image/jpeg', 0.82);
+        setStudentAvatar(compressed, true);
+        toast('✅ Profile photo saved locally');
+      } catch(err){
+        toast('⚠️ Could not process image');
+      }
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function initAvatarPicker(){
   const fi = $('avatarFileInput');
-  if(!fi) return;
-  fi.addEventListener('change', e=>{
-    const file = e.target.files && e.target.files[0];
-    if(!file) return;
-    if(!file.type.startsWith('image/')){ toast('⚠️ Please select an image file'); return; }
-    
-    // Read and compress using off-screen canvas to ~160x160 to keep storage fast
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const img = new Image();
-      img.onload = () => {
-        try {
-          const canvas = document.createElement('canvas');
-          const size = 160;
-          canvas.width = size;
-          canvas.height = size;
-          const ctx = canvas.getContext('2d');
-          
-          // Center crop
-          const minDim = Math.min(img.width, img.height);
-          const sx = (img.width - minDim) / 2;
-          const sy = (img.height - minDim) / 2;
-          ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
-          
-          const compressed = canvas.toDataURL('image/jpeg', 0.85);
-          setStudentAvatar(compressed, true);
-          toast('✅ Profile photo updated');
-        } catch(err){
-          setStudentAvatar(ev.target.result, true);
-          toast('✅ Profile photo updated');
-        }
-      };
-      img.src = ev.target.result;
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  });
+  const ci = $('avatarCameraInput');
+  if(fi) fi.addEventListener('change', e => { handleAvatarFileSelection(e.target.files && e.target.files[0]); e.target.value = ''; });
+  if(ci) ci.addEventListener('change', e => { handleAvatarFileSelection(e.target.files && e.target.files[0]); e.target.value = ''; });
 }
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', initAvatarPicker);
@@ -5699,7 +5761,7 @@ if(document.readyState === 'loading'){
    window.storage (personal, not shared) and used app-wide as the source
    of truth for the student's name (replaces the old Speed-tab field).
 ===================================================================== */
-let STUDENT_PROFILE = { name:'', address:'', mobile:'', institute:'', examCourse:'typing_both' };
+let STUDENT_PROFILE = { name:'', address:'', mobile:'', city:'', institute:'', examCourse:'typing_both' };
 
 async function loadProfile(){
   try{
@@ -5709,6 +5771,7 @@ async function loadProfile(){
   if($('profName')) $('profName').value = STUDENT_PROFILE.name || '';
   if($('profAddress')) $('profAddress').value = STUDENT_PROFILE.address || '';
   if($('profMobile')) $('profMobile').value = STUDENT_PROFILE.mobile || '';
+  if($('profCity')) $('profCity').value = STUDENT_PROFILE.city || '';
   if($('profInstitute')) $('profInstitute').value = STUDENT_PROFILE.institute || '';
   if($('studentName')) $('studentName').value = STUDENT_PROFILE.name || 'Student';
   
@@ -5725,16 +5788,30 @@ async function saveProfile(){
   const chosenCourse = $('profExamCourse') ? $('profExamCourse').value : 'typing_both';
   localStorage.setItem('exam_prep_course', chosenCourse);
 
+  const cityVal = ($('profCity') ? $('profCity').value : '').trim();
+  if (cityVal.length > 60) { toast('⚠️ City must be 60 characters or fewer'); return; }
+
   STUDENT_PROFILE = {
     name: ($('profName').value || '').trim(),
     address: ($('profAddress').value || '').trim(),
     mobile: ($('profMobile').value || '').trim(),
+    city: cityVal,
     institute: ($('profInstitute').value || '').trim(),
     examCourse: chosenCourse
   };
   if($('studentName')) $('studentName').value = STUDENT_PROFILE.name || 'Student';
   try{
     await window.storage.set('student-profile', JSON.stringify(STUDENT_PROFILE), false);
+    if (window.StudentPortal && StudentPortal.token && typeof StudentPortal.api === 'function') {
+      StudentPortal.api('/api/student/profile', {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: STUDENT_PROFILE.name,
+          phone: STUDENT_PROFILE.mobile,
+          city: STUDENT_PROFILE.city
+        })
+      }).catch(() => {});
+    }
     toast('✅ Profile saved');
   }catch(e){ toast('⚠️ Could not save profile'); }
   updateVannakam();
@@ -5973,6 +6050,7 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const target = $(id);
   if(target) target.classList.add('active');
+  if(typeof pushAppNavState === 'function') pushAppNavState(id);
   const isTest = (id === 'screen-test');
   document.body.classList.toggle('in-test', isTest);
   document.documentElement.classList.toggle('in-test', isTest);
@@ -6005,7 +6083,7 @@ function showScreen(id){
 ===================================================================== */
 function readConfig(){
   const tl = document.querySelector('input[name="tl"]:checked');
-  const durVal = tl ? parseInt(tl.value, 10) : 300;
+  const durVal = tl ? parseInt(tl.value, 10) : 120;
   CFG = {
     name: (STUDENT_PROFILE.name && STUDENT_PROFILE.name.trim()) || 'Student',
     lang: $('selLang').value,
@@ -7539,8 +7617,8 @@ async function saveResult(r, typedText, questionText, testMode){
     renderRecentResults(list);
     renderAnalyticsPage();
     renderHistoryPage();
-    if (window.StudentPortal && StudentPortal.token) {
-      StudentPortal.syncProgressResult(newEntry);
+    if (window.LocalReportsStore && typeof LocalReportsStore.writeSingleReportToFolder === 'function') {
+      LocalReportsStore.writeSingleReportToFolder(newEntry);
     }
   }catch(e){
     console.error('storage error', e);
@@ -7557,8 +7635,8 @@ async function loadRecentResults(){
     renderRecentResults(list);
     renderAnalyticsPage();
     renderHistoryPage();
-    if (window.StudentPortal && StudentPortal.token) {
-      StudentPortal.syncProgressResult(newEntry);
+    if (window.LocalReportsStore && typeof LocalReportsStore.writeSingleReportToFolder === 'function') {
+      LocalReportsStore.writeSingleReportToFolder(newEntry);
     }
     return list;
   }catch(e){
@@ -8097,6 +8175,8 @@ function loadPracLesson(){
   const pracScreen = $('screen-practice');
   if (pracScreen) {
     pracScreen.classList.toggle('reverse-minimal-mode', isReverse);
+    const statsRow = pracScreen.querySelector('.drill-stats-row');
+    if (statsRow) statsRow.style.setProperty('display', isReverse ? 'none' : 'flex', 'important');
   }
   if($('pracLessonTitle')){
     const rawTitle = lesson.lesson || (pracIdx >= 0 ? ('Lesson ' + (pracIdx + 1)) : 'Drill');
@@ -8121,7 +8201,44 @@ function loadPracLesson(){
   renderPracticeText('');
   updatePracStats('');
   updateReverseExpectedHint('', lesson.text || '');
+  renderReverseTamilTapPad(isReverse && isTA);
 }
+
+function renderReverseTamilTapPad(show) {
+  const pad = $('revTamilTapPad');
+  if (!pad) return;
+  if (!show) { pad.style.display = 'none'; pad.innerHTML = ''; return; }
+  pad.style.display = 'flex';
+  const ref = (window.KEYMAP_REFERENCE && (window.KEYMAP_REFERENCE[pracLayout] || window.KEYMAP_REFERENCE.tamil99)) || null;
+  const chars = [];
+  if (ref && Array.isArray(ref.rows)) {
+    ref.rows.slice(1).forEach(row => row.forEach(cell => {
+      if (cell.label && /[\u0B80-\u0BFF]/.test(cell.label) && !chars.includes(cell.label)) chars.push(cell.label);
+    }));
+  }
+  pad.innerHTML = chars.slice(0, 32).map(ch =>
+    `<button type="button" class="ghostbtn rev-ta-key" onclick="tapReverseTamilChar('${ch}')" style="min-width:44px;min-height:44px;padding:6px 10px;font-size:16px;font-weight:700;font-family:'Noto Sans Tamil',sans-serif;border-radius:10px;">${ch}</button>`
+  ).join('') + `<button type="button" class="ghostbtn rev-ta-key" onclick="tapReverseTamilChar(' ')" style="min-width:72px;min-height:44px;padding:6px 12px;font-size:12px;font-weight:700;border-radius:10px;">␣ Space</button>`;
+}
+
+function tapReverseTamilChar(ch) {
+  const pi = $('practiceInput');
+  if (!pi) return;
+  const lesson = currentPracLesson();
+  const targetText = (lesson && lesson.text) ? lesson.text : '';
+  const nextVal = pi.value + ch;
+  if (targetText.startsWith(nextVal)) {
+    pi.value = nextVal;
+    lastPIValue = nextVal;
+    lastPISelection = nextVal.length;
+    onPracticeChanged();
+    updateReverseExpectedHint(nextVal, targetText);
+    if (typeof AudioEngine !== 'undefined') AudioEngine.playKey(true);
+  } else {
+    triggerReverseErrorFeedback();
+  }
+}
+window.tapReverseTamilChar = tapReverseTamilChar;
 
 function renderPracticeText(typed){
   const lesson = currentPracLesson();
@@ -9538,81 +9655,148 @@ if($('btnHomeStartTest')){
   });
 }
 
+var __ttNavFromPopstate = false;
+function pushAppNavState(screenId) {
+  if (__ttNavFromPopstate || !window.history || typeof window.history.pushState !== 'function') return;
+  try {
+    const cur = window.history.state;
+    if (screenId === 'screen-config') {
+      if (!cur || cur.screen !== 'screen-config') {
+        window.history.replaceState({ screen: 'screen-config' }, '');
+      }
+      return;
+    }
+    if (!cur || cur.screen !== screenId) {
+      window.history.pushState({ screen: screenId }, '');
+    }
+  } catch (e) {}
+}
+window.pushAppNavState = pushAppNavState;
+
 function registerBackButton() {
-  const handleBack = () => {
-    // 0a. Close Faculty Hotline modal if open
-    const hotlineModal = document.getElementById('facultyHotlineModal');
-    if (hotlineModal && hotlineModal.style.display !== 'none' && hotlineModal.style.display !== '') {
-      closeFacultyHotline();
-      return;
-    }
-    // 0. Close notification center if open
-    const notifModal = document.getElementById('notifCenterModal');
-    if (notifModal && notifModal.style.display !== 'none' && notifModal.style.display !== '') {
-      if(window.NotificationService) NotificationService.closeCenter();
-      else notifModal.style.display = 'none';
-      return;
-    }
-    // 1. Close weak key bottom sheet if open
-    const weakOverlay = document.getElementById('weakKeySheetOverlay');
-    if (weakOverlay && weakOverlay.style.display !== 'none') {
-      closeWeakKeySheet();
-      return;
-    }
-    // 2. Close historical report overlay first if open
-    const reportOverlay = document.getElementById('reportViewOverlay');
-    if (reportOverlay) {
-      reportOverlay.remove();
-      return;
-    }
-    // 2. Close modal dialogs if open
-    const openModal = document.querySelector('.modalbg.open');
-    if (openModal) {
-      closeModal();
-      return;
-    }
-    // 3. Screen navigation
-    const activeScreen = document.querySelector('.screen.active');
-    if (activeScreen && activeScreen.id === 'screen-test') {
-      if (confirm('Do you Want to Exit?')) {
-        clearInterval(timerInt);
-        showScreen('screen-config');
-        setTimeout(() => {
-          const el = document.querySelector('.launch-modes-head') || document.getElementById('modeCardsRow');
-          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 120);
-      }
-    } else if (activeScreen && activeScreen.id === 'screen-practice') {
-      closePractice();
-    } else if (activeScreen && (activeScreen.id === 'screen-games' || activeScreen.id === 'screen-games-hub')) {
-      if (activeScreen.id === 'screen-games') {
-        const goModal = document.getElementById('gameOverModal');
-        if (goModal && goModal.style.display === 'flex') {
-          if (typeof backToGamesHub === 'function') backToGamesHub();
-          else GamesEngine.quit();
-        } else if (confirm('Do you Want to Exit?')) {
-          GamesEngine.quit();
-        }
-      } else {
-        if (typeof exitGames === 'function') exitGames();
-        else showScreen('screen-config');
-      }
-    } else if (activeScreen && activeScreen.id === 'screen-results') {
-      showScreen('screen-config');
-    } else if (activeScreen && activeScreen.id === 'screen-config') {
-      if (confirm('Do you Want to Exit?')) {
-        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
-          window.Capacitor.Plugins.App.exitApp();
-        }
-      }
-    } else {
-      showScreen('screen-config');
-    }
+  if (window.__ttBackNavRegistered) return;
+  window.__ttBackNavRegistered = true;
+
+  const isVisibleOverlay = (el) => {
+    if (!el) return false;
+    const st = el.style && el.style.display;
+    return st && st !== 'none';
   };
 
+  const handleBack = (fromPopState = false) => {
+    // 1. Topmost modal / overlay / popup
+    const histOverlay = document.getElementById('historyReportOverlay');
+    if (isVisibleOverlay(histOverlay)) { closeHistoryOverlay(); return true; }
+
+    const keyMapModal = document.getElementById('modalKeyMap');
+    if (keyMapModal && (isVisibleOverlay(keyMapModal) || keyMapModal.classList.contains('show'))) {
+      if (typeof closeKeyMapModal === 'function') closeKeyMapModal();
+      else keyMapModal.style.display = 'none';
+      return true;
+    }
+
+    const hotlineModal = document.getElementById('facultyHotlineModal');
+    if (isVisibleOverlay(hotlineModal)) { closeFacultyHotline(); return true; }
+
+    const notifModal = document.getElementById('notifCenterModal');
+    if (isVisibleOverlay(notifModal)) {
+      if (window.NotificationService) NotificationService.closeCenter();
+      else notifModal.style.display = 'none';
+      return true;
+    }
+
+    const otgModal = document.getElementById('otgInfoModal');
+    if (isVisibleOverlay(otgModal)) {
+      if (window.OTGKeyboardService) OTGKeyboardService.hideInfoModal();
+      else otgModal.style.display = 'none';
+      return true;
+    }
+
+    const weakOverlay = document.getElementById('weakKeySheetOverlay');
+    if (isVisibleOverlay(weakOverlay)) { closeWeakKeySheet(); return true; }
+
+    const reportOverlay = document.getElementById('reportViewOverlay');
+    if (reportOverlay) { reportOverlay.remove(); return true; }
+
+    const biryaniModal = document.getElementById('biryaniUpgradeModal');
+    if (isVisibleOverlay(biryaniModal)) { closeBiryaniUpgradeModal(); return true; }
+
+    const authModal = document.getElementById('authGateModal');
+    if (isVisibleOverlay(authModal)) { authModal.style.display = 'none'; return true; }
+
+    const openModalEl = document.querySelector('.modalbg.open, .modalbg.show');
+    if (openModalEl) { closeModal(); return true; }
+
+    // 2. Active practice / test / game session
+    const activeScreen = document.querySelector('.screen.active');
+    const activeId = activeScreen ? activeScreen.id : 'screen-config';
+
+    if (activeId === 'screen-practice') {
+      closePractice();
+      return true;
+    }
+    if (activeId === 'screen-test') {
+      const hasTyped = $('typingArea') && $('typingArea').value.trim().length > 0 && !submitted;
+      if (!hasTyped || confirm('Exit active test? Unsaved typing progress will be lost.')) {
+        clearInterval(timerInt);
+        showScreen('screen-config');
+      }
+      return true;
+    }
+    if (activeId === 'screen-games') {
+      const goModal = document.getElementById('gameOverModal');
+      if (isVisibleOverlay(goModal)) {
+        if (typeof backToGamesHub === 'function') backToGamesHub();
+        else if (window.GamesEngine) GamesEngine.quit();
+      } else if (window.GamesEngine) {
+        GamesEngine.quit();
+      }
+      return true;
+    }
+
+    // 3. Nested screens (one level back -> module home / dashboard)
+    if (activeId === 'screen-keyboard-test') {
+      if (window.OTGKeyboardService) OTGKeyboardService.openConnectScreen();
+      else showScreen('screen-config');
+      return true;
+    }
+    if (activeId === 'screen-games-hub') {
+      if (typeof exitGames === 'function') exitGames();
+      else showScreen('screen-config');
+      return true;
+    }
+    if (activeId !== 'screen-config') {
+      showScreen('screen-config');
+      return true;
+    }
+
+    // 4. Non-dashboard tab inside screen-config -> Dashboard (tab-speed)
+    const activeTab = document.querySelector('.tab-content.active');
+    if (activeTab && activeTab.id !== 'tab-speed') {
+      switchTab('speed');
+      return true;
+    }
+
+    // 5. At Dashboard root: allow normal exit / browser back
+    if (!fromPopState && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+      window.Capacitor.Plugins.App.exitApp();
+    }
+    return false;
+  };
+
+  window.__ttHandleBack = handleBack;
+
   if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
-    window.Capacitor.Plugins.App.addListener('backButton', handleBack);
+    window.Capacitor.Plugins.App.addListener('backButton', () => handleBack(false));
   }
+  window.addEventListener('popstate', () => {
+    __ttNavFromPopstate = true;
+    try {
+      handleBack(true);
+    } finally {
+      __ttNavFromPopstate = false;
+    }
+  });
 }
 if (window.Capacitor) {
   registerBackButton();
@@ -10091,6 +10275,7 @@ window.handleDeleteAccountConfirmation = handleDeleteAccountConfirmation;
   <script src="js/firebase_config.js"></script>
   <!-- FIREBASE AUTH & BACKEND ENGINE SCRIPT -->
   <script src="js/firebase_service.js"></script>
+  <script src="js/local_reports_store.js"></script>
   <!-- STUDENT COURSES, AUTH & COUPON PORTAL SCRIPT -->
   <script src="js/student_portal.js"></script>
   <script>

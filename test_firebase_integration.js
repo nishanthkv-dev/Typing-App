@@ -404,9 +404,9 @@ async function runSuite() {
         entry: { lang: 'en', layout: 'qwerty', passage: 'English Passage 1', netWpm: 42, accuracy: 98, passed: true, timestamp: 1700000001000 }
       })
     });
-    assert(progSave.status === 201 && progSave.data.savedCount === 1, 'Cloud progress result saved to Firestore practiceHistory');
+    assert(progSave.status === 410 && progSave.data.code === 'LOCAL_ONLY_REPORTS', 'Cloud progress upload disabled (410 LOCAL_ONLY_REPORTS)');
     const progList = await httpJson(`${baseUrl}/api/student/progress`, { headers: studentHeaders });
-    assert(progList.status === 200 && progList.data.history.length === 1 && progList.data.history[0].netWpm === 42, 'Student fetches synced cloud progress history');
+    assert(progList.status === 410 && progList.data.code === 'LOCAL_ONLY_REPORTS', 'Cloud progress fetch disabled (410 LOCAL_ONLY_REPORTS)');
 
     const pagedStudents = await httpJson(`${baseUrl}/api/admin/students?page=1&limit=1`, { headers: adminHeaders });
     assert(pagedStudents.status === 200 && pagedStudents.data.pagination && pagedStudents.data.pagination.total >= 1, 'Admin students endpoint returns pagination metadata');

@@ -7,6 +7,7 @@ const ARRAY_COLLECTIONS = [
   'couponRedemptions',
   'purchases',
   'enrollments',
+  'exams',
   'examSchedules',
   'examAttempts',
   'practiceHistory',
