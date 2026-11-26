@@ -67,6 +67,7 @@ async function runSuite() {
 
   const srv = createServer({
     port: 0,
+    dbDriver: 'json',
     dbPath,
     jwtSecret: 'test-qa-jwt-secret-key-9876543210',
     paymentWebhookSecret: 'test-qa-payment-secret',

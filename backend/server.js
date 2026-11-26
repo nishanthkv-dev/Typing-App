@@ -149,10 +149,14 @@ function createServer(options = {}) {
   }
 
   async function verifyIncomingFirebaseToken(idToken) {
-    if (verifyFirebaseTokenFn) {
-      return verifyFirebaseTokenFn(idToken);
+    try {
+      if (verifyFirebaseTokenFn) {
+        return await verifyFirebaseTokenFn(idToken);
+      }
+      return await firebaseAdmin.verifyFirebaseIdToken(idToken, { checkRevoked: true });
+    } catch {
+      throw createAppError('Invalid or expired Firebase authentication token.', 401, 'INVALID_FIREBASE_TOKEN');
     }
-    return firebaseAdmin.verifyFirebaseIdToken(idToken, { checkRevoked: true });
   }
 
   function applySecurityAndCorsHeaders(req, res) {

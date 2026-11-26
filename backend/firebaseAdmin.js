@@ -1,11 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 
-let adminSdk = null;
+let adminAppMod = null;
+let adminAuthMod = null;
+let adminFirestoreMod = null;
+
 try {
-  adminSdk = require('firebase-admin');
+  adminAppMod = require('firebase-admin/app');
+  adminAuthMod = require('firebase-admin/auth');
+  adminFirestoreMod = require('firebase-admin/firestore');
 } catch {
-  adminSdk = null;
+  adminAppMod = null;
 }
 
 function parseServiceAccountFromConfig(config) {
@@ -14,7 +19,6 @@ function parseServiceAccountFromConfig(config) {
     if (raw.startsWith('{')) {
       return JSON.parse(raw);
     }
-    // Support base64-encoded JSON for PaaS environment variables
     const decoded = Buffer.from(raw, 'base64').toString('utf8');
     return JSON.parse(decoded);
   }
@@ -41,37 +45,37 @@ function createFirebaseAdminManager(config = {}, overrides = {}) {
     if (authClient || firestoreClient || app) {
       return { configured: true, initError: null };
     }
-    if (!adminSdk) {
+    if (!adminAppMod || !adminAuthMod || !adminFirestoreMod) {
       initError = 'firebase-admin package is not installed.';
       return { configured: false, initError };
     }
 
     try {
       const appName = overrides.appName || `typing-thalaiva-${config.firebaseProjectId || 'default'}`;
-      const existing = adminSdk.apps.find(a => a && a.name === appName);
+      const existingApps = typeof adminAppMod.getApps === 'function' ? adminAppMod.getApps() : [];
+      const existing = existingApps.find(a => a && a.name === appName);
       if (existing) {
         app = existing;
       } else {
         const serviceAccount = parseServiceAccountFromConfig(config);
         const appOpts = {};
         if (serviceAccount) {
-          appOpts.credential = adminSdk.credential.cert(serviceAccount);
+          appOpts.credential = adminAppMod.cert(serviceAccount);
           appOpts.projectId = config.firebaseProjectId || serviceAccount.project_id;
         } else if (process.env.FIRESTORE_EMULATOR_HOST || process.env.FIREBASE_AUTH_EMULATOR_HOST) {
           appOpts.projectId = config.firebaseProjectId || 'typing-thalaiva-emulator';
         } else if (process.env.GOOGLE_CLOUD_PROJECT || process.env.K_SERVICE) {
-          // Managed Google Cloud runtime (Cloud Run / App Engine / Cloud Functions) ADC
-          appOpts.credential = adminSdk.credential.applicationDefault();
+          appOpts.credential = adminAppMod.applicationDefault();
           if (config.firebaseProjectId) appOpts.projectId = config.firebaseProjectId;
         } else {
           initError = 'Firebase Admin credentials are not configured (set FIREBASE_SERVICE_ACCOUNT_PATH or FIREBASE_SERVICE_ACCOUNT_JSON).';
           return { configured: false, initError };
         }
-        app = adminSdk.initializeApp(appOpts, appName);
+        app = adminAppMod.initializeApp(appOpts, appName);
       }
 
-      authClient = app.auth();
-      firestoreClient = app.firestore();
+      authClient = adminAuthMod.getAuth(app);
+      firestoreClient = adminFirestoreMod.getFirestore(app);
       try {
         firestoreClient.settings({ ignoreUndefinedProperties: true });
       } catch {
