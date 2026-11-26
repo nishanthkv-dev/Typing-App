@@ -3775,6 +3775,9 @@ body:has(#screen-test.active) .bottom-nav-bar {
           <button type="button" class="ghostbtn" style="flex:1;min-width:140px;font-size:12.5px;padding:10px 12px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="OTGKeyboardService.openTesterScreen()">
             <span>🧪</span> Test My Keyboard
           </button>
+          <button type="button" id="btnProfileKeyMap" class="ghostbtn" style="flex:1;min-width:140px;font-size:12.5px;padding:10px 12px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="openKeyMapModal()">
+            <span>🗺️</span> Keyboard Key Map
+          </button>
         </div>
       </div>
 
@@ -3986,7 +3989,6 @@ body:has(#screen-test.active) .bottom-nav-bar {
     <div class="test-cockpit-bar">
       <div class="cockpit-left-group">
         <button class="test-back-btn" onclick="confirmQuit()">‹ Exit</button>
-        <button class="tool-btn" onclick="openKeyMapModal()" title="Keyboard Key Map" style="height:28px;padding:2px 8px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:3px;border-radius:6px;background:var(--primary-glow);color:var(--primary);border:1px solid var(--primary-border);white-space:nowrap;">🗺️ Key Map</button>
         <span id="kbBadge"></span>
         <span id="otgCockpitBadge" class="otg-badge otg-fallback" onclick="OTGKeyboardService.showInfoModal()" title="OTG Physical Keyboard Status" style="cursor:pointer;">⌨️ Virtual/Touch</span>
         <div class="live-cockpit-stats">
