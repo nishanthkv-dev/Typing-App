@@ -132,7 +132,7 @@ async function runSuite() {
       body: JSON.stringify({
         name: 'Priya S',
         email: 'priya.registered@example.com',
-        password: 'Password123',
+        password: 'StudentPass#2026',
         role: 'admin' // Tamper attempt!
       })
     });
@@ -155,21 +155,21 @@ async function runSuite() {
     const resetRes = await httpJson(`${baseUrl}/api/auth/reset-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: forgotRes.data.resetToken, newPassword: 'NewPassword456' })
+      body: JSON.stringify({ token: forgotRes.data.resetToken, newPassword: 'StudentNewPass#2026' })
     });
     assert(resetRes.status === 200, 'Password reset completes cleanly');
 
     const oldLoginFail = await httpJson(`${baseUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'priya.registered@example.com', password: 'Password123' })
+      body: JSON.stringify({ email: 'priya.registered@example.com', password: 'StudentPass#2026' })
     });
     assert(oldLoginFail.status === 401, 'Old password rejected after reset');
 
     const newLoginOk = await httpJson(`${baseUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'priya.registered@example.com', password: 'NewPassword456' })
+      body: JSON.stringify({ email: 'priya.registered@example.com', password: 'StudentNewPass#2026' })
     });
     assert(newLoginOk.status === 200 && !!newLoginOk.data.token, 'New password login succeeds');
 
@@ -189,7 +189,7 @@ async function runSuite() {
     const studentAdminLoginAttempt = await httpJson(`${baseUrl}/api/admin/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'priya.registered@example.com', password: 'NewPassword456' })
+      body: JSON.stringify({ email: 'priya.registered@example.com', password: 'StudentNewPass#2026' })
     });
     assert(studentAdminLoginAttempt.status === 401, 'Student cannot sign in to /api/admin/auth/login');
 
