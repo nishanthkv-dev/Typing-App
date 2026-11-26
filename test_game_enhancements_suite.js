@@ -279,8 +279,8 @@ async function runEnhancementsTestSuite() {
   // Verify crisp DoTE logo asset & Games Module visibility
   const doteStat = fs.statSync(path.join(__dirname, 'www', 'img', 'dote_emblem.png'));
   assert(doteStat.size > 20000, `DoTE emblem PNG is full high-res asset (${doteStat.size} bytes)`);
-  assert(document.getElementById('gamesHubDoteLogo') !== null, "DoTE emblem rendered in Games Hub");
-  assert(document.getElementById('gameTopDoteLogo') !== null, "DoTE emblem rendered in Game Screen top bar");
+  assert(document.getElementById('gamesHubDoteLogo') === null, "DoTE emblem cleanly removed from Games Hub");
+  assert(document.getElementById('gameTopDoteLogo') === null, "DoTE emblem cleanly removed from Game Screen top bar");
 
   console.log("  [PASS] Submit, Back->Hub->Dashboard flow, Word Typing (no missing words), zero-activity guard, and DoTE logo verified");
 

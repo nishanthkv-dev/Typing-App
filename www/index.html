@@ -40,6 +40,8 @@
 .rp-box.ta{font-family:'Noto Sans Tamil',Arial,sans-serif;}
 .rp-box:not(.ta){font-family:'Courier New',monospace;font-size:14px;}
 .rp-box .rc{display:inline-block;min-width:1.5em;height:1.5em;line-height:1.4em;text-align:center;border:1.5px solid #dc2626;border-radius:50%;color:#dc2626;font-size:.8em;font-weight:700;margin:0 1px;background:#fff0f0;}
+.rp-box .rcw{display:inline-block;background:#fee2e2;color:#991b1b;border:1.5px solid #dc2626;border-radius:4px;padding:0 4px;margin:0 1px;font-weight:700;line-height:1.45;}
+.rp-box .rcp{display:inline-block;background:#fef3c7;color:#92400e;border:1.5px solid #d97706;border-radius:4px;padding:0 4px;margin:0 1px;font-weight:700;line-height:1.45;}
 .rp-box .rm{text-decoration:underline;text-decoration-color:#dc2626;text-decoration-thickness:2px;}
 .rp-box .rt{color:#6b7280;text-decoration:underline dotted #9ca3af;}
 .rp-leg .rc{display:inline-block;width:14px;height:14px;border:1.5px solid #dc2626;border-radius:50%;vertical-align:middle;}
@@ -48,6 +50,7 @@
 .rp-weak td{border:1px solid #ddd;padding:5px 10px;}
 .rp-note{background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:9px 12px;font-size:12.5px;color:#7c2d12;}
 .rp.pdfmode{width:794px;max-width:none;}
+.rp.pdfmode{width:740px;max-width:740px;}
 .rp.pdfmode .rp-box{max-height:none;overflow:visible;}
 @media (max-width:520px){.rp:not(.pdfmode) .rp-cols{flex-direction:column;}.rp:not(.pdfmode) .rp-col{width:100%;flex:none;}}
 #btnFullscreen::after{display:none;}
@@ -73,6 +76,49 @@ body:not([data-theme="black"]) #passDisplay .w-bad{color:#b91c1c;}
 #screen-practice .glass-card {
   padding: 12px 14px;
   margin-bottom: 10px;
+}
+#screen-practice.reverse-minimal-mode .dote-prep-pill,
+#screen-practice.reverse-minimal-mode #pracModeSeg,
+#screen-practice.reverse-minimal-mode #pracChipsField,
+#screen-practice.reverse-minimal-mode .drill-stats-row,
+#screen-practice.reverse-minimal-mode #btnPracKeyMap,
+#screen-practice.reverse-minimal-mode #otgDrillBadge,
+#screen-practice.reverse-minimal-mode #btnPracReset {
+  display: none !important;
+}
+#screen-practice.reverse-minimal-mode .practice-split-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+#screen-practice.reverse-minimal-mode .practice-panel-left,
+#screen-practice.reverse-minimal-mode .practice-panel-right {
+  width: 100% !important;
+  flex: none !important;
+}
+.rev-expected-hint {
+  display: none;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--primary);
+  border: 1px solid rgba(37, 99, 235, 0.28);
+  text-transform: none;
+}
+#screen-practice.reverse-minimal-mode .rev-expected-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+@keyframes revShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); background: rgba(239, 68, 68, 0.18); color: #dc2626; border-color: #dc2626; }
+  75% { transform: translateX(4px); }
+}
+.rev-expected-hint.rev-hint-shake {
+  animation: revShake 0.25s ease-in-out;
 }
 #pracLessonChips {
   max-height: 86px;
@@ -2892,6 +2938,14 @@ body:has(#screen-test.active) .bottom-nav-bar {
   box-shadow: 0 0 16px rgba(99, 102, 241, 0.8) !important;
   transform: translateY(2px) scale(0.96) !important;
 }
+@keyframes vkeyBlink {
+  0% { background: #2563eb; color: #ffffff; border-color: #1d4ed8; box-shadow: 0 0 20px rgba(37, 99, 235, 0.95); transform: scale(0.94); }
+  50% { background: #60a5fa; color: #ffffff; border-color: #3b82f6; box-shadow: 0 0 24px rgba(59, 130, 246, 0.9); transform: scale(1.04); }
+  100% { background: var(--card-bg, #ffffff); color: var(--ink, #1e293b); border-color: var(--card-border, #cbd5e1); box-shadow: 0 2px 4px rgba(0,0,0,0.06); transform: scale(1); }
+}
+.vkey.key-blink {
+  animation: vkeyBlink 0.28s ease-out;
+}
 .vkey-sub {
   font-size: 9px;
   color: var(--muted);
@@ -3081,7 +3135,6 @@ body:has(#screen-test.active) .bottom-nav-bar {
         </div>
         <button class="tool-btn notif-bell-btn" id="btnNotifCenter" onclick="NotificationService.openCenter()" title="Notifications">🔔<span class="notif-badge" id="hdrNotifBadge" style="display:none;">0</span></button>
         <button class="tool-btn" id="btnFullscreen" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
-        <button class="tool-btn" id="btnAudioToggle" onclick="cycleAudioMode()" title="Sound Effects">🔊</button>
         <div class="avatar-pill" id="hdrAvatarWrap" onclick="switchTab('profile')" title="Student Profile">
           <img id="hdrAvatarImg" alt="Profile" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232563eb'/%3E%3Cpath d='M14 54C14 46 22 42 32 42C42 42 50 46 50 54' fill='%2360a5fa' stroke='%23fff' stroke-width='2'/%3E%3Ccircle cx='32' cy='28' r='14' fill='%23fed7aa'/%3E%3C/svg%3E">
         </div>
@@ -3093,7 +3146,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
       
       <!-- HERO WELCOME BANNER -->
       <div class="hero-card">
-        <div class="hero-label" id="lblHeroTargetTrack">Tamil Nadu Technical Exam Prep · Nov 2026</div>
+        <div class="hero-label" id="lblHeroTargetTrack">Tamil Nadu Technical Exam Prep</div>
         <div class="hero-title" id="lblVanakkam">Vanakkam, Student! 👋</div>
         <div class="hero-subtitle">Master your touch typing speed, accuracy, and official government examination syllabus.</div>
         <div class="hero-stats-row">
@@ -3353,17 +3406,6 @@ body:has(#screen-test.active) .bottom-nav-bar {
             </div>
           </div>
 
-          <div class="form-field" style="margin-top:6px;">
-            <div class="form-label">Visual Theme:</div>
-            <div class="custom-select-wrap">
-              <select id="ddTheme">
-                <option value="white" selected>Executive Light (Default)</option>
-                <option value="black">Midnight OLED (Dark)</option>
-                <option value="golden">Imperial Academy (Gold)</option>
-              </select>
-            </div>
-          </div>
-
           <div class="preview-chip-box" id="previewWord">hello</div>
         </div>
       </div>
@@ -3524,6 +3566,13 @@ body:has(#screen-test.active) .bottom-nav-bar {
     <!-- ---------------- TAB 3: ANALYTICS (LIFETIME PROGRESS GRAPH & STAT CARDS ONLY) ---------------- -->
     <div class="tab-content" id="tab-progress">
       
+      <!-- LANGUAGE FILTER & DIFFERENTIATION -->
+      <div class="seg-control" style="margin-bottom:12px;">
+        <button class="seg-btn active" id="anFilterAll" type="button" onclick="setAnalyticsLangFilter('all')">All Languages</button>
+        <button class="seg-btn" id="anFilterEn" type="button" onclick="setAnalyticsLangFilter('en')" style="color:#2563eb;">English</button>
+        <button class="seg-btn" id="anFilterTa" type="button" onclick="setAnalyticsLangFilter('ta')" style="color:#d97706;">தமிழ் Tamil</button>
+      </div>
+
       <!-- LIFETIME PROGRESS GRAPH (WPM & MARKS) -->
       <div class="glass-card" style="margin-bottom:14px;">
         <div class="card-header-bar">
@@ -3532,13 +3581,43 @@ body:has(#screen-test.active) .bottom-nav-bar {
         <div id="analyticsGraphContainer" style="width:100%;height:165px;position:relative;">
           <canvas id="analyticsGraphCanvas" style="width:100%;height:100%;display:block;"></canvas>
         </div>
-        <div style="display:flex;align-items:center;justify-content:center;gap:18px;margin-top:10px;font-size:11.5px;font-weight:700;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;font-weight:700;">
           <span style="color:#2563eb;display:inline-flex;align-items:center;gap:5px;">
-            <span style="width:12px;height:3px;background:#2563eb;border-radius:2px;display:inline-block;"></span> Net WPM
+            <span style="width:12px;height:3px;background:#2563eb;border-radius:2px;display:inline-block;"></span> English WPM
+          </span>
+          <span style="color:#d97706;display:inline-flex;align-items:center;gap:5px;">
+            <span style="width:12px;height:3px;background:#d97706;border-radius:2px;display:inline-block;"></span> Tamil WPM
           </span>
           <span style="color:#7c3aed;display:inline-flex;align-items:center;gap:5px;">
             <span style="width:12px;height:3px;background:#7c3aed;border-radius:2px;display:inline-block;"></span> Exam Marks
           </span>
+        </div>
+      </div>
+
+      <!-- LANGUAGE COMPARISON CARD (ENGLISH VS TAMIL) -->
+      <div class="glass-card" style="margin-bottom:14px;" id="anLangCompareCard">
+        <div class="card-header-bar">
+          <h2>🌐 English vs தமிழ் Tamil</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:rgba(37,99,235,0.08);border:1.5px solid rgba(37,99,235,0.3);border-radius:12px;padding:10px;">
+            <div style="font-size:12px;font-weight:800;color:#2563eb;margin-bottom:6px;display:flex;justify-content:space-between;">
+              <span>English</span><span id="anEnCount">0 tests</span>
+            </div>
+            <div style="font-size:12px;color:var(--ink);line-height:1.6;">
+              Best: <b style="color:#2563eb;" id="anEnBest">—</b> WPM<br>
+              Avg: <b style="color:#2563eb;" id="anEnAvg">—</b> WPM · <b id="anEnAcc">—</b>
+            </div>
+          </div>
+          <div style="background:rgba(217,119,6,0.09);border:1.5px solid rgba(217,119,6,0.35);border-radius:12px;padding:10px;">
+            <div style="font-size:12px;font-weight:800;color:#d97706;margin-bottom:6px;display:flex;justify-content:space-between;">
+              <span>தமிழ் Tamil</span><span id="anTaCount">0 tests</span>
+            </div>
+            <div style="font-size:12px;color:var(--ink);line-height:1.6;">
+              Best: <b style="color:#d97706;" id="anTaBest">—</b> WPM<br>
+              Avg: <b style="color:#d97706;" id="anTaAvg">—</b> WPM · <b id="anTaAcc">—</b>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -3741,18 +3820,6 @@ body:has(#screen-test.active) .bottom-nav-bar {
             </select>
           </div>
           <div class="form-hint" id="lblExamCourseHint">Full government examination syllabus with official stroke deduction formulas.</div>
-        </div>
-
-        <div class="form-field">
-          <div class="form-label">Exam Time Period / Target Session:</div>
-          <div class="custom-select-wrap">
-            <select id="profExamPeriod" onchange="syncExamPeriod()">
-              <option value="November 2026" selected>November 2026</option>
-              <option value="June 2027">June 2027</option>
-              <option value="November 2027">November 2027</option>
-            </select>
-          </div>
-          <div class="form-hint">Official Tamil Nadu Technical Examinations timetable schedule.</div>
         </div>
 
         <div style="margin-top:14px;">
@@ -3990,7 +4057,6 @@ body:has(#screen-test.active) .bottom-nav-bar {
       <div class="cockpit-left-group">
         <button class="test-back-btn" onclick="confirmQuit()">‹ Exit</button>
         <span id="kbBadge"></span>
-        <span id="otgCockpitBadge" class="otg-badge otg-fallback" onclick="OTGKeyboardService.showInfoModal()" title="OTG Physical Keyboard Status" style="cursor:pointer;">⌨️ Virtual/Touch</span>
         <div class="live-cockpit-stats">
           <span class="live-stat-pill"><span class="pill-label">Chars: </span><b id="liveChars">0</b></span>
           <span class="live-stat-pill">⌫ <b id="liveBack">0</b></span>
@@ -4202,7 +4268,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
       </div>
 
       <!-- PRACTICE MODE SWITCHER: LESSON/ROW DRILLS vs WORD PRACTICE -->
-      <div class="seg-control" style="margin-bottom:10px;">
+      <div class="seg-control" id="pracModeSeg" style="margin-bottom:10px;">
         <button class="seg-btn active" id="pmLetters" type="button" onclick="setPracMode('letters')">🔤 Lesson &amp; Row Drills</button>
         <button class="seg-btn" id="pmWords" type="button" onclick="setPracMode('words')">📝 Word Practice</button>
       </div>
@@ -4217,7 +4283,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
         </div>
       </div>
 
-      <div class="form-field" style="margin-bottom:0;">
+      <div class="form-field" id="pracChipsField" style="margin-bottom:0;">
         <div class="form-label">Lesson / Row Module:</div>
         <div class="mb-chips" id="pracLessonChips"></div>
       </div>
@@ -4242,6 +4308,7 @@ body:has(#screen-test.active) .bottom-nav-bar {
       <div class="passcard practice-panel-left" style="margin:0;display:flex;flex-direction:column;">
         <div class="panelhead" style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding:7px 10px 6px;font-size:10.5px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--primary);background:var(--card-bg);border-bottom:1px solid var(--card-border);position:sticky;top:0;z-index:5;flex-shrink:0;">
           <span id="pracLessonTitle" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Lesson 1</span>
+          <span id="revExpectedHint" class="rev-expected-hint">Next: —</span>
           <span id="pracProgressPct" style="flex-shrink:0;">0%</span>
         </div>
         <div id="pracScrollWrap">
@@ -4263,8 +4330,8 @@ body:has(#screen-test.active) .bottom-nav-bar {
     </div>
 
     <div class="btn-row-dual">
-      <button class="ghostbtn" onclick="resetPracticeAttempt()">Reset Lesson</button>
-      <button class="solidbtn" onclick="closePractice()">Finish Practice</button>
+      <button class="ghostbtn" id="btnPracReset" onclick="resetPracticeAttempt()">Reset Lesson</button>
+      <button class="solidbtn" id="btnPracFinish" onclick="onFinishPracticeClick()">Finish Practice</button>
     </div>
   </section>
 
@@ -4276,24 +4343,12 @@ body:has(#screen-test.active) .bottom-nav-bar {
       <div class="games-hub-title-row" style="display:flex;align-items:center;gap:10px;">
         <button id="btnGamesBackToDashboard" class="test-back-btn" onclick="exitGames()" style="white-space:nowrap;flex-shrink:0;">&lt; Back to Dashboard</button>
         <div style="font-weight:800;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:8px;white-space:nowrap;">
-          <img id="gamesHubDoteLogo" src="img/dote_emblem.png" alt="DoTE Tamil Nadu Emblem" class="dote-logo-img" style="height:34px;width:auto;">
-          <span>🎮 Typing Arcade Arena</span>
+          <span>Typing Arcade Arena</span>
         </div>
       </div>
       <div class="games-hub-actions">
         <button class="ghostbtn" onclick="openLeaderboardModal()">🏆 Hall of Legends</button>
         <button class="ghostbtn" onclick="openGameHistoryModal()">📜 My History</button>
-      </div>
-    </div>
-
-    <!-- DOTE ARCADE EXAM PREP BANNER -->
-    <div class="dote-prep-card" style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(245,158,11,0.08));border:1.5px solid rgba(245,158,11,0.35);border-radius:14px;padding:10px 14px;margin-bottom:14px;">
-      <img src="img/dote_emblem.png" alt="DoTE Tamil Nadu Emblem" class="dote-logo-img" style="height:44px;width:auto;">
-      <div style="min-width:0;">
-        <div style="font-size:10.5px;font-weight:800;color:#d97706;text-transform:uppercase;letter-spacing:0.8px;">DoTE Typewriting Arcade</div>
-        <div style="font-size:12px;font-weight:600;color:var(--ink);line-height:1.4;margin-top:2px;">
-          Build real Tamil &amp; English typing accuracy and speed for DoTE examinations at a comfortable student pace.
-        </div>
       </div>
     </div>
 
@@ -4410,11 +4465,10 @@ body:has(#screen-test.active) .bottom-nav-bar {
        SCREEN 6: ACTIVE GAME ARENA (FULL-SCREEN 100DVH HUD & CANVAS)
   =================================================================== -->
   <section class="screen" id="screen-games">
-    <!-- TOP GAME HUD BAR (NON-OVERLAPPING DOTE BRANDING & CONTROLS) -->
+    <!-- TOP GAME HUD BAR -->
     <div class="game-top-bar" id="gameTopBar">
       <div class="game-top-brand">
-        <img id="gameTopDoteLogo" src="img/dote_emblem.png" alt="DoTE Tamil Nadu Emblem" class="dote-logo-img" style="height:32px;width:auto;">
-        <span id="gameTopTitle" style="font-size:13px;font-weight:800;color:#1e3a8a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">DoTE Typing Arcade</span>
+        <span id="gameTopTitle" style="font-size:13px;font-weight:800;color:#1e3a8a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Typing Arcade</span>
       </div>
       <div class="game-top-actions">
         <button class="game-top-sound-btn" id="gameSoundBtn" onclick="toggleGameSound()" title="Sound Effects">🔊</button>
@@ -4565,9 +4619,15 @@ body:has(#screen-test.active) .bottom-nav-bar {
         </div>
       </div>
 
-      <div style="margin-bottom:14px;">
+      <div style="margin-bottom:12px;">
         <h4 style="margin:0 0 4px;font-size:15px;font-weight:800;color:var(--ink);">Press any key to test it</h4>
         <div style="font-size:12px;color:var(--muted);line-height:1.45;">Works with your device's physical keyboard, whether Bluetooth, USB-OTG, or built-in.</div>
+      </div>
+
+      <!-- Sample Words & Live Typed Preview -->
+      <div id="kbTesterWordsCard" style="background:var(--subtle-bg, #f8fafc);border:1px solid var(--card-border);border-radius:12px;padding:10px 12px;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Test Words (English &amp; தமிழ்)</div>
+        <div id="kbTesterSampleWords" style="font-size:14px;font-weight:700;color:var(--ink);line-height:1.45;">asdf jkl; quick brown fox jumps · தமிழ் தட்டச்சு பயிற்சி</div>
       </div>
 
       <!-- Interactive Virtual Keyboard Layout -->
@@ -4629,11 +4689,8 @@ body:has(#screen-test.active) .bottom-nav-bar {
         </div>
       </div>
 
-      <div style="display:flex;gap:10px;margin-top:16px;">
-        <button type="button" class="ghostbtn" style="flex:1;padding:10px;border-radius:10px;font-size:13px;" onclick="OTGKeyboardService.resetTester()">
-          🔄 Reset Test
-        </button>
-        <button type="button" class="solidbtn" style="flex:1;padding:10px;border-radius:10px;font-size:13px;" onclick="showScreen('screen-config')">
+      <div style="display:flex;margin-top:16px;">
+        <button type="button" id="btnDoneTesting" class="solidbtn" style="width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:700;" onclick="showScreen('screen-config')">
           Done Testing
         </button>
       </div>
@@ -5297,7 +5354,7 @@ function cycleAudioMode() {
   const labels = {'1': '🔊 Switch', '2': '🔔 Typewriter', '0': '🔇 Silent'};
   const next = modes[(modes.indexOf(sel.value) + 1) % modes.length];
   sel.value = next;
-  $('btnAudioToggle').textContent = next === '0' ? '🔇' : (next === '1' ? '🔊' : '🔔');
+  if($('btnAudioToggle')) $('btnAudioToggle').textContent = next === '0' ? '🔇' : (next === '1' ? '🔊' : '🔔');
   AudioEngine.play(next);
   toast('Audio: ' + labels[next]);
 }
@@ -5642,7 +5699,7 @@ if(document.readyState === 'loading'){
    window.storage (personal, not shared) and used app-wide as the source
    of truth for the student's name (replaces the old Speed-tab field).
 ===================================================================== */
-let STUDENT_PROFILE = { name:'', address:'', mobile:'', institute:'', examCourse:'typing_both', examPeriod:'November 2026' };
+let STUDENT_PROFILE = { name:'', address:'', mobile:'', institute:'', examCourse:'typing_both' };
 
 async function loadProfile(){
   try{
@@ -5656,9 +5713,7 @@ async function loadProfile(){
   if($('studentName')) $('studentName').value = STUDENT_PROFILE.name || 'Student';
   
   const savedCourse = localStorage.getItem('exam_prep_course') || STUDENT_PROFILE.examCourse || 'typing_both';
-  const savedPeriod = localStorage.getItem('exam_time_period') || STUDENT_PROFILE.examPeriod || 'November 2026';
   if($('profExamCourse')) $('profExamCourse').value = savedCourse;
-  if($('profExamPeriod')) $('profExamPeriod').value = savedPeriod;
   
   updateVannakam();
   updateHeroTrackLabel();
@@ -5668,17 +5723,14 @@ async function loadProfile(){
 
 async function saveProfile(){
   const chosenCourse = $('profExamCourse') ? $('profExamCourse').value : 'typing_both';
-  const chosenPeriod = $('profExamPeriod') ? $('profExamPeriod').value : 'November 2026';
   localStorage.setItem('exam_prep_course', chosenCourse);
-  localStorage.setItem('exam_time_period', chosenPeriod);
 
   STUDENT_PROFILE = {
     name: ($('profName').value || '').trim(),
     address: ($('profAddress').value || '').trim(),
     mobile: ($('profMobile').value || '').trim(),
     institute: ($('profInstitute').value || '').trim(),
-    examCourse: chosenCourse,
-    examPeriod: chosenPeriod
+    examCourse: chosenCourse
   };
   if($('studentName')) $('studentName').value = STUDENT_PROFILE.name || 'Student';
   try{
@@ -5971,14 +6023,16 @@ function readConfig(){
     lockBackspace: $('optLockBackspace') ? $('optLockBackspace').checked : false,
     blindInput: $('optBlindInput') ? $('optBlindInput').checked : false,
     sound: $('selSound') ? $('selSound').value : '1',
-    theme: $('ddTheme') ? $('ddTheme').value : 'white',
+    theme: localStorage.getItem('app_theme') || document.body.getAttribute('data-theme') || 'white',
     textSize: $('ddTextSize') ? $('ddTextSize').value : '20'
   };
   window.CFG = CFG;
 }
 
 function applyPreviewStyles(){
-  document.body.setAttribute('data-theme', $('ddTheme').value);
+  const activeTheme = localStorage.getItem('app_theme') || document.body.getAttribute('data-theme') || 'white';
+  document.body.setAttribute('data-theme', activeTheme);
+  document.documentElement.setAttribute('data-theme', activeTheme);
   document.documentElement.style.setProperty('--typesize', $('ddTextSize').value + 'px');
   const isTA = $('selLang').value === 'ta';
   $('tamilLayoutField').style.display = isTA ? 'block' : 'none';
@@ -5998,8 +6052,8 @@ function populatePassageDropdown(){
   }).join('');
   if(prev && prev < list.length) sel.value = prev;
 }
-['ddTheme','ddTextSize','selLang','selLayout'].forEach(id=>{
-  $(id).addEventListener('change', applyPreviewStyles);
+['ddTextSize','selLang','selLayout'].forEach(id=>{
+  if($(id)) $(id).addEventListener('change', applyPreviewStyles);
 });
 $('selLang').addEventListener('change', populatePassageDropdown);
 if ($('selPassage')) {
@@ -7118,12 +7172,17 @@ function buildReportHTML(r){
   const chipHTML = chips.map(c=>`<div class="rp-chip" style="background:${c[0]}"><b>${c[1]}</b><span>${c[2]}</span></div>`).join('')
     + `<div class="rp-chip bs"><b>${backspaceCount}</b><span>⌫ Backspace used</span></div>`;
   const circ = t => `<span class="rcw">${esc(t)}</span>`;
+  const part = t => `<span class="rcp">${esc(t)}</span>`;
   const orig = r.compare.origRender.map(t=>{
     if(t.cls==='sub'||t.cls==='omit') return `<span class="rm">${esc(t.text)}</span>`;
     if(t.cls==='tail-ignored'||t.cls==='tail') return `<span class="rt">${esc(t.text)}</span>`;
     return esc(t.text);
   }).join(' ');
-  const typed = r.compare.typedRender.map(t=> (t.cls==='sub'||t.cls==='extra') ? circ(t.text) : esc(t.text)).join(' ');
+  const typed = r.compare.typedRender.map(t=> {
+    if(t.cls==='sub'||t.cls==='extra') return circ(t.text);
+    if(t.cls==='partial') return part(t.text);
+    return esc(t.text);
+  }).join(' ');
   const weak = (r.weakestKeys||[]).slice(0,6);
   const weakHTML = weak.length
     ? `<table class="rp-weak">${weak.map(k=>`<tr><td>${esc(k.letter)}</td><td>${k.count}×</td></tr>`).join('')}</table>
@@ -7169,7 +7228,7 @@ function buildReportHTML(r){
     <div class="rp-sec">Mistakes${CFG.time===600?' &amp; marks':''} calculation</div>
     ${calcHTML(r)}
     <div class="rp-sec">Comparison — ${stEN} portion${timed?' (evaluated for marks)':''}</div>
-    <div class="rp-leg"><span class="rc"></span> Mistake (circled, in Your Response) &nbsp; <u>abc</u> Mistake word (red underline, in Original Passage) &nbsp; · ${esc(ptitle)}</div>
+    <div class="rp-leg"><span style="display:inline-block;background:#fee2e2;color:#991b1b;border:1.5px solid #dc2626;border-radius:4px;padding:0 4px;font-weight:700;">abc</span> Mistake / Extra (in Your Response) &nbsp; <u>abc</u> Mistake word (red underline, in Original Passage) &nbsp; · ${esc(ptitle)}</div>
     <div class="rp-cols">
       <div class="rp-col"><div class="rp-lab">Original Passage</div><div class="rp-box${isTA?' ta':''}">${orig}</div></div>
       <div class="rp-col"><div class="rp-lab">Your Response</div><div class="rp-box${isTA?' ta':''}">${typed||'&nbsp;'}</div></div>
@@ -7743,13 +7802,13 @@ async function shareResultImage(){
    PRACTICE MODE — untimed letter/word drills for English & Tamil,
    sourced from the institute's own PRAC lesson bank.
 ===================================================================== */
-let pracLang = 'en';
-let pracLayout = 'tamil99';
-let pracIdx = 0;
-let pracBaseLessonIdx = 0;
-let pracMode = 'letters'; // 'letters' | 'words'
-let pracCustomLesson = null;
-let pracScreenReturnTo = 'screen-config';
+var pracLang = 'en';
+var pracLayout = 'tamil99';
+var pracIdx = 0;
+var pracBaseLessonIdx = 0;
+var pracMode = 'letters'; // 'letters' | 'words'
+var pracCustomLesson = null;
+var pracScreenReturnTo = 'screen-config';
 
 function currentPracLesson(){
   if(pracIdx === -1 && pracCustomLesson) return pracCustomLesson;
@@ -7919,10 +7978,15 @@ function openPractice(){
   setTimeout(()=>{ if($('practiceInput')) $('practiceInput').focus({ preventScroll: true }); }, 80);
 }
 function closePractice(){
-  showScreen(pracScreenReturnTo || 'screen-config');
+  const target = pracScreenReturnTo || 'screen-config';
+  showScreen(target);
+  if (target === 'screen-config' && typeof switchTab === 'function') {
+    switchTab('practice');
+  }
 }
 function setPracLang(l){
   pracLang = l;
+  if (typeof window !== 'undefined') window.pracLang = l;
   pracIdx = 0; pracBaseLessonIdx = 0; pracCustomLesson = null;
   pracMode = 'letters';
   pracComposer.raw=''; pracComposer.outLen=0;
@@ -7938,6 +8002,7 @@ function setPracLang(l){
 }
 function setPracLayout(layout){
   pracLayout = layout;
+  if (typeof window !== 'undefined') window.pracLayout = layout;
   if($('pracLayoutSel')) $('pracLayoutSel').value = layout;
   if($('tabPracTrackSel') && pracLang === 'ta') $('tabPracTrackSel').value = layout;
   pracComposer.raw=''; pracComposer.outLen=0;
@@ -7983,12 +8048,60 @@ function selectPracLesson(i){
   loadPracLesson();
 }
 
+function updateReverseExpectedHint(typed, target) {
+  const hintEl = $('revExpectedHint');
+  if (!hintEl) return;
+  const idx = (typed || '').length;
+  if (!target || idx >= target.length) {
+    hintEl.textContent = '✓ Complete';
+    return;
+  }
+  const ch = target[idx];
+  const disp = ch === ' ' ? 'SPACE (␣)' : (ch === '\n' ? 'ENTER (↵)' : ch);
+  hintEl.textContent = 'Next: ' + disp;
+}
+
+function triggerReverseErrorFeedback() {
+  if (typeof AudioEngine !== 'undefined' && typeof AudioEngine.playKey === 'function') {
+    try { AudioEngine.playKey(false); } catch (e) {}
+  }
+  const hintEl = $('revExpectedHint');
+  if (hintEl) {
+    hintEl.classList.remove('rev-hint-shake');
+    try { void hintEl.offsetWidth; } catch (e) {}
+    hintEl.classList.add('rev-hint-shake');
+  }
+}
+
+function onFinishPracticeClick() {
+  const lesson = currentPracLesson();
+  if (lesson && lesson.isReverseTyping) {
+    const typed = $('practiceInput') ? $('practiceInput').value : '';
+    const target = lesson.text || '';
+    if (typed !== target) {
+      triggerReverseErrorFeedback();
+      toast('Type all reversed words accurately before submitting!');
+      return;
+    }
+  }
+  closePractice();
+}
+window.onFinishPracticeClick = onFinishPracticeClick;
+
 function loadPracLesson(){
   const lesson = currentPracLesson();
   const isTA = pracLang === 'ta';
+  const isReverse = Boolean(lesson && lesson.isReverseTyping);
+  const pracScreen = $('screen-practice');
+  if (pracScreen) {
+    pracScreen.classList.toggle('reverse-minimal-mode', isReverse);
+  }
   if($('pracLessonTitle')){
     const rawTitle = lesson.lesson || (pracIdx >= 0 ? ('Lesson ' + (pracIdx + 1)) : 'Drill');
     $('pracLessonTitle').textContent = rawTitle;
+  }
+  if($('btnPracFinish')) {
+    $('btnPracFinish').textContent = isReverse ? 'Submit Answer' : 'Finish Practice';
   }
   $('pracSub').textContent = lesson.sub || '';
   const extEl = $('pracExText');
@@ -8005,6 +8118,7 @@ function loadPracLesson(){
   if(sw) sw.scrollTop = 0;
   renderPracticeText('');
   updatePracStats('');
+  updateReverseExpectedHint('', lesson.text || '');
 }
 
 function renderPracticeText(typed){
@@ -8063,8 +8177,8 @@ function onPracticeChanged(){
 }
 
 const PI = $('practiceInput');
-let lastPIValue = '';
-let lastPISelection = 0;
+var lastPIValue = '';
+var lastPISelection = 0;
 
 ['click', 'keyup', 'select', 'focus'].forEach(evt => {
   PI.addEventListener(evt, () => {
@@ -8125,12 +8239,39 @@ PI.addEventListener('input', e=>{
 
   onPracticeChanged();
 
+  const lesson = currentPracLesson();
+  const targetText = (lesson && lesson.text) ? lesson.text : '';
+  if (lesson && lesson.isReverseTyping && PI.value.length > oldVal.length) {
+    const curVal = PI.value;
+    let allowed = targetText.startsWith(curVal);
+    if (!allowed && isTA && curVal.length > 0 && curVal.length <= targetText.length) {
+      // Allow intermediate Tamil base consonant while composing a combined vowel-sign syllable
+      const lastTypedCh = curVal[curVal.length - 1];
+      const expectedAtPos = targetText[curVal.length - 1];
+      if (curVal.slice(0, -1) === targetText.slice(0, curVal.length - 1) && lastTypedCh === expectedAtPos) {
+        allowed = true;
+      }
+    }
+    if (!allowed) {
+      PI.value = oldVal;
+      try { PI.setSelectionRange(oldVal.length, oldVal.length); } catch (err) {}
+      if (isTA) { pracComposer.raw = ''; pracComposer.outLen = 0; }
+      onPracticeChanged();
+      triggerReverseErrorFeedback();
+      updateReverseExpectedHint(oldVal, targetText);
+      lastPIValue = oldVal;
+      lastPISelection = oldVal.length;
+      return;
+    }
+  }
+  if (lesson && lesson.isReverseTyping) {
+    updateReverseExpectedHint(PI.value, targetText);
+  }
+
   if(insertedStr.length > 0){
     try {
       const curVal = PI.value;
       const curIdx = curVal.length - 1;
-      const lesson = currentPracLesson();
-      const targetText = (lesson && lesson.text) ? lesson.text : '';
       const isCorrect = (targetText && curIdx >= 0 && curIdx < targetText.length && curVal[curIdx] === targetText[curIdx]);
       if(typeof AudioEngine !== 'undefined') AudioEngine.playKey(isCorrect);
     } catch(err){}
@@ -8699,10 +8840,6 @@ function setAppTheme(theme) {
   if (lblBadge) {
     lblBadge.textContent = normalizedTheme === 'dark' ? 'Dark' : (normalizedTheme === 'golden' ? 'Gold' : 'Light');
   }
-  const ddTheme = $('ddTheme');
-  if (ddTheme) {
-    ddTheme.value = normalizedTheme === 'dark' ? 'black' : (normalizedTheme === 'golden' ? 'golden' : 'white');
-  }
 }
 
 function initAppTheme() {
@@ -8828,15 +8965,8 @@ function syncExamCourseWithConfig() {
   updateHeroTrackLabel();
 }
 
-function syncExamPeriod() {
-  const period = $('profExamPeriod') ? $('profExamPeriod').value : 'November 2026';
-  localStorage.setItem('exam_time_period', period);
-  updateHeroTrackLabel();
-}
-
 function updateHeroTrackLabel() {
   const course = localStorage.getItem('exam_prep_course') || 'typing_both';
-  const period = localStorage.getItem('exam_time_period') || 'November 2026';
   const heroLabel = $('lblHeroTargetTrack');
   if(!heroLabel) return;
   
@@ -8846,7 +8976,7 @@ function updateHeroTrackLabel() {
   else if(course === 'typing_english') courseStr = 'English Typewriting Exam (100m)';
   else courseStr = 'DoTE Typewriting Prep (100m)';
   
-  heroLabel.textContent = `${courseStr} · ${period}`;
+  heroLabel.textContent = courseStr;
 }
 
 /* =====================================================================
@@ -8876,8 +9006,33 @@ function quickSelectLanguage(lang, layout) {
 ===================================================================== */
 let currentAnalyticsFilter = 'all';
 
+function setAnalyticsLangFilter(lang) {
+  currentAnalyticsFilter = (lang === 'en' || lang === 'ta') ? lang : 'all';
+  if ($('anFilterAll')) $('anFilterAll').classList.toggle('active', currentAnalyticsFilter === 'all');
+  if ($('anFilterEn')) $('anFilterEn').classList.toggle('active', currentAnalyticsFilter === 'en');
+  if ($('anFilterTa')) $('anFilterTa').classList.toggle('active', currentAnalyticsFilter === 'ta');
+  renderAnalyticsPage();
+}
+window.setAnalyticsLangFilter = setAnalyticsLangFilter;
+
 function renderAnalyticsPage() {
-  const list = Array.isArray(RECENT_RESULTS_CACHE) ? RECENT_RESULTS_CACHE : [];
+  const allList = Array.isArray(RECENT_RESULTS_CACHE) ? RECENT_RESULTS_CACHE : [];
+
+  // Language Comparison Stats (always computed from full cache for clear EN vs TA comparison)
+  const enList = allList.filter(r => r.lang !== 'ta');
+  const taList = allList.filter(r => r.lang === 'ta');
+  if ($('anEnCount')) $('anEnCount').textContent = `${enList.length} test${enList.length === 1 ? '' : 's'}`;
+  if ($('anTaCount')) $('anTaCount').textContent = `${taList.length} test${taList.length === 1 ? '' : 's'}`;
+  if ($('anEnBest')) $('anEnBest').textContent = enList.length ? Math.max(...enList.map(r => r.netWpm || 0)).toString() : '—';
+  if ($('anEnAvg')) $('anEnAvg').textContent = enList.length ? Math.round(enList.reduce((s, r) => s + (r.netWpm || 0), 0) / enList.length).toString() : '—';
+  if ($('anEnAcc')) $('anEnAcc').textContent = enList.length ? (Math.round(enList.reduce((s, r) => s + (r.accuracy || 0), 0) / enList.length) + '% Acc') : '—';
+  if ($('anTaBest')) $('anTaBest').textContent = taList.length ? Math.max(...taList.map(r => r.netWpm || 0)).toString() : '—';
+  if ($('anTaAvg')) $('anTaAvg').textContent = taList.length ? Math.round(taList.reduce((s, r) => s + (r.netWpm || 0), 0) / taList.length).toString() : '—';
+  if ($('anTaAcc')) $('anTaAcc').textContent = taList.length ? (Math.round(taList.reduce((s, r) => s + (r.accuracy || 0), 0) / taList.length) + '% Acc') : '—';
+
+  const list = currentAnalyticsFilter === 'all'
+    ? allList
+    : allList.filter(r => currentAnalyticsFilter === 'ta' ? r.lang === 'ta' : r.lang !== 'ta');
   
   // WPM Statistics: Best, Worst, Lifetime Average
   const wpmBestEl = $('anWpmBest');
@@ -9060,11 +9215,12 @@ function drawAnalyticsChart(records) {
   ctx.lineTo(width - padR, padT + chartH);
   ctx.stroke();
 
-  // Calculate coordinates for WPM points
+  // Calculate coordinates for WPM points (tagged with language color: English=#2563eb, Tamil=#d97706)
   const wpmPoints = chronological.map((r, i) => {
     const x = chronological.length === 1 ? (padL + chartW / 2) : (padL + (i / (chronological.length - 1)) * chartW);
     const y = padT + chartH - ((Number(r.netWpm) || 0) / maxVal) * chartH;
-    return { x, y, val: Number(r.netWpm) || 0, date: r.date || `#${i+1}` };
+    const isTa = r.lang === 'ta';
+    return { x, y, val: Number(r.netWpm) || 0, date: r.date || `#${i+1}`, lang: isTa ? 'ta' : 'en', color: isTa ? '#d97706' : '#2563eb' };
   });
 
   // Calculate coordinates for Marks points (if any)
@@ -9077,25 +9233,24 @@ function drawAnalyticsChart(records) {
     }
   });
 
-  // Draw WPM Area Fill & Line
-  if(wpmPoints.length > 1) {
-    const grad = ctx.createLinearGradient(0, padT, 0, padT + chartH);
-    grad.addColorStop(0, 'rgba(37, 99, 235, 0.22)');
-    grad.addColorStop(1, 'rgba(37, 99, 235, 0.01)');
-
+  // Draw WPM Area Fill & Separate Language-Colored Lines (English=#2563eb, Tamil=#d97706)
+  const enPts = wpmPoints.filter(p => p.lang === 'en');
+  const taPts = wpmPoints.filter(p => p.lang === 'ta');
+  if (enPts.length > 1) {
     ctx.beginPath();
-    ctx.moveTo(wpmPoints[0].x, padT + chartH);
-    wpmPoints.forEach(pt => ctx.lineTo(pt.x, pt.y));
-    ctx.lineTo(wpmPoints[wpmPoints.length - 1].x, padT + chartH);
-    ctx.closePath();
-    ctx.fillStyle = grad;
-    ctx.fill();
-
-    // Line stroke
-    ctx.beginPath();
-    ctx.moveTo(wpmPoints[0].x, wpmPoints[0].y);
-    wpmPoints.forEach(pt => ctx.lineTo(pt.x, pt.y));
+    ctx.moveTo(enPts[0].x, enPts[0].y);
+    enPts.forEach(pt => ctx.lineTo(pt.x, pt.y));
     ctx.strokeStyle = '#2563eb';
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }
+  if (taPts.length > 1) {
+    ctx.beginPath();
+    ctx.moveTo(taPts[0].x, taPts[0].y);
+    taPts.forEach(pt => ctx.lineTo(pt.x, pt.y));
+    ctx.strokeStyle = '#d97706';
     ctx.lineWidth = 2.5;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
@@ -9161,16 +9316,16 @@ function drawAnalyticsChart(records) {
       ctx.arc(wPt.x, wPt.y, 4.2, 0, Math.PI * 2);
       ctx.fillStyle = '#ffffff';
       ctx.fill();
-      // Inner blue dot
+      // Inner language-colored dot
       ctx.beginPath();
       ctx.arc(wPt.x, wPt.y, 2.8, 0, Math.PI * 2);
-      ctx.fillStyle = '#2563eb';
+      ctx.fillStyle = wPt.color || '#2563eb';
       ctx.fill();
     } else {
-      // Separate WPM marker
+      // Separate WPM marker (colored by English=#2563eb vs Tamil=#d97706)
       ctx.beginPath();
       ctx.arc(wPt.x, wPt.y, 4.5, 0, Math.PI * 2);
-      ctx.fillStyle = '#2563eb';
+      ctx.fillStyle = wPt.color || '#2563eb';
       ctx.fill();
       ctx.lineWidth = 2;
       ctx.strokeStyle = '#ffffff';
@@ -9426,9 +9581,7 @@ function registerBackButton() {
         }, 120);
       }
     } else if (activeScreen && activeScreen.id === 'screen-practice') {
-      if (confirm('Do you Want to Exit?')) {
-        closePractice();
-      }
+      closePractice();
     } else if (activeScreen && (activeScreen.id === 'screen-games' || activeScreen.id === 'screen-games-hub')) {
       if (activeScreen.id === 'screen-games') {
         const goModal = document.getElementById('gameOverModal');

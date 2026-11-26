@@ -81,7 +81,8 @@ async function runSuite() {
   window.openPracticeReverse();
   assert(document.getElementById('screen-practice').classList.contains('active'), 'Reverse Typing opens #screen-practice');
   assert(document.getElementById('pracLessonTitle').textContent.includes('Reverse Typing'), 'Header title updated to Reverse Typing');
-  assert(window.currentPracLesson().text.includes('sdrawkcab'), 'English Reverse Typing drill loaded with backwards words');
+  assert(window.currentPracLesson().text.includes('rats'), 'English Reverse Typing drill loaded with word-by-word reversed words (star -> rats)');
+  assert(window.reverseWordsInText('star sri apple', 'en') === 'rats irs elppa', 'reverseWordsInText reverses individual words without scrambling sentence order');
 
   document.getElementById('tabPracTrackSel').value = 'tamil99';
   window.onTabPracTrackChange('tamil99');

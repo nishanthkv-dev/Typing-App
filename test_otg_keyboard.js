@@ -72,7 +72,7 @@ async function runOTGKeyboardTestSuite() {
   assert(Boolean(OTG), 'OTGKeyboardService is mounted on window');
   assert(Boolean(document.getElementById('btnOTGStatus')), 'Header OTG status button (#btnOTGStatus) exists');
   assert(Boolean(document.getElementById('hdrOTGDot')), 'Header OTG indicator dot (#hdrOTGDot) exists');
-  assert(Boolean(document.getElementById('otgCockpitBadge')), 'Cockpit OTG status badge (#otgCockpitBadge) exists in #screen-test');
+  assert(!document.getElementById('otgCockpitBadge'), 'Cockpit OTG status badge (#otgCockpitBadge) cleanly removed from #screen-test');
   assert(Boolean(document.getElementById('otgDrillBadge')), 'Drill OTG status badge (#otgDrillBadge) exists in #tab-drills');
   assert(Boolean(document.getElementById('typingArea')), 'Typing Area textarea (#typingArea) exists');
   assert(Boolean(document.getElementById('practiceInput')), 'Practice Input textarea (#practiceInput) exists');
@@ -83,7 +83,6 @@ async function runOTGKeyboardTestSuite() {
   assert(OTG.getDeviceName() === 'Dell KB216 Wired USB Keyboard', 'Correctly retrieved connected keyboard device name');
   assert(document.getElementById('typingArea').getAttribute('inputmode') === 'none', 'Soft keyboard suppressed (inputmode="none") on #typingArea');
   assert(document.getElementById('practiceInput').getAttribute('inputmode') === 'none', 'Soft keyboard suppressed (inputmode="none") on #practiceInput');
-  assert(document.getElementById('otgCockpitBadge').classList.contains('otg-connected'), 'Cockpit badge reflects otg-connected state');
 
   console.log('\n--- TEST SUITE 3: DISCONNECTION & RECONNECTION CYCLES ---');
   let listenerFired = false;
@@ -102,7 +101,6 @@ async function runOTGKeyboardTestSuite() {
   assert(listenerFired === true, 'Subscriber callback notified on disconnection');
   assert(lastEventPayload.connected === false, 'Payload correctly reported connected: false');
   assert(document.getElementById('typingArea').getAttribute('inputmode') === 'text', 'Virtual keyboard restored (inputmode="text") on disconnection');
-  assert(document.getElementById('otgCockpitBadge').classList.contains('otg-fallback'), 'Cockpit badge updated to fallback mode');
 
   // Simulate USB Reconnection
   listenerFired = false;

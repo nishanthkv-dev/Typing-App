@@ -76,7 +76,7 @@ async function runTests() {
   const examCourseSel = document.getElementById('profExamCourse');
   const examPeriodSel = document.getElementById('profExamPeriod');
   check(examCourseSel !== null, "profExamCourse dropdown exists");
-  check(examPeriodSel !== null, "profExamPeriod dropdown exists");
+  check(examPeriodSel === null, "profExamPeriod dropdown cleanly removed");
 
   // Check 4 exam options
   const courseOptions = Array.from(examCourseSel.options).map(o => o.value);
@@ -85,13 +85,6 @@ async function runTests() {
         courseOptions.includes('typing_english') &&
         courseOptions.includes('coa_both'),
         "Exam Course has all 4 required options (Tamil 100m, English 100m, Both 100m, COA 50m)");
-
-  // Check 3 exam period options
-  const periodOptions = Array.from(examPeriodSel.options).map(o => o.value);
-  check(periodOptions.includes('November 2026') &&
-        periodOptions.includes('June 2027') &&
-        periodOptions.includes('November 2027'),
-        "Exam Period has all 3 required options (November 2026, June 2027, November 2027)");
 
   // Test COA exam sync (50 marks)
   examCourseSel.value = 'coa_both';

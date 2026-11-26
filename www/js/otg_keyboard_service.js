@@ -289,8 +289,10 @@
     }
   }
 
+  var _otgInitialized = false;
   function init() {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || _otgInitialized) return;
+    _otgInitialized = true;
 
     // Listen to native Android bridge custom event
     window.addEventListener('otg-keyboard-status', function (evt) {
@@ -358,9 +360,83 @@
     setConnectTab(currentConnectTab);
   }
 
+  var TAMIL_CHAR_TO_KEYCODE = {
+    'ஸ':'KeyQ','ஷ':'KeyW','ஜ':'KeyE','ஹ':'KeyR','ல':'KeyN','ள':'KeyS','ர':'KeyM','ற':'KeyW',
+    'ன':'KeyD','ந':'KeyP','த':'KeyL','ட':'KeyU','ண':'KeyI','ப':'KeyJ','ம':'KeyK','ய':'KeyA',
+    'வ':'KeyC','க':'KeyH','ச':'KeyR','ஞ':'KeyB','ங':'KeyB',
+    'அ':'KeyA','ஆ':'KeyA','இ':'KeyS','ஈ':'KeyS','உ':'KeyD','ஊ':'KeyD',
+    'எ':'KeyG','ஏ':'KeyG','ஐ':'KeyI','ஒ':'KeyZ','ஓ':'KeyZ','ஔ':'KeyX','ஃ':'KeyF',
+    '்':'KeyF','ா':'KeyH','ி':'KeyP','ீ':'KeyP','ு':'KeyC','ூ':'KeyC','ெ':'KeyV','ே':'KeyN','ை':'KeyI'
+  };
+  var blinkTimers = {};
+
+  function resolveTesterKeyEl(e) {
+    var code = e.code || '';
+    var key = e.key || '';
+    var kc = e.keyCode || e.which || 0;
+    var keyEl = null;
+
+    if (code && code !== 'Unidentified') {
+      keyEl = document.querySelector('#visualKbTesterLayout [data-key="' + code + '"]') || document.querySelector('[data-key="' + code + '"]');
+    }
+    if (!keyEl && key && key.length === 1) {
+      if (key === ' ') {
+        keyEl = document.querySelector('#visualKbTesterLayout [data-key="Space"]') || document.querySelector('[data-key="Space"]');
+      } else {
+        var upper = key.toUpperCase();
+        if (upper >= 'A' && upper <= 'Z') {
+          keyEl = document.querySelector('#visualKbTesterLayout [data-char="' + upper + '"]') || document.querySelector('[data-char="' + upper + '"]');
+        } else if (TAMIL_CHAR_TO_KEYCODE[key]) {
+          var mappedCode = TAMIL_CHAR_TO_KEYCODE[key];
+          keyEl = document.querySelector('#visualKbTesterLayout [data-key="' + mappedCode + '"]') || document.querySelector('[data-key="' + mappedCode + '"]');
+        }
+      }
+    }
+    if (!keyEl && kc) {
+      if (kc === 32) {
+        keyEl = document.querySelector('#visualKbTesterLayout [data-key="Space"]');
+      } else if (kc >= 65 && kc <= 90) {
+        var c = 'Key' + String.fromCharCode(kc);
+        keyEl = document.querySelector('#visualKbTesterLayout [data-key="' + c + '"]');
+      }
+    }
+    return keyEl;
+  }
+
+  function triggerKeyBlink(keyEl) {
+    if (!keyEl) return;
+    var keyId = (typeof keyEl.getAttribute === 'function' ? (keyEl.getAttribute('data-key') || keyEl.getAttribute('data-char')) : null) || 'k';
+    if (blinkTimers[keyId]) {
+      clearTimeout(blinkTimers[keyId]);
+    }
+    if (keyEl.classList) {
+      keyEl.classList.remove('key-blink');
+      try { void keyEl.offsetWidth; } catch (err) {}
+      keyEl.classList.add('key-blink');
+      keyEl.classList.add('key-pressed');
+    }
+    blinkTimers[keyId] = setTimeout(function() {
+      if (keyEl.classList) keyEl.classList.remove('key-blink');
+      delete blinkTimers[keyId];
+    }, 300);
+  }
+
   function openTesterScreen() {
+    if (!_otgInitialized) init();
     if (typeof window.showScreen === 'function') {
       window.showScreen('screen-keyboard-test');
+    }
+    if (typeof document !== 'undefined') {
+      document.querySelectorAll('.vkey.key-pressed, .vkey.key-blink').forEach(function(el) {
+        el.classList.remove('key-pressed', 'key-blink');
+      });
+      try {
+        var scr = document.getElementById('screen-keyboard-test');
+        if (scr) {
+          if (!scr.hasAttribute('tabindex')) scr.setAttribute('tabindex', '-1');
+          scr.focus({ preventScroll: true });
+        }
+      } catch (e) {}
     }
     updateTesterScreenStatus();
   }
@@ -418,23 +494,18 @@
       updateConnectScreenStatus();
     }
 
-    // Key lookup in tester DOM
-    var selector = '';
-    if (code) {
-      selector = '[data-key="' + code + '"]';
-    }
-    var keyEl = selector ? document.querySelector(selector) : null;
-    if (!keyEl && key && key.length === 1) {
-      keyEl = document.querySelector('[data-char="' + key.toUpperCase() + '"]');
-    }
+    // Key lookup in tester DOM (supports code, key, Tamil characters, and Android keyCode)
+    var keyEl = resolveTesterKeyEl(e);
 
     if (action === 'down') {
       testerState.keysPressed++;
       var formattedKey = key;
-      if (code && code !== key) {
+      if (code && code !== key && code !== 'Unidentified') {
         formattedKey = (key.length === 1 ? key.toUpperCase() : key) + ' (' + code + ')';
+      } else if (key === ' ') {
+        formattedKey = 'SPACE';
       }
-      testerState.lastKey = formattedKey;
+      testerState.lastKey = formattedKey || 'Key';
 
       var countEl = document.getElementById('kbTestPressCount');
       var lastEl = document.getElementById('kbTestLastKey');
@@ -442,7 +513,7 @@
       if (lastEl) lastEl.textContent = testerState.lastKey;
 
       if (keyEl) {
-        keyEl.classList.add('key-pressed');
+        triggerKeyBlink(keyEl);
       }
 
       // Play audio mechanical feedback

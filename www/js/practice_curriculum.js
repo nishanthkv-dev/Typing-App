@@ -566,8 +566,8 @@
 
   // Helper to fetch current active lesson bank
   function getPracLessons() {
-    const lang = (typeof pracLang !== 'undefined') ? pracLang : 'en';
-    const layout = (typeof pracLayout !== 'undefined') ? pracLayout : 'tamil99';
+    const lang = (typeof window !== 'undefined' && window.pracLang !== undefined) ? window.pracLang : ((typeof pracLang !== 'undefined') ? pracLang : 'en');
+    const layout = (typeof window !== 'undefined' && window.pracLayout !== undefined) ? window.pracLayout : ((typeof pracLayout !== 'undefined') ? pracLayout : 'tamil99');
     if (lang === 'ta') {
       if (layout === 'typewriter') {
         return PRAC.typewriter || PRAC.ta || [];
@@ -739,7 +739,7 @@
           right: ["Index→y, u", "Middle→i", "Ring→o", "Little→p"],
           homeKeys: false
         },
-        text: "qwert poiuy qwert poiuy qwert poiuy qwert poiuy\nq w e r t y u i o p p o i u y t r e w q\nawerqfa ;oiupj; gftfrf hjyjuj qwert yuiop\ntype quit pure pour poet rope write power trip\nquietly require priority report poetry quote tower\nproper route top priority write your true story"
+        text: "qwert poiuy qwert poiuy qwert poiuy qwert poiuy\nq w e r t y u i o p p o i u y t r e w q\nqwert yuiop poiuyt rewq qwert yuiop\ntype quit pure pour poet rope write power trip\nquiet require priority report poetry quote tower\nproper route top priority write your true power"
       },
       bottom: {
         rowKey: 'bottom',
@@ -751,7 +751,7 @@
           right: ["Index→n, m", "Middle→,", "Ring→.", "Little→/"],
           homeKeys: false
         },
-        text: "zxcvb mnbvc zxcvb mnbvc zxcvb mnbvc zxcvb mnbvc\nazxcvf lkmnbj azxcvf lkmnbj z x c v b n m\nzoom calm mix box van moon zone cave bench\ncomb move verb next climb exact vibrant exam\nzenith bronze, brave move. maximum victory box,\ncivic cabin mix, zero excuse, next climb, brave zone."
+        text: "zxcvb mnbvc zxcvb mnbvc zxcvb mnbvc zxcvb mnbvc\nz x c v b n m , . / / . , m n b v c x z\nzxc vbn bnm mnb vcx zxcv bnm, cvbn m,./\nzzz xxx ccc vvv bbb nnn mmm ,,, ... ///\nzxcvb, nm./ zxcv bnm, cvbn mnbv zxcv bnm."
       },
       mixed: {
         rowKey: 'mixed',
@@ -777,7 +777,7 @@
           right: ["ஆள்காட்டி→க (h), ப (j)", "நடு→ம (k)", "மோதிர→த (l)", "சுண்டு→ந (;)"],
           homeKeys: true
         },
-        text: "அ இ உ ் எ க ப ம த ந அ இ உ ் எ க ப ம த ந\nஅகம் இகம் உகம் பகம் மனம் தனம் நகம் பதம் மதம்\nஎது மெது பதம் களம் மடம் பலம் தவம் பணம் கனம்\nஅன்பு கல்வி பண்பு நன்றி பக்கம் சட்டம் தத்தம்\nமனம் தனம் பகம் உகம் இகம் அகம் கல்வி களம்"
+        text: "அ இ உ ் எ க ப ம த ந அ இ உ ் எ க ப ம த ந\nஅகம் இகம் உகம் பகம் மதம் பதம் நகம் கபம்\nகி பி மி தி நி கு பு மு து நு கெ பெ மெ தெ நெ\nகபம் மதம் பதம் அகம் இகம் உகம் கப்பம் பக்கம் தத்தம்"
       },
       top: {
         rowKey: 'top',
@@ -789,7 +789,7 @@
           right: ["ள (y)", "ற (u)", "ன (i)", "ட (o)", "ண (p)", "ச ([)"],
           homeKeys: false
         },
-        text: "ஆ ஈ ஊ ஐ ஏ ள ற ன ட ண ச ஆ ஈ ஊ ஐ ஏ ள ற ன ட ண ச\nஆடல் ஈகை ஊக்கம் ஏணி ஐந்து சட்டம் படம் மணம்\nகண்ணன் கற்றல் பாடம் நாடக மன்றம் நன்றி\nஆசிரியர் பாடம் மாணவர் ஊக்கம் ஆக்கம் தரும்\nஎண்ணித் துணிக கருமம் கற்றல் நன்று சட்டம்"
+        text: "ஆ ஈ ஊ ஐ ஏ ள ற ன ட ண ச ஆ ஈ ஊ ஐ ஏ ள ற ன ட ண ச\nளா றீ னூ டை ணே சா சீ சூ சை சே டா டீ டூ டை டே\nஆள ஈற ஊன ஏட ஐச சாள டாண றூன ணாட சீன சைட"
       },
       bottom: {
         rowKey: 'bottom',
@@ -801,7 +801,7 @@
           right: ["ல (n)", "ர (m)", "ழ (/)"],
           homeKeys: false
         },
-        text: "ஔ ஓ ஒ வ ங ல ர ழ ஔ ஓ ஒ வ ங ல ர ழ\nஒற்றுமை ஓட்டம் ஔவை வானம் தமிழ் வள்ளல் மலர்\nவெற்றி வேல் அழகு வழக்கம் உலகம் சிறப்பு நிலம்\nவாழ்க தமிழ் வளர்க பாரதம் ஒற்றுமை வலிமை\nஅழகு தமிழ் இனிமை வழக்கம் உலகம் மலர்"
+        text: "ஔ ஓ ஒ வ ங ல ர ழ ஔ ஓ ஒ வ ங ல ர ழ\nவொ வோ வௌ லொ லோ லௌ ரொ ரோ ரௌ ழொ ழோ ழௌ\nவல ரழ ஙவ லர ழல வரழ ஔவ ஓல ஒர லவ ரவ ழவ"
       },
       mixed: {
         rowKey: 'mixed',
@@ -827,7 +827,7 @@
           right: ["ப (g)", "ா (h)", "த (j)", "ம (k)", "ல (l)", "் (;)"],
           homeKeys: true
         },
-        text: "ய ள ன க ப ா த ம ல ய ள ன க ப ா த ம ல\nகல்வி களம் கனம் பதம் படம் மடம் பலம் பணம்\nகபிலர் மலர் தமிழ் களம் பதம் மணம் தவம் பணம்\nபதம் பணம் மடம் பலம் களம் கல்வி கனம் மலர்\nபக்தி மணம் தவம் கபிலர் களம் மடம் படம்"
+        text: "ய ள ன க ப ா த ம ல ய ள ன க ப ா த ம ல\nகளம் பதம் பலம் மலம் கனம் மனம் தளம் தலம்\nபாகம் மாதம் காலம் யாம் தாம் நாம் களம் பதம்"
       },
       top: {
         rowKey: 'top',
@@ -839,7 +839,7 @@
           right: ["y u i o p மேல் விசைகள்"],
           homeKeys: false
         },
-        text: "கூடு நூல் சுடர் வலம் நலம் ரதம் ஐந்து டமாரம்\nகாலை சூரியன் கிழக்கு திசையில் ஒளி வீசுகிறது\nபாடம் காலம் தீபம் தூய்மை வீரம் புயல் பூக்கள்\nகண்ணன் கற்றல் பாடம் மன்றம் நன்றி சட்டம்\nதுல்லியம் வேகம் பயிற்சி தினமும் தொடர வேண்டும்"
+        text: "ணு று நு சு கூ லு ரு ஐ டி ணு று நு சு கூ லு ரு ஐ டி\nணுறு நுசு கூலு ருஐ டிணு றுநு சுகூ லுரு\nகூலு ருநு சுறு ணுடி ஐரு கூசு லுணு"
       },
       bottom: {
         rowKey: 'bottom',
@@ -851,7 +851,7 @@
           right: ["n m , . / கீழ் விசைகள்"],
           homeKeys: false
         },
-        text: "கெ தெ பெ மெ நெ செ வெ கே தே பே மே நே சே வே\nஅன்பு கல்வி ஒற்றுமை வெற்றி மேகம் செய்தி வேலை\nநல்ல சொல் வெல்லும் முயற்சி உயர்வு தரும்\nஅறிவே ஆற்றல் உழைப்பே உயர்வு நேர்மையே அறம்\nவிடாமுயற்சி வெற்றி தரும் தட்டச்சு கலை சிறந்தது"
+        text: "ண ஒ உ எ ெ ே அ இ ண ஒ உ எ ெ ே அ இ\nணஒ உஎ ெே அஇ எண உஒ இஅ ணெ ணே\nஅஇ உஎ ஒஔ ணெ ணே அஉ இஎ"
       },
       mixed: {
         rowKey: 'mixed',
@@ -875,7 +875,7 @@
     return bank[rowKey] || bank.home;
   }
 
-  // --- REVERSE TYPING DRILLS (TYPE WORDS AND SENTENCES BACKWARDS) ---
+  // --- REVERSE TYPING DRILLS (REVERSE INDIVIDUAL WORDS, NOT SENTENCE ORDER) ---
   function reverseGraphemes(str, lang) {
     if (!str) return '';
     let parts;
@@ -892,60 +892,65 @@
     return parts.reverse().join('');
   }
 
+  function reverseWordsInText(str, lang) {
+    if (!str) return '';
+    return str.split('\n').map(line =>
+      line.split(' ').map(word => word ? reverseGraphemes(word, lang) : '').join(' ')
+    ).join('\n');
+  }
+
   const REVERSE_DRILLS = {
     en: {
       isReverseTyping: true,
-      lesson: "Reverse Typing — Backwards Practice",
-      sub: "Type words and sentences backwards to strengthen finger reversal & focus",
-      keyHint: "Backwards words & sentences",
+      lesson: "Reverse Typing — Word Reversal",
+      sub: "Type each reversed word accurately (e.g. star → rats, sri → irs, apple → elppa)",
+      keyHint: "Word-by-word reversal",
       fingerGuide: {
-        left: ["Read carefully before typing backwards"],
-        right: ["Keep eyes on the target characters"],
+        left: ["Type each reversed word letter by letter"],
+        right: ["Guided mode: only next expected key is accepted"],
         homeKeys: true
       },
       text: [
-        "pots rats wolf emit live flow",
-        "gnipyt deeps lliks ecitcarp ymedaca",
-        "sdrawkcab sdrow epyt",
-        "ycarucca dna deeps dliub",
-        "ecitcarp hcuot ysub yad yreve",
-        "sdrawkcab secnetnes dna sdrow epyt"
+        reverseWordsInText("star sri apple stop wolf time", 'en'),
+        reverseWordsInText("typing speed skill practice academy", 'en'),
+        reverseWordsInText("focus rhythm touch finger drill", 'en'),
+        reverseWordsInText("accuracy builds strong typing habit", 'en')
       ].join('\n')
     },
     tamil99: {
       isReverseTyping: true,
       lesson: "தலைகீழ் தட்டச்சு (Reverse Typing — Tamil99)",
-      sub: "சொற்கள் மற்றும் வாக்கியங்களை தலைகீழாகத் தட்டச்சு செய்து பயிற்சி செய்யவும்",
+      sub: "ஒவ்வொரு சொல்லையும் எழுத்து வாரியாகத் தலைகீழாகத் தட்டச்சு செய்யவும்",
       keyHint: "தமிழ் தலைகீழ் சொல் பயிற்சி",
       fingerGuide: {
-        left: ["கண்கள் திரையில் — எழுத்து வரிசையைக் கவனிக்கவும்"],
-        right: ["தவறின்றி தலைகீழாகத் தட்டச்சு செய்யவும்"],
+        left: ["ஒவ்வொரு சொல்லையும் தலைகீழாகத் தட்டச்சு செய்யவும்"],
+        right: ["சரியான அடுத்த எழுத்து மட்டுமே ஏற்கப்படும்"],
         homeKeys: true
       },
       text: [
-        ["அகம்", "இகம்", "படம்", "மலர்", "நன்றி"].map(w => reverseGraphemes(w, 'ta')).join(' '),
-        ["அன்பு", "கல்வி", "பண்பு", "வெற்றி", "பயிற்சி"].map(w => reverseGraphemes(w, 'ta')).join(' '),
-        ["தமிழ்", "வானம்", "உலகம்", "பாடம்", "அறிவு"].map(w => reverseGraphemes(w, 'ta')).join(' '),
-        reverseGraphemes("தினமும் பயிற்சி செய்க", 'ta'),
-        reverseGraphemes("வெற்றி நிச்சயம்", 'ta')
+        reverseWordsInText("அகம் இகம் படம் மலர் நன்றி", 'ta'),
+        reverseWordsInText("அன்பு கல்வி பண்பு வெற்றி பயிற்சி", 'ta'),
+        reverseWordsInText("தமிழ் வானம் உலகம் பாடம் அறிவு", 'ta'),
+        reverseWordsInText("தினமும் பயிற்சி செய்க", 'ta'),
+        reverseWordsInText("வெற்றி நிச்சயம்", 'ta')
       ].join('\n')
     },
     typewriter: {
       isReverseTyping: true,
       lesson: "தலைகீழ் தட்டச்சு (Reverse Typing — Typewriter)",
-      sub: "இயந்திர தட்டச்சு விசைகளில் சொற்களைத் தலைகீழாகப் பயிற்சி செய்யவும்",
+      sub: "ஒவ்வொரு சொல்லையும் இயந்திர தட்டச்சு விசைகளில் தலைகீழாகத் தட்டச்சு செய்யவும்",
       keyHint: "தமிழ் தட்டச்சு தலைகீழ் பயிற்சி",
       fingerGuide: {
-        left: ["இடக்கை விசைக் கட்டுப்பாடு"],
-        right: ["வலக்கை விசைக் கட்டுப்பாடு"],
+        left: ["ஒவ்வொரு சொல்லையும் தலைகீழாகத் தட்டச்சு செய்யவும்"],
+        right: ["சரியான அடுத்த எழுத்து மட்டுமே ஏற்கப்படும்"],
         homeKeys: true
       },
       text: [
-        ["களம்", "பதம்", "பலம்", "மடம்", "கனம்"].map(w => reverseGraphemes(w, 'ta')).join(' '),
-        ["கல்வி", "பக்தி", "மலர்", "தமிழ்", "பாடம்"].map(w => reverseGraphemes(w, 'ta')).join(' '),
-        reverseGraphemes("முயற்சி உயர்வு தரும்", 'ta'),
-        reverseGraphemes("அறிவே ஆற்றல்", 'ta'),
-        reverseGraphemes("வெற்றி நிச்சயம்", 'ta')
+        reverseWordsInText("களம் பதம் பலம் மடம் கனம்", 'ta'),
+        reverseWordsInText("கல்வி பக்தி மலர் தமிழ் பாடம்", 'ta'),
+        reverseWordsInText("முயற்சி உயர்வு தரும்", 'ta'),
+        reverseWordsInText("அறிவே ஆற்றல்", 'ta'),
+        reverseWordsInText("வெற்றி நிச்சயம்", 'ta')
       ].join('\n')
     }
   };
@@ -976,6 +981,7 @@
   window.getRowDrill = getRowDrill;
   window.getReverseDrill = getReverseDrill;
   window.reverseGraphemes = reverseGraphemes;
+  window.reverseWordsInText = reverseWordsInText;
   window.getPracLessons = getPracLessons;
   window.setPracLayout = setPracLayout;
   window.generateAdaptiveReinforcement = generateAdaptiveReinforcement;
