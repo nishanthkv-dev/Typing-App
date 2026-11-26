@@ -6023,14 +6023,16 @@ function readConfig(){
     lockBackspace: $('optLockBackspace') ? $('optLockBackspace').checked : false,
     blindInput: $('optBlindInput') ? $('optBlindInput').checked : false,
     sound: $('selSound') ? $('selSound').value : '1',
-    theme: localStorage.getItem('app_theme') || document.body.getAttribute('data-theme') || 'white',
+    theme: (()=>{ try { return localStorage.getItem('app_theme'); } catch(e){ return null; } })() || document.body.getAttribute('data-theme') || 'white',
     textSize: $('ddTextSize') ? $('ddTextSize').value : '20'
   };
   window.CFG = CFG;
 }
 
 function applyPreviewStyles(){
-  const activeTheme = localStorage.getItem('app_theme') || document.body.getAttribute('data-theme') || 'white';
+  let savedTheme = null;
+  try { savedTheme = localStorage.getItem('app_theme'); } catch(e) {}
+  const activeTheme = savedTheme || document.body.getAttribute('data-theme') || 'white';
   document.body.setAttribute('data-theme', activeTheme);
   document.documentElement.setAttribute('data-theme', activeTheme);
   document.documentElement.style.setProperty('--typesize', $('ddTextSize').value + 'px');
