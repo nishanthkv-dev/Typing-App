@@ -3,12 +3,14 @@ apply plugin: 'com.android.application'
 android {
     namespace "in.srikalaimagal.typingthalaiva"
     compileSdk rootProject.ext.compileSdkVersion
+    def appVersionCode = (project.findProperty('VERSION_CODE') ?: System.getenv('VERSION_CODE') ?: '1').toString().toInteger()
+    def appVersionName = (project.findProperty('VERSION_NAME') ?: System.getenv('VERSION_NAME') ?: '1.0.0').toString()
     defaultConfig {
         applicationId "in.srikalaimagal.typingthalaiva"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode (project.findProperty('VERSION_CODE') ?: System.getenv('VERSION_CODE') ?: '1').toInteger()
-        versionName (project.findProperty('VERSION_NAME') ?: System.getenv('VERSION_NAME') ?: '1.0.0').toString()
+        versionCode appVersionCode
+        versionName appVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
