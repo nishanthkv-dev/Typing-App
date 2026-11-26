@@ -17,10 +17,34 @@ function roundInr(value) {
   return Math.max(0, Math.round(Number(value) || 0));
 }
 
+const COMMON_WEAK_PASSWORDS = new Set([
+  '12345678',
+  '123456789',
+  '1234567890',
+  'password',
+  'password123',
+  'qwerty123',
+  '11111111',
+  '00000000',
+  'abcdefgh'
+]);
+
+function validateStrongPassword(password) {
+  const pwd = String(password || '');
+  if (pwd.length < 8) {
+    return 'Password must be at least 8 characters long.';
+  }
+  if (COMMON_WEAK_PASSWORDS.has(pwd.toLowerCase())) {
+    return 'Please choose a stronger password (avoid common sequences like 12345678 or password).';
+  }
+  return null;
+}
+
 function hashPassword(password) {
   const pwd = String(password || '');
-  if (pwd.length < 6) {
-    throw new Error('Password must be at least 6 characters long.');
+  const weakErr = validateStrongPassword(pwd);
+  if (weakErr) {
+    throw new Error(weakErr);
   }
   const salt = crypto.randomBytes(16).toString('hex');
   const derived = crypto.scryptSync(pwd, salt, 64).toString('hex');
@@ -163,6 +187,7 @@ module.exports = {
   normalizeEmail,
   isValidEmail,
   roundInr,
+  validateStrongPassword,
   hashPassword,
   verifyPassword,
   hashToken,

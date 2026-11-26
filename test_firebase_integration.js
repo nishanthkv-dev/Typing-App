@@ -16,6 +16,7 @@ const { FirestoreDatabase } = require('./backend/firestoreDb');
 const { runMigration } = require('./backend/migrate_to_firestore');
 const { seed } = require('./backend/seed');
 const { redactObject } = require('./backend/middleware/rateLimiter');
+const { getConfig } = require('./backend/config');
 
 let total = 0;
 let passed = 0;
@@ -376,6 +377,44 @@ async function runSuite() {
     assert(seedFs._dump('admins').length === 1, 'Repeated seed creates only 1 admin record');
     assert(seedFs._dump('coupons').filter(c => c.code === 'WELCOME100').length === 1, 'Repeated seed creates only 1 WELCOME100 coupon');
     assert(seedFs._dump('coupons').filter(c => c.code === 'TYPE25').length === 1, 'Repeated seed creates only 1 TYPE25 coupon');
+
+    // -----------------------------------------------------------------------
+    // 7. HARDENING: PASSWORD POLICY, PROD SECRET GUARD, PROGRESS SYNC & PAGINATION
+    // -----------------------------------------------------------------------
+    console.log('\n--- TEST 7: HARDENING (PASSWORD POLICY, PROD SECRETS, PROGRESS SYNC, PAYWALL, PAGINATION) ---');
+    const weakReg = await httpJson(`${baseUrl}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Test User', email: 'weak@example.com', password: '12345678' })
+    });
+    assert(weakReg.status === 400 && weakReg.data.code === 'WEAK_PASSWORD', 'Common/weak 8-char password 12345678 rejected');
+
+    let prodSecretBlocked = false;
+    try {
+      getConfig({ nodeEnv: 'production', jwtSecret: 'strong-jwt-secret', paymentWebhookSecret: '' });
+    } catch (e) {
+      prodSecretBlocked = e.message.includes('PAYMENT_WEBHOOK_SECRET');
+    }
+    assert(prodSecretBlocked, 'Production config refuses missing PAYMENT_WEBHOOK_SECRET');
+
+    const progSave = await httpJson(`${baseUrl}/api/student/progress`, {
+      method: 'POST',
+      headers: studentHeaders,
+      body: JSON.stringify({
+        entry: { lang: 'en', layout: 'qwerty', passage: 'English Passage 1', netWpm: 42, accuracy: 98, passed: true, timestamp: 1700000001000 }
+      })
+    });
+    assert(progSave.status === 201 && progSave.data.savedCount === 1, 'Cloud progress result saved to Firestore practiceHistory');
+    const progList = await httpJson(`${baseUrl}/api/student/progress`, { headers: studentHeaders });
+    assert(progList.status === 200 && progList.data.history.length === 1 && progList.data.history[0].netWpm === 42, 'Student fetches synced cloud progress history');
+
+    const pagedStudents = await httpJson(`${baseUrl}/api/admin/students?page=1&limit=1`, { headers: adminHeaders });
+    assert(pagedStudents.status === 200 && pagedStudents.data.pagination && pagedStudents.data.pagination.total >= 1, 'Admin students endpoint returns pagination metadata');
+
+    // Verify client handlePurchaseActivation does not grant free offline premium
+    await dom.window.FirebaseService.setGuestState();
+    await dom.window.handlePurchaseActivation('combo_speed');
+    assert(dom.window.FirebaseService.entitlement.isPremium === false, 'Client paywall button no longer grants free offline premium');
 
     console.log('\n======================================================================');
     console.log(`   FIREBASE INTEGRATION & SECURITY QA: ${passed}/${total} PASSED`);

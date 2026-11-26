@@ -12,6 +12,7 @@ const {
   normalizeEmail,
   isValidEmail,
   roundInr,
+  validateStrongPassword,
   hashPassword,
   verifyPassword,
   hashToken,
@@ -21,6 +22,7 @@ const {
   sanitizeUser
 } = require('./security');
 const { evaluateCouponQuote, createAppError, resolveCourseAlias } = require('./services/couponService');
+const { sendPasswordResetEmail } = require('./services/emailService');
 const {
   addAuditLog,
   addNotification,
@@ -91,6 +93,18 @@ function getClientIp(req) {
   const fwd = req.headers['x-forwarded-for'];
   if (fwd) return String(fwd).split(',')[0].trim();
   return req.socket ? req.socket.remoteAddress || '' : '';
+}
+
+function paginateList(items, searchParams, defaultLimit = 50) {
+  const total = items.length;
+  const limit = Math.min(200, Math.max(1, Number(searchParams.get('limit') || defaultLimit)));
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const page = Math.min(totalPages, Math.max(1, Number(searchParams.get('page') || 1)));
+  const start = (page - 1) * limit;
+  return {
+    items: items.slice(start, start + limit),
+    pagination: { page, limit, total, totalPages }
+  };
 }
 
 function serveStaticFile(res, filePath, contentType) {
@@ -393,8 +407,9 @@ function createServer(options = {}) {
         if (!isValidEmail(email)) {
           throw createAppError('Valid email address is required.', 400, 'INVALID_EMAIL');
         }
-        if (password.length < 6) {
-          throw createAppError('Password must be at least 6 characters.', 400, 'WEAK_PASSWORD');
+        const weakPwdErr = validateStrongPassword(password);
+        if (weakPwdErr) {
+          throw createAppError(weakPwdErr, 400, 'WEAK_PASSWORD');
         }
 
         const result = await db.runTransaction((draft) => {
@@ -680,10 +695,22 @@ function createServer(options = {}) {
         if (resetInfo && typeof onPasswordResetToken === 'function') {
           onPasswordResetToken(resetInfo);
         }
+        let emailResult = { sent: false };
+        if (resetInfo) {
+          emailResult = await sendPasswordResetEmail({
+            config,
+            to: resetInfo.email,
+            resetToken: resetInfo.rawToken
+          }).catch(err => {
+            logSafe('warn', 'password_reset_email_failed', { error: err.message });
+            return { sent: false };
+          });
+        }
 
         const responsePayload = {
           ok: true,
-          message: 'If an account matches that email, password reset instructions have been generated.'
+          emailSent: Boolean(emailResult && emailResult.sent),
+          message: 'If an account matches that email, password reset instructions have been sent.'
         };
         if (exposeResetTokenForTest && resetInfo) {
           responsePayload.resetToken = resetInfo.rawToken;
@@ -695,8 +722,9 @@ function createServer(options = {}) {
         const body = await readJsonBody(req);
         const token = String(body.token || '').trim();
         const newPassword = String(body.newPassword || '');
-        if (!token || newPassword.length < 6) {
-          throw createAppError('Valid reset token and new password (min 6 chars) are required.', 400, 'INVALID_RESET_PAYLOAD');
+        const weakResetErr = validateStrongPassword(newPassword);
+        if (!token || weakResetErr) {
+          throw createAppError(weakResetErr || 'Valid reset token and new password are required.', 400, 'INVALID_RESET_PAYLOAD');
         }
 
         await db.runTransaction((draft) => {
@@ -861,6 +889,58 @@ function createServer(options = {}) {
           }
         });
         return sendJson(res, 200, { ok: true });
+      }
+
+      if (method === 'GET' && pathname === '/api/student/progress') {
+        const student = await requireStudent(req);
+        const state = db.read();
+        const history = (state.practiceHistory || [])
+          .filter(h => h.userId === student.id)
+          .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+          .slice(0, 100);
+        return sendJson(res, 200, { history });
+      }
+
+      if (method === 'POST' && pathname === '/api/student/progress') {
+        const student = await requireStudent(req);
+        const body = await readJsonBody(req);
+        const rawEntries = Array.isArray(body.entries) ? body.entries : (body.entry ? [body.entry] : [body]);
+        const saved = await db.runTransaction((draft) => {
+          if (!draft.practiceHistory) draft.practiceHistory = [];
+          const added = [];
+          for (const item of rawEntries.slice(0, 50)) {
+            if (!item || typeof item !== 'object') continue;
+            const ts = Number(item.timestamp || Date.now());
+            const existing = draft.practiceHistory.find(
+              h => h.userId === student.id && h.timestamp === ts && h.passage === item.passage
+            );
+            if (existing) continue;
+            const record = {
+              id: generateId('prc'),
+              userId: student.id,
+              lang: String(item.lang || 'en').slice(0, 10),
+              layout: String(item.layout || '').slice(0, 24),
+              passage: String(item.passage || '').slice(0, 140),
+              grossWpm: Number(item.grossWpm || 0),
+              netWpm: Number(item.netWpm || 0),
+              marks: item.marks !== undefined ? Number(item.marks) : null,
+              accuracy: Number(item.accuracy || 0),
+              passed: Boolean(item.passed),
+              errors: Number(item.errors || 0),
+              elapsed: Number(item.elapsed || 0),
+              backspaces: Number(item.backspaces || 0),
+              mode: String(item.mode || 'parallel').slice(0, 30),
+              weakKeys: (item.weakKeys && typeof item.weakKeys === 'object') ? item.weakKeys : {},
+              timestamp: ts,
+              isoDate: String(item.isoDate || new Date(ts).toISOString()),
+              createdAt: new Date().toISOString()
+            };
+            draft.practiceHistory.unshift(record);
+            added.push(record);
+          }
+          return added;
+        });
+        return sendJson(res, 201, { savedCount: saved.length });
       }
 
       // ---------------------------------------------------------------------
@@ -1080,7 +1160,8 @@ function createServer(options = {}) {
             students = students.filter(s => s.enrollments.some(e => e.status === statusFilter));
           }
 
-          return sendJson(res, 200, { students });
+          const paged = paginateList(students, parsedUrl.searchParams, 50);
+          return sendJson(res, 200, { students: paged.items, pagination: paged.pagination });
         }
 
         // COURSES CRUD
@@ -1190,7 +1271,8 @@ function createServer(options = {}) {
               (p.transactionRef || '').toLowerCase().includes(q)
             );
           }
-          return sendJson(res, 200, { purchases });
+          const paged = paginateList(purchases, parsedUrl.searchParams, 50);
+          return sendJson(res, 200, { purchases: paged.items, pagination: paged.pagination });
         }
 
         const purchaseVerifyMatch = pathname.match(/^\/api\/admin\/purchases\/([^/]+)\/verify$/);
@@ -1297,7 +1379,8 @@ function createServer(options = {}) {
             );
           }
 
-          return sendJson(res, 200, { enrollments });
+          const paged = paginateList(enrollments, parsedUrl.searchParams, 50);
+          return sendJson(res, 200, { enrollments: paged.items, pagination: paged.pagination });
         }
 
         const enrActivateMatch = pathname.match(/^\/api\/admin\/enrollments\/([^/]+)\/activate$/);
@@ -1612,8 +1695,8 @@ function createServer(options = {}) {
         // AUDIT LOGS
         if (method === 'GET' && pathname === '/api/admin/audit-logs') {
           const state = db.read();
-          const limit = Math.min(200, Math.max(1, Number(parsedUrl.searchParams.get('limit') || 50)));
-          return sendJson(res, 200, { logs: state.auditLogs.slice(0, limit) });
+          const paged = paginateList(state.auditLogs, parsedUrl.searchParams, 50);
+          return sendJson(res, 200, { logs: paged.items, pagination: paged.pagination });
         }
       }
 

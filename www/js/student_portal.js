@@ -316,6 +316,48 @@
       }
     },
 
+    async syncProgressResult(entry) {
+      if (!this.token || !getApiBase() || !entry) return false;
+      try {
+        await this.api('/api/student/progress', {
+          method: 'POST',
+          body: JSON.stringify({ entry })
+        });
+        return true;
+      } catch (_) {
+        return false;
+      }
+    },
+
+    async syncCloudProgress() {
+      if (!this.token || !getApiBase()) return null;
+      try {
+        const res = await this.api('/api/student/progress', { method: 'GET' });
+        const remote = Array.isArray(res.history) ? res.history : [];
+        if (remote.length && global.storage && typeof global.storage.get === 'function') {
+          const curRes = await global.storage.get('recent-results', false).catch(() => null);
+          const curVal = (curRes && typeof curRes === 'object' && curRes.value !== undefined) ? curRes.value : curRes;
+          const localList = curVal ? (typeof curVal === 'string' ? JSON.parse(curVal) : curVal) : [];
+          const seen = new Set(localList.map(r => `${r.timestamp || ''}|${r.passage || ''}`));
+          let merged = [...localList];
+          for (const item of remote) {
+            const key = `${item.timestamp || ''}|${item.passage || ''}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              merged.push(item);
+            }
+          }
+          merged.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          merged = merged.slice(0, 100);
+          await global.storage.set('recent-results', JSON.stringify(merged), false).catch(() => {});
+          if (typeof global.loadRecentResults === 'function') global.loadRecentResults();
+        }
+        return remote;
+      } catch (_) {
+        return null;
+      }
+    },
+
     isAuthenticated() {
       if (this.token && this.dashboard && this.dashboard.user) return true;
       return Boolean(global.FirebaseService && !global.FirebaseService.isGuest && global.FirebaseService.currentUser);
@@ -376,6 +418,7 @@
       this.setToken(res.token);
       this.syncFirebaseServiceState(res.user, res.entitlement, res.sessionId);
       await this.syncDashboard({ silent: true });
+      this.syncCloudProgress().catch(() => {});
       this.closeAuthModal();
       notifyToast(`✅ Signed in as ${res.user.name}`);
 

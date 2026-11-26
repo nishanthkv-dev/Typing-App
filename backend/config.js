@@ -34,6 +34,13 @@ function getConfig(overrides = {}) {
     throw new Error('FATAL: JWT_SECRET environment variable must be set in production.');
   }
 
+  const paymentWebhookSecret = overrides.paymentWebhookSecret ?? process.env.PAYMENT_WEBHOOK_SECRET ?? (
+    nodeEnv === 'production' ? '' : 'dev-payment-hmac-secret'
+  );
+  if (nodeEnv === 'production' && !paymentWebhookSecret) {
+    throw new Error('FATAL: PAYMENT_WEBHOOK_SECRET environment variable must be set in production.');
+  }
+
   const firebaseProjectId = overrides.firebaseProjectId ?? process.env.FIREBASE_PROJECT_ID ?? '';
   const firebaseServiceAccountPath = overrides.firebaseServiceAccountPath ?? process.env.FIREBASE_SERVICE_ACCOUNT_PATH ?? process.env.GOOGLE_APPLICATION_CREDENTIALS ?? '';
   const firebaseServiceAccountJson = overrides.firebaseServiceAccountJson ?? process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? '';
@@ -83,7 +90,10 @@ function getConfig(overrides = {}) {
       .split(',')
       .map(s => s.trim())
       .filter(Boolean),
-    paymentWebhookSecret: overrides.paymentWebhookSecret ?? process.env.PAYMENT_WEBHOOK_SECRET ?? 'dev-payment-hmac-secret',
+    paymentWebhookSecret,
+    resendApiKey: overrides.resendApiKey ?? process.env.RESEND_API_KEY ?? '',
+    emailFrom: overrides.emailFrom ?? process.env.EMAIL_FROM ?? 'no-reply@srikalaimagal.in',
+    appPublicUrl: overrides.appPublicUrl ?? process.env.APP_PUBLIC_URL ?? '',
     adminBootstrapEmail: overrides.adminBootstrapEmail ?? process.env.ADMIN_BOOTSTRAP_EMAIL ?? '',
     adminBootstrapPassword: overrides.adminBootstrapPassword ?? process.env.ADMIN_BOOTSTRAP_PASSWORD ?? '',
     adminBootstrapName: overrides.adminBootstrapName ?? process.env.ADMIN_BOOTSTRAP_NAME ?? 'Institute Administrator',

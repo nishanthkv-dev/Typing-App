@@ -7478,6 +7478,9 @@ async function saveResult(r, typedText, questionText, testMode){
     renderRecentResults(list);
     renderAnalyticsPage();
     renderHistoryPage();
+    if (window.StudentPortal && StudentPortal.token) {
+      StudentPortal.syncProgressResult(newEntry);
+    }
   }catch(e){
     console.error('storage error', e);
     toast('⚠️ Could not save test result to storage.');
@@ -7493,6 +7496,9 @@ async function loadRecentResults(){
     renderRecentResults(list);
     renderAnalyticsPage();
     renderHistoryPage();
+    if (window.StudentPortal && StudentPortal.token) {
+      StudentPortal.syncProgressResult(newEntry);
+    }
     return list;
   }catch(e){
     RECENT_RESULTS_CACHE = [];
@@ -9585,22 +9591,17 @@ async function handleGoogleSignInForUpgrade() {
 
 async function handlePurchaseActivation(planId) {
   if (!window.FirebaseService) return;
-  const pkg = planId || document.querySelector('input[name="pkgOption"]:checked')?.value || 'combo_speed';
-  
-  if (window.FirebaseService.isGuest) {
-    if (typeof toast === 'function') toast('⚠️ Please sign in with Google first to bind your purchase.');
+  const rawPkg = planId || document.querySelector('input[name="pkgOption"]:checked')?.value || 'combo_speed';
+  const mappedCourseId = rawPkg === 'tamil_speed' ? 'tamil_senior' : rawPkg === 'english_speed' ? 'english_senior' : rawPkg;
+
+  if (window.StudentPortal && typeof window.StudentPortal.getApiBase === 'function' && window.StudentPortal.getApiBase()) {
+    closeBiryaniUpgradeModal();
+    await window.StudentPortal.openCheckout(mappedCourseId);
     return;
   }
 
-  try {
-    if (typeof toast === 'function') toast('Processing course unlock...');
-    await window.FirebaseService.activateCoursePackage(pkg, 365, 'biryani_paywall');
-    if (typeof toast === 'function') toast('🎉 Congratulations! Full Practice Library Unlocked!');
-    closeBiryaniUpgradeModal();
-    renderAccountAccessCard();
-    if (typeof populatePassageDropdown === 'function') populatePassageDropdown();
-  } catch (err) {
-    if (typeof toast === 'function') toast('⚠️ Activation failed: ' + err.message);
+  if (typeof toast === 'function') {
+    toast('⚠️ Online payment & coupon verification requires a live backend connection (Coming Soon).');
   }
 }
 
@@ -9848,8 +9849,8 @@ window.handleDeleteAccountConfirmation = handleDeleteAccountConfirmation;
           <input id="stuRegEmail" type="email" required placeholder="student@example.com" style="width:100%;padding:10px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
         </div>
         <div class="form-field">
-          <div class="form-label">Password (min 6 characters)</div>
-          <input id="stuRegPassword" type="password" minlength="6" required placeholder="Create a password" style="width:100%;padding:10px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
+          <div class="form-label">Password (min 8 characters)</div>
+          <input id="stuRegPassword" type="password" minlength="8" required placeholder="Create a strong password (8+ chars)" style="width:100%;padding:10px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
           <input id="stuRegPhone" type="tel" placeholder="Mobile Number" style="padding:10px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
@@ -9877,7 +9878,7 @@ window.handleDeleteAccountConfirmation = handleDeleteAccountConfirmation;
         </div>
         <div class="form-field">
           <div class="form-label">New Password</div>
-          <input id="stuResetNewPassword" type="password" minlength="6" placeholder="Min 6 characters" style="width:100%;padding:9px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
+          <input id="stuResetNewPassword" type="password" minlength="8" placeholder="Min 8 characters" style="width:100%;padding:9px;border:1.5px solid var(--card-border);border-radius:10px;background:var(--bg-main);color:var(--ink);" />
         </div>
         <button type="button" class="solidbtn" style="width:100%;" onclick="StudentPortal.submitResetPassword()">Update Password</button>
       </div>
