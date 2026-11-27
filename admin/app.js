@@ -142,6 +142,113 @@ async function loadOverview() {
   }
 }
 
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
+  }
+}
+
 async function ensureCoursesLoaded() {
   const data = await apiFetch('/api/admin/courses');
   cachedCourses = data.courses || [];
@@ -207,6 +314,113 @@ async function loadEnrollments() {
   }
 }
 
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
+  }
+}
+
 async function activateEnrollment(id) {
   try {
     await apiFetch(`/api/admin/enrollments/${encodeURIComponent(id)}/activate`, { method: 'POST', body: '{}' });
@@ -214,6 +428,113 @@ async function activateEnrollment(id) {
     loadEnrollments();
   } catch (err) {
     showGlobalAlert(err.message, 'error');
+  }
+}
+
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
   }
 }
 
@@ -247,6 +568,113 @@ async function submitScheduleForm(e) {
   }
 }
 
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
+  }
+}
+
 function openCompleteModal(id) {
   document.getElementById('cmpEnrollmentId').value = id;
   document.getElementById('cmpScoreSummary').value = '';
@@ -275,6 +703,113 @@ async function submitCompleteForm(e) {
   }
 }
 
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
+  }
+}
+
 async function enableRebooking(id) {
   try {
     await apiFetch(`/api/admin/enrollments/${encodeURIComponent(id)}/enable-rebooking`, { method: 'POST', body: '{}' });
@@ -282,6 +817,113 @@ async function enableRebooking(id) {
     loadEnrollments();
   } catch (err) {
     showGlobalAlert(err.message, 'error');
+  }
+}
+
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
   }
 }
 
@@ -331,6 +973,113 @@ async function loadCoupons() {
     }).join('');
   } catch (err) {
     showGlobalAlert(err.message, 'error');
+  }
+}
+
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
   }
 }
 
@@ -420,6 +1169,113 @@ async function submitCouponForm(e) {
   }
 }
 
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
+  }
+}
+
 async function toggleCoupon(id, nextActive) {
   try {
     await apiFetch(`/api/admin/coupons/${encodeURIComponent(id)}`, {
@@ -430,6 +1286,113 @@ async function toggleCoupon(id, nextActive) {
     loadCoupons();
   } catch (err) {
     showGlobalAlert(err.message, 'error');
+  }
+}
+
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
   }
 }
 
@@ -454,6 +1417,113 @@ async function viewCouponRedemptions(id, code) {
     document.getElementById('redemptionsModal').classList.add('open');
   } catch (err) {
     showGlobalAlert(err.message, 'error');
+  }
+}
+
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
   }
 }
 
@@ -491,6 +1561,113 @@ async function loadPurchases() {
   }
 }
 
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
+  }
+}
+
 async function verifyPurchase(id, status) {
   try {
     await apiFetch(`/api/admin/purchases/${encodeURIComponent(id)}/verify`, {
@@ -501,6 +1678,113 @@ async function verifyPurchase(id, status) {
     loadPurchases();
   } catch (err) {
     showGlobalAlert(err.message, 'error');
+  }
+}
+
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
   }
 }
 
@@ -528,6 +1812,113 @@ async function loadCentralExams() {
   }
 }
 
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
+  }
+}
+
 async function createCentralExam() {
   const name = (document.getElementById('newExamName')?.value || '').trim();
   const date = (document.getElementById('newExamDate')?.value || '').trim();
@@ -548,16 +1939,19 @@ async function archiveCentralExam(id) {
   } catch (err) { showGlobalAlert(err.message, 'error'); }
 }
 
+let cachedStudentsList = [];
+
 async function loadStudents() {
   try {
     const q = encodeURIComponent(document.getElementById('stuSearch').value.trim());
     const data = await apiFetch(`/api/admin/students?q=${q}`);
+    cachedStudentsList = Array.isArray(data.students) ? data.students : [];
     const tbody = document.getElementById('studentsTableBody');
-    if (!data.students.length) {
+    if (!cachedStudentsList.length) {
       tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;">No students registered yet.</td></tr>';
       return;
     }
-    tbody.innerHTML = data.students.map(s => `
+    tbody.innerHTML = cachedStudentsList.map(s => `
       <tr>
         <td><b>${esc(s.name)}</b><br><span style="font-size:11px;color:var(--muted);">${esc(s.email)} ${s.phone ? '• ' + esc(s.phone) : ''}</span></td>
         <td>${esc(s.city || '—')}</td>
@@ -573,6 +1967,113 @@ async function loadStudents() {
     `).join('');
   } catch (err) {
     showGlobalAlert(err.message, 'error');
+  }
+}
+
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
   }
 }
 
@@ -595,6 +2096,113 @@ async function loadCourses() {
     `).join('');
   } catch (err) {
     showGlobalAlert(err.message, 'error');
+  }
+}
+
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
   }
 }
 
@@ -646,6 +2254,113 @@ async function submitCourseForm(e) {
   }
 }
 
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
+  }
+}
+
 async function loadAuditLogs() {
   try {
     const data = await apiFetch('/api/admin/audit-logs?limit=100');
@@ -665,6 +2380,113 @@ async function loadAuditLogs() {
     `).join('');
   } catch (err) {
     showGlobalAlert(err.message, 'error');
+  }
+}
+
+async function downloadStudentsPdf() {
+  const btn = document.getElementById('btnDownloadStudentsPdf');
+  const origText = btn ? btn.textContent : '';
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating PDF...'; }
+    const q = encodeURIComponent((document.getElementById('stuSearch')?.value || '').trim());
+    const data = await apiFetch(`/api/admin/students?q=${q}`);
+    const list = Array.isArray(data.students) ? data.students : cachedStudentsList;
+    if (!list.length) {
+      showGlobalAlert('No student records to export.', 'error');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 28;
+    let y = 36;
+
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageW, 56, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('Typing Thalaiva — Registered Student Details', margin, 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(`Generated: ${new Date().toLocaleString()}   |   Total Students: ${list.length}`, margin, 42);
+
+    y = 74;
+    const cols = [
+      { label: '#', w: 28 },
+      { label: 'Name', w: 120 },
+      { label: 'Email', w: 165 },
+      { label: 'Phone', w: 85 },
+      { label: 'City', w: 75 },
+      { label: 'Providers', w: 70 },
+      { label: 'Enrollments', w: 165 },
+      { label: 'Joined', w: 76 }
+    ];
+
+    const drawHeader = () => {
+      doc.setFillColor(239, 246, 255);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), 22, 'F');
+      doc.setTextColor(30, 58, 138);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      let x = margin + 4;
+      cols.forEach(c => { doc.text(c.label, x, y + 14); x += c.w; });
+      y += 22;
+    };
+
+    drawHeader();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+
+    list.forEach((s, idx) => {
+      const enrStr = (s.enrollments && s.enrollments.length)
+        ? s.enrollments.map(e => `${e.courseTitle || e.courseId} (${e.status})`).join(', ')
+        : 'None';
+      const vals = [
+        String(idx + 1),
+        String(s.name || '—'),
+        String(s.email || '—'),
+        String(s.phone || '—'),
+        String(s.city || '—'),
+        (s.authProviders || []).join(', ') || '—',
+        enrStr,
+        fmtDate(s.createdAt)
+      ];
+      const wrapped = vals.map((v, i) => doc.splitTextToSize(v, cols[i].w - 8));
+      const maxLines = Math.max(...wrapped.map(w => w.length), 1);
+      const rowH = maxLines * 11 + 8;
+
+      if (y + rowH > pageH - 28) {
+        doc.addPage();
+        y = 32;
+        drawHeader();
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+      }
+
+      if (idx % 2 === 1) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'F');
+      }
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(margin, y, cols.reduce((a, c) => a + c.w, 0), rowH, 'S');
+
+      doc.setTextColor(15, 23, 42);
+      let x = margin + 4;
+      wrapped.forEach((lines, i) => {
+        doc.text(lines, x, y + 12);
+        x += cols[i].w;
+      });
+      y += rowH;
+    });
+
+    const fname = `TypingThalaiva_Students_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fname);
+  } catch (err) {
+    showGlobalAlert(err.message || 'Could not generate Students PDF.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
   }
 }
 

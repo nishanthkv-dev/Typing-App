@@ -353,6 +353,9 @@ function createServer(options = {}) {
       const fname = path.basename(pathname);
       return serveStaticFile(res, path.join(firebaseLibsDir, fname), 'application/javascript; charset=utf-8');
     }
+    if (method === 'GET' && pathname === '/libs/jspdf.umd.min.js') {
+      return serveStaticFile(res, path.join(ROOT_DIR, 'www', 'libs', 'jspdf.umd.min.js'), 'application/javascript; charset=utf-8');
+    }
 
     try {
       // ---------------------------------------------------------------------
