@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: typing-thalaiva-backend
+    runtime: node
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: npm run start:backend
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_DRIVER
+        value: firestore
+      - key: JWT_SECRET
+        sync: false
+      - key: PAYMENT_WEBHOOK_SECRET
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        value: typingthalaiva
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: ADMIN_ALLOWED_EMAILS
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: https://localhost,http://localhost,capacitor://localhost
+      - key: PHONEPE_ENV
+        value: sandbox
+      - key: PHONEPE_MERCHANT_ID
+        sync: false
+      - key: PHONEPE_SALT_KEY
+        sync: false
+      - key: PHONEPE_SALT_INDEX
+        value: "1"

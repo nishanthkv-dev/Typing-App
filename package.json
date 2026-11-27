@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Typing Thalaiva – Tamil & English typing tutor wrapped as a native Android app via Capacitor",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "build": "echo \"Static app – no build step required\" && exit 0",
     "qa": "node run_playwright_qa.js",
